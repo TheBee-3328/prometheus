@@ -1,0 +1,9 @@
+[package]
+name = "prometheus-core"
+version = "0.1.0"
+edition = "2021"
+description = "Shared model + arithmetic coder for PROMETHEUS"
+
+[lib]
+name = "prometheus_core"
+path = "src/lib.rs"

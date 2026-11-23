@@ -1,13 +1,10 @@
-//! Phase 0 store baseline: write magic + length + raw payload.
-//! Format is intentional so Phase 1 can replace the payload encoding
-//! without changing the CLI contract.
+//! Phase 1 compressor: order-2 context model + 32-bit arithmetic coder.
 
+use prometheus_core::{ArithmeticEncoder, Model, Order2Model, MAGIC};
 use std::env;
 use std::fs::File;
-use std::io::{self, Read, Write};
+use std::io::{self, BufReader, BufWriter, Read, Write};
 use std::process;
-
-const MAGIC: &[u8; 4] = b"PRM0";
 
 fn main() {
     let mut args = env::args().skip(1);
@@ -29,14 +26,26 @@ fn usage() -> ! {
 }
 
 fn compress(input_path: &str, output_path: &str) -> io::Result<()> {
-    let mut input = File::open(input_path)?;
+    let mut input = BufReader::new(File::open(input_path)?);
     let mut data = Vec::new();
     input.read_to_end(&mut data)?;
 
-    let mut out = File::create(output_path)?;
+    let out = BufWriter::new(File::create(output_path)?);
+    let mut out = out;
     out.write_all(MAGIC)?;
     out.write_all(&(data.len() as u64).to_le_bytes())?;
-    out.write_all(&data)?;
+
+    let mut model = Order2Model::new();
+    let mut enc = ArithmeticEncoder::new(out);
+    for &byte in &data {
+        for i in (0..8).rev() {
+            let bit = (byte >> i) & 1;
+            let p = model.predict();
+            enc.encode_bit(bit, p)?;
+            model.update(bit);
+        }
+    }
+    let mut out = enc.finish()?;
     out.flush()?;
     Ok(())
 }

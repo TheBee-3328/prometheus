@@ -5,7 +5,17 @@ version = 4
 [[package]]
 name = "prometheus-compress"
 version = "0.1.0"
+dependencies = [
+ "prometheus-core",
+]
+
+[[package]]
+name = "prometheus-core"
+version = "0.1.0"
 
 [[package]]
 name = "prometheus-decompress"
 version = "0.1.0"
+dependencies = [
+ "prometheus-core",
+]

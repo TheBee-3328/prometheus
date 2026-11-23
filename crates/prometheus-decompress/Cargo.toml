@@ -2,8 +2,11 @@
 name = "prometheus-decompress"
 version = "0.1.0"
 edition = "2021"
-description = "PROMETHEUS decompressor (Phase 0: store/copy-through baseline)"
+description = "PROMETHEUS decompressor (Phase 1: order-2 + arithmetic coding)"
 
 [[bin]]
 name = "prometheus-decompress"
 path = "src/main.rs"
+
+[dependencies]
+prometheus-core = { path = "../prometheus-core" }
