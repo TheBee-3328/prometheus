@@ -1,6 +1,6 @@
-//! Decompressor: order-2 + LZ match model + arithmetic coding (lockstep with compress).
+//! Decompressor: order-2 + LZ match model + arithmetic coding, then preprocessor decode.
 
-use prometheus_core::{ArithmeticDecoder, Model, Order2MatchModel, MAGIC};
+use prometheus_core::{decode, ArithmeticDecoder, Model, Order2MatchModel, MAGIC};
 use std::env;
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Read, Write};
@@ -38,25 +38,21 @@ fn decompress(input_path: &str, output_path: &str) -> io::Result<()> {
 
     let mut model = Order2MatchModel::new();
     let mut dec = ArithmeticDecoder::new(input)?;
-    let mut out = BufWriter::new(File::create(output_path)?);
-    let mut buf = vec![0u8; declared.min(1 << 20)];
-    let mut written = 0usize;
-
-    while written < declared {
-        let chunk = (declared - written).min(buf.len());
-        for b in buf.iter_mut().take(chunk) {
-            let mut byte = 0u8;
-            for _ in 0..8 {
-                let p = model.predict();
-                let bit = dec.decode_bit(p)?;
-                model.update(bit);
-                byte = (byte << 1) | bit;
-            }
-            *b = byte;
+    let mut pre = vec![0u8; declared];
+    for b in pre.iter_mut() {
+        let mut byte = 0u8;
+        for _ in 0..8 {
+            let p = model.predict();
+            let bit = dec.decode_bit(p)?;
+            model.update(bit);
+            byte = (byte << 1) | bit;
         }
-        out.write_all(&buf[..chunk])?;
-        written += chunk;
+        *b = byte;
     }
+
+    let data = decode(&pre);
+    let mut out = BufWriter::new(File::create(output_path)?);
+    out.write_all(&data)?;
     out.flush()?;
     Ok(())
 }

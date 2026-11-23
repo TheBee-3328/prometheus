@@ -1,6 +1,6 @@
-//! Compressor: order-2 + LZ match model + 32-bit arithmetic coder.
+//! Compressor: preprocessor + order-2 + LZ match model + 32-bit arithmetic coder.
 
-use prometheus_core::{ArithmeticEncoder, Model, Order2MatchModel, MAGIC};
+use prometheus_core::{encode, ArithmeticEncoder, Model, Order2MatchModel, MAGIC};
 use std::env;
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Read, Write};
@@ -27,8 +27,9 @@ fn usage() -> ! {
 
 fn compress(input_path: &str, output_path: &str) -> io::Result<()> {
     let mut input = BufReader::new(File::open(input_path)?);
-    let mut data = Vec::new();
-    input.read_to_end(&mut data)?;
+    let mut raw = Vec::new();
+    input.read_to_end(&mut raw)?;
+    let data = encode(&raw);
 
     let out = BufWriter::new(File::create(output_path)?);
     let mut out = out;
