@@ -4,6 +4,10 @@
 //! 1. Word-initial capitalization → lowercase + marker on the preceding separator.
 //! 2. Longest-match dictionary of common XML/wiki strings → single high bytes
 //!    (`0x80..`), with `0xFF` escaping for literal high bytes.
+//!
+//! Cap markers occupy `0x01..=0x08`. Literal bytes in that range (and the
+//! escape byte `0x7F`) are prefixed with `CAP_ESC` so encode/decode are
+//! inverses for every `&[u8]`.
 
 /// Escape prefix for literal bytes that collide with dictionary tokens / escape.
 const ESC: u8 = 0xFF;
@@ -11,7 +15,11 @@ const ESC: u8 = 0xFF;
 /// First dictionary token byte; tokens are `DICT_BASE .. DICT_BASE+DICT.len()`.
 const DICT_BASE: u8 = 0x80;
 
-/// Capitalization markers (replace a preceding separator). Unused in raw enwik8.
+/// Escape prefix for literal cap-marker bytes and for `CAP_ESC` itself.
+/// Chosen as `0x7F` (DEL): absent in enwik8, so SCORE-neutral on the corpus.
+const CAP_ESC: u8 = 0x7F;
+
+/// Capitalization markers (replace a preceding separator).
 const CAP_SPACE: u8 = 0x01;
 const CAP_NL: u8 = 0x02;
 const CAP_GT: u8 = 0x03;
@@ -99,6 +107,7 @@ fn is_cap_marker(b: u8) -> bool {
 }
 
 /// Fold word-initial `A..=Z` to lowercase; mark the preceding separator (or BOS).
+/// Literal `0x01..=0x08` and `CAP_ESC` are escaped with a `CAP_ESC` prefix.
 fn encode_capitals(input: &[u8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(input.len() + input.len() / 64);
     for &c in input {
@@ -115,7 +124,12 @@ fn encode_capitals(input: &[u8]) -> Vec<u8> {
                 continue;
             }
         }
-        out.push(c);
+        if is_cap_marker(c) || c == CAP_ESC {
+            out.push(CAP_ESC);
+            out.push(c);
+        } else {
+            out.push(c);
+        }
     }
     out
 }
@@ -124,13 +138,26 @@ fn encode_capitals(input: &[u8]) -> Vec<u8> {
 fn decode_capitals(input: &[u8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(input.len());
     let mut capitalize = false;
-    for &c in input {
+    let mut i = 0;
+    while i < input.len() {
+        let c = input[i];
+        i += 1;
         if capitalize {
             capitalize = false;
             if (b'a'..=b'z').contains(&c) {
                 out.push(c - 32);
             } else {
                 out.push(c);
+            }
+            continue;
+        }
+        if c == CAP_ESC {
+            if i < input.len() {
+                out.push(input[i]);
+                i += 1;
+            } else {
+                // Truncated escape: emit the escape byte itself.
+                out.push(CAP_ESC);
             }
             continue;
         }
@@ -253,10 +280,43 @@ mod tests {
     }
 
     #[test]
+    fn encode_decode_cap_marker_bytes() {
+        // Literals that alias CAP_SPACE..CAP_BOS and the escape byte.
+        assert_roundtrip(&[0x01]);
+        assert_roundtrip(&[0x01, b'a']);
+        assert_roundtrip(&[0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]);
+        assert_roundtrip(&[CAP_ESC]);
+        assert_roundtrip(&[CAP_ESC, CAP_ESC]);
+        assert_roundtrip(&[0x00, 0x01, 0x7F, 0x08, b' ', b'A']);
+        let mut all_ctrl = Vec::new();
+        for b in 0x00u8..=0x1F {
+            all_ctrl.push(b);
+        }
+        assert_roundtrip(&all_ctrl);
+    }
+
+    #[test]
+    fn encode_decode_random_bytes() {
+        // Deterministic pseudo-random covering full byte range.
+        let mut data = Vec::with_capacity(4096);
+        let mut state: u32 = 0xC0FFEE;
+        for _ in 0..4096 {
+            state = state
+                .wrapping_mul(1664525)
+                .wrapping_add(1013904223);
+            data.push((state >> 24) as u8);
+        }
+        assert_roundtrip(&data);
+    }
+
+    #[test]
     fn capitals_only_roundtrip() {
         let s = b"Alpha beta Gamma\nDelta >Epsilon \"Zeta\" 'Eta' [Theta] (Iota)";
         let e = encode_capitals(s);
         assert_eq!(decode_capitals(&e), s);
+        // Capitals layer alone must also invert marker-range literals.
+        let ctrl = [0x01u8, 0x08, 0x7F, b' ', b'A'];
+        assert_eq!(decode_capitals(&encode_capitals(&ctrl)), ctrl);
     }
 
     #[test]
