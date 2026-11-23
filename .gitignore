@@ -1,0 +1,21 @@
+# Data (never commit)
+enwik8
+enwik9
+*.enwik*
+
+# Judge / build artifacts
+/target/
+**/*.compressed
+**/*.out
+**/*.roundtrip
+/tmp_judge/
+/judge_work/
+
+# Tune / local
+tune/trials.csv
+*.log
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
