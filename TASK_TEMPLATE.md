@@ -17,6 +17,7 @@ WHAT HAS ALREADY FAILED (from LOG.md):
 ## Rules (always attach)
 
 - Work on your assigned git branch or worktree only.
+- **Nix:** run all builds/tests via `nix develop -c …` (see `flake.nix`). Do not rely on host `~/.cargo`.
 - Do not change judge files, data files, or scoring unless you are the JUDGE agent and the orchestrator authorized it.
 - Integer / fixed-point only in the model path; no FP, no HashMap iteration dependence, no threads in the model path.
 - Prefer small decompressor code: every byte counts toward SCORE.

@@ -14,6 +14,7 @@
 
 ## Known risks
 
+- **NixOS:** all builds/judge runs via `nix develop -c …` (`flake.nix`). Host `~/.cargo` is not authoritative.
 - `enwik9` is 1 GB on disk; do not commit it.
 - Official Hutter S differs from our SCORE (we omit compressor size / 2× decomp); do not confuse them in claims.
 - Bit-identical compressor/decompressor model path is mandatory; FP or HashMap order will fail determinism.
