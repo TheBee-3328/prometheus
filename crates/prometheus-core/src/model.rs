@@ -1,5 +1,7 @@
 //! Context models. Integer / fixed-point only; no FP, no HashMap.
 
+use crate::word_model::WordModel;
+
 /// Bit predictor: returns p(bit=1) on a 0..=65535 scale, then learns `bit`.
 pub trait Model {
     fn predict(&mut self) -> u16;
@@ -52,6 +54,15 @@ impl Order2Model {
             p as u16
         }
     }
+
+    /// Prediction and visit count at the current order-2 context.
+    #[inline]
+    pub fn predict_counts(&self) -> (u16, u16) {
+        let i = self.index();
+        let n0 = self.n0[i];
+        let n1 = self.n1[i];
+        (Self::prob(n0, n1), (n0 as u16) + (n1 as u16))
+    }
 }
 
 impl Default for Order2Model {
@@ -63,8 +74,7 @@ impl Default for Order2Model {
 impl Model for Order2Model {
     #[inline]
     fn predict(&mut self) -> u16 {
-        let i = self.index();
-        Self::prob(self.n0[i], self.n1[i])
+        self.predict_counts().0
     }
 
     #[inline]
@@ -90,6 +100,63 @@ impl Model for Order2Model {
             self.prev0 = byte;
             self.bit_cxt = 1;
         }
+    }
+}
+
+/// Order-2 + word model with count-weighted fixed-point mix (no learned mixer).
+pub struct CombinedModel {
+    order2: Order2Model,
+    word: WordModel,
+}
+
+impl CombinedModel {
+    pub fn new() -> Self {
+        Self {
+            order2: Order2Model::new(),
+            word: WordModel::new(),
+        }
+    }
+}
+
+impl Default for CombinedModel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Model for CombinedModel {
+    #[inline]
+    fn predict(&mut self) -> u16 {
+        let (p0, _n0) = self.order2.predict_counts();
+        let (p1, n1) = self.word.predict_counts();
+        // Keep order-2 as the base; only nudge toward the word model when the
+        // word context has evidence. Avoids cold-hash dilution (attempt 1).
+        if n1 < 6 {
+            return p0;
+        }
+        // w in 0..96: at most ~37.5% pull toward word when mid-word / hot.
+        let mut w = n1 as u32;
+        if w > 96 {
+            w = 96;
+        }
+        if self.word.in_word() {
+            // Longer partial words are where order-2 (2 bytes) is weakest.
+            w = (w + 16).min(112);
+        }
+        let p = p0 as i32 + ((p1 as i32 - p0 as i32) * (w as i32)) / 256;
+        if p < 1 {
+            1
+        } else if p > 65534 {
+            65534
+        } else {
+            p as u16
+        }
+    }
+
+    #[inline]
+    fn update(&mut self, bit: u8) {
+        self.order2.update(bit);
+        self.word.update(bit);
     }
 }
 
@@ -134,5 +201,24 @@ mod tests {
         }
         let later = m.predict();
         assert!(later < first, "expected p1 to drop after many zeros: {later} vs {first}");
+    }
+
+    #[test]
+    fn combined_lockstep() {
+        let bits: Vec<u8> = b" hello world <tag> the"
+            .iter()
+            .flat_map(|b| (0..8).rev().map(move |i| (b >> i) & 1))
+            .collect();
+        let mut a = CombinedModel::new();
+        let mut b = CombinedModel::new();
+        let mut preds = Vec::new();
+        for &bit in &bits {
+            preds.push(a.predict());
+            a.update(bit);
+        }
+        for (i, &bit) in bits.iter().enumerate() {
+            assert_eq!(b.predict(), preds[i], "combined mismatch at {i}");
+            b.update(bit);
+        }
     }
 }
