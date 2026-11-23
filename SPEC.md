@@ -6,6 +6,15 @@
 
 **Overall budget:** 40 agent runs or 8 wall-clock hours, whichever comes first. Check budget before each spawn.
 
+**Nix (mandatory):** This machine is NixOS/Nix. All builds, tests, and judge runs must use the project flake:
+
+```bash
+nix develop -c ./judge.sh enwik8 .
+# or: nix develop   # then run commands inside the shell
+```
+
+Do not assume host `~/.cargo` toolchains or system packages beyond what `flake.nix` provides. Prefer `nix develop -c <cmd>` in scripts and agent briefs. `judge.sh` itself should invoke cargo/strip/time from PATH after entering the flake shell (orchestrator/agents enter nix before calling judge, or judge re-execs under `nix develop` if `IN_NIX_SHELL` / flake marker is unset).
+
 ---
 
 ## Official Hutter Prize constraints (source of truth)
