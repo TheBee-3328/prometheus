@@ -29,6 +29,11 @@
           ];
           RUSTFLAGS = "-C target-cpu=native";
           shellHook = ''
+            # mkShell may inject: NIX_LDFLAGS=-rpath $PWD/outputs/out/lib
+            # Unquoted spaces in $PWD break the linker (ld sees multiple args).
+            if [[ "''${NIX_LDFLAGS:-}" == *" "* ]]; then
+              export NIX_LDFLAGS=""
+            fi
             echo "PROMETHEUS nix shell: $(rustc --version) | $(cargo --version)"
           '';
         };

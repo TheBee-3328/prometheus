@@ -1,0 +1,9 @@
+[package]
+name = "prometheus-compress"
+version = "0.1.0"
+edition = "2021"
+description = "PROMETHEUS compressor (Phase 0: store/copy-through baseline)"
+
+[[bin]]
+name = "prometheus-compress"
+path = "src/main.rs"
