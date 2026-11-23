@@ -1,28 +1,32 @@
 # STATUS
 
-**Current phase:** 1 (workspace + arithmetic coder + order-2)  
-**Current best SCORE:** **100299876** (enwik8, store baseline)  
-**Best measured on:** enwik8 via `nix develop -c ./judge.sh enwik8 .`  
-**Baseline line:** `ROUNDTRIP=OK COMPRESSED=100000012 DECOMPRESSOR=299864 SCORE=100299876 COMPRESS_SECONDS=0.14 DECOMPRESS_SECONDS=0.13 PEAK_RSS_MB=98`  
-**Agent runs used:** 1 / 40 (P0-JUDGE done)  
+**Current phase:** 2 (parallel context/mixer/preprocessor builders)  
+**Current best SCORE:** **38254897** (enwik8, order-2)  
+**Best measured on:** enwik8  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=37955033 DECOMPRESSOR=299864 SCORE=38254897 COMPRESS_SECONDS=12.11 DECOMPRESS_SECONDS=13.33 PEAK_RSS_MB=113`  
+**Ratio vs raw:** ~2.62× (compressed alone); SCORE/1e8 ≈ 0.38  
+**Agent runs used:** 2 / 40  
 **Wall clock budget:** 8 hours from Phase 0 start  
 
 ## Running tasks
 
 | Task ID | Agent | Status |
 |---|---|---|
-| P1-BUILD | BUILDER | spawning |
+| P2-ORDERS | BUILDER | spawning |
+| P2-MATCH | BUILDER | spawning |
+| P2-WORD | BUILDER | spawning |
+| P2-MIXER | BUILDER | spawning |
+| P2-PRE | BUILDER | spawning |
 
 ## Known risks
 
-- **NixOS:** all builds/judge runs via `nix develop -c …` (`flake.nix`). Host `~/.cargo` is not authoritative. Paths with spaces need `NIX_LDFLAGS` cleared (handled in flake/judge).
-- `enwik9` is 1 GB on disk; do not commit it.
-- Official Hutter S differs from our SCORE (we omit compressor size / 2× decomp); do not confuse them in claims.
-- Bit-identical compressor/decompressor model path is mandatory; FP or HashMap order will fail determinism.
-- Store baseline SCORE ≈ input size; Phase 1 must beat this on enwik8.
+- **NixOS:** `nix develop -c …` only.
+- Parallel Phase 2 merge conflicts likely on `model.rs` / mains — merge one-at-a-time with rebase.
+- Decompressor still ~300KB; size optimization later.
+- Do not claim enwik9 results yet.
 
 ## Next three tasks
 
-1. Phase 1: shared model crate, arithmetic coder, order-2 model; beat store SCORE on enwik8.
-2. Phase 2: parallel builders (orders 1–6, match, word, mixer+APM, preprocessor).
-3. Phase 3: reviewer + tuner.
+1. Merge each Phase 2 builder that improves SCORE.
+2. Phase 3 reviewer after merge batch.
+3. Phase 3 tuner on enwik8.

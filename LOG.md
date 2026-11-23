@@ -13,3 +13,5 @@ Append-only. Every agent result (success or failure) goes here.
 
 - Official rules recorded in SPEC.md from https://www.hutter1.net/prize/hrules.htm
 - Internal SCORE = compressed + decompressor (+ aux files). Never claim enwik9 results without `./judge.sh enwik9`.
+| 2026-11-23 | P1-BUILD | order-2 + arithmetic coder; merged d170a6a | 37955033 | 299864 | 38254897 | 12.11 | 13.33 | 113 | PASS |
+| 2026-11-23 | ORCH-P2 | Spawning 5 parallel builders (orders/match/word/mixer/pre) | — | — | — | — | — | — | in progress |
