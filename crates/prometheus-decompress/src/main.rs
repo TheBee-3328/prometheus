@@ -1,6 +1,6 @@
-//! Phase 1 decompressor: order-2 + arithmetic coding (lockstep with compress).
+//! Decompressor: order-2 + LZ match model + arithmetic coding (lockstep with compress).
 
-use prometheus_core::{ArithmeticDecoder, Model, Order2Model, MAGIC};
+use prometheus_core::{ArithmeticDecoder, Model, Order2MatchModel, MAGIC};
 use std::env;
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Read, Write};
@@ -36,7 +36,7 @@ fn decompress(input_path: &str, output_path: &str) -> io::Result<()> {
     len_bytes.copy_from_slice(&header[4..12]);
     let declared = u64::from_le_bytes(len_bytes) as usize;
 
-    let mut model = Order2Model::new();
+    let mut model = Order2MatchModel::new();
     let mut dec = ArithmeticDecoder::new(input)?;
     let mut out = BufWriter::new(File::create(output_path)?);
     let mut buf = vec![0u8; declared.min(1 << 20)];

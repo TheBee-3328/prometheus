@@ -1,6 +1,6 @@
-//! Phase 1 compressor: order-2 context model + 32-bit arithmetic coder.
+//! Compressor: order-2 + LZ match model + 32-bit arithmetic coder.
 
-use prometheus_core::{ArithmeticEncoder, Model, Order2Model, MAGIC};
+use prometheus_core::{ArithmeticEncoder, Model, Order2MatchModel, MAGIC};
 use std::env;
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Read, Write};
@@ -35,7 +35,7 @@ fn compress(input_path: &str, output_path: &str) -> io::Result<()> {
     out.write_all(MAGIC)?;
     out.write_all(&(data.len() as u64).to_le_bytes())?;
 
-    let mut model = Order2Model::new();
+    let mut model = Order2MatchModel::new();
     let mut enc = ArithmeticEncoder::new(out);
     for &byte in &data {
         for i in (0..8).rev() {

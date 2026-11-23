@@ -1,0 +1,383 @@
+//! LZ-style longest-match context model.
+//!
+//! Hash of the last few bytes maps to a prior buffer position. When the
+//! context verifies, subsequent bits are predicted from the byte that followed
+//! that prior occurrence. Mixed with order-2 only for sufficiently long matches.
+
+use crate::model::{Model, Order2Model};
+
+const BUF_BITS: usize = 24; // 16 MiB history
+const BUF_SIZE: usize = 1 << BUF_BITS;
+const BUF_MASK: usize = BUF_SIZE - 1;
+
+const HASH_BITS: usize = 23; // 8M slots
+const HASH_SIZE: usize = 1 << HASH_BITS;
+const HASH_MASK: usize = HASH_SIZE - 1;
+
+/// How many trailing bytes form the hash context.
+const HASH_ORDER: usize = 4;
+/// Minimum match length before ensemble uses match probabilities.
+const MIN_MIX_LEN: u32 = 5;
+
+/// LZ match model: buffer + hash → expected next bits.
+pub struct MatchModel {
+    buf: Box<[u8]>,
+    /// Bytes written so far (also next write index into `buf` via mask).
+    pos: usize,
+    ht: Box<[u32]>,
+    /// Absolute index of next expected matched byte.
+    match_pos: usize,
+    /// Matched bytes so far (0 = inactive).
+    match_len: u32,
+    expected: u8,
+    bit_cxt: u16,
+}
+
+impl MatchModel {
+    pub fn new() -> Self {
+        Self {
+            buf: vec![0u8; BUF_SIZE].into_boxed_slice(),
+            pos: 0,
+            ht: vec![0u32; HASH_SIZE].into_boxed_slice(),
+            match_pos: 0,
+            match_len: 0,
+            expected: 0,
+            bit_cxt: 1,
+        }
+    }
+
+    #[inline]
+    pub fn match_len(&self) -> u32 {
+        self.match_len
+    }
+
+    /// Bits completed in the current byte = floor(log2(bit_cxt)).
+    #[inline]
+    fn bits_seen(bit_cxt: u16) -> u8 {
+        (15u32.saturating_sub(bit_cxt.leading_zeros() as u32)) as u8
+    }
+
+    #[inline]
+    fn expected_bit(&self) -> u8 {
+        let bit_index = Self::bits_seen(self.bit_cxt);
+        (self.expected >> (7 - bit_index)) & 1
+    }
+
+    #[inline]
+    fn context_hash(&self, end: usize) -> usize {
+        // FNV-ish hash of buf[end-HASH_ORDER+1 ..= end]
+        let mut h: u32 = 2166136261;
+        for i in (0..HASH_ORDER).rev() {
+            let b = self.buf[end.wrapping_sub(i) & BUF_MASK] as u32;
+            h ^= b;
+            h = h.wrapping_mul(16777619);
+        }
+        (h as usize) & HASH_MASK
+    }
+
+    #[inline]
+    fn predict_from_match(&self) -> u16 {
+        if self.match_len < MIN_MIX_LEN {
+            return 32768;
+        }
+        let bit_index = Self::bits_seen(self.bit_cxt);
+        let expected_bit = (self.expected >> (7 - bit_index)) & 1;
+        let conf: u32 = match self.match_len {
+            0..=4 => 0,
+            5..=6 => 14000,
+            7..=10 => 20000,
+            11..=20 => 26000,
+            21..=40 => 30000,
+            _ => 32000,
+        };
+        let p = if expected_bit == 1 {
+            32768u32 + conf
+        } else {
+            32768u32.saturating_sub(conf)
+        };
+        if p < 1 {
+            1
+        } else if p > 65534 {
+            65534
+        } else {
+            p as u16
+        }
+    }
+
+    fn finish_byte(&mut self, byte: u8) {
+        let p = self.pos;
+        self.buf[p & BUF_MASK] = byte;
+
+        // Extend an active match after a fully matching byte.
+        if self.match_len > 0 {
+            self.match_len = self.match_len.saturating_add(1);
+            self.match_pos = self.match_pos.wrapping_add(1);
+            // Stop before reading the byte we just wrote as "future".
+            if self.match_pos >= p + 1 || self.match_len > 0xffff {
+                self.match_len = 0;
+            } else {
+                self.expected = self.buf[self.match_pos & BUF_MASK];
+            }
+        }
+
+        // Index context ending at `p`; look up prior occurrence.
+        if p + 1 >= HASH_ORDER {
+            let h = self.context_hash(p);
+            let candidate = self.ht[h] as usize;
+            self.ht[h] = p as u32;
+
+            if self.match_len == 0 && candidate > 0 && candidate < p {
+                // Verify shared context length.
+                let mut ctx = 0usize;
+                let max = (p - candidate).min(255);
+                while ctx < max {
+                    if self.buf[p.wrapping_sub(ctx) & BUF_MASK]
+                        != self.buf[candidate.wrapping_sub(ctx) & BUF_MASK]
+                    {
+                        break;
+                    }
+                    ctx += 1;
+                }
+                if ctx >= HASH_ORDER {
+                    let next = candidate + 1;
+                    if next <= p {
+                        self.match_pos = next;
+                        self.match_len = ctx as u32;
+                        self.expected = self.buf[next & BUF_MASK];
+                    }
+                }
+            }
+        }
+
+        self.pos = p + 1;
+        self.bit_cxt = 1;
+    }
+}
+
+impl Default for MatchModel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Model for MatchModel {
+    #[inline]
+    fn predict(&mut self) -> u16 {
+        self.predict_from_match()
+    }
+
+    #[inline]
+    fn update(&mut self, bit: u8) {
+        if self.match_len > 0 && bit != self.expected_bit() {
+            self.match_len = 0;
+        }
+
+        self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
+        if self.bit_cxt >= 256 {
+            let byte = (self.bit_cxt & 0xff) as u8;
+            self.finish_byte(byte);
+        }
+    }
+}
+
+/// Mix order-2 CM with the match model; match weight grows with match length.
+pub struct Order2MatchModel {
+    order2: Order2Model,
+    match_m: MatchModel,
+}
+
+impl Order2MatchModel {
+    pub fn new() -> Self {
+        Self {
+            order2: Order2Model::new(),
+            match_m: MatchModel::new(),
+        }
+    }
+
+    #[inline]
+    fn mix(p_o2: u16, p_m: u16, match_len: u32) -> u16 {
+        let w = match match_len {
+            0..=4 => 0u32,
+            5..=6 => 100,
+            7..=10 => 160,
+            11..=20 => 200,
+            21..=40 => 230,
+            _ => 245,
+        };
+        let p = (p_o2 as u32 * (256 - w) + p_m as u32 * w) / 256;
+        if p < 1 {
+            1
+        } else if p > 65534 {
+            65534
+        } else {
+            p as u16
+        }
+    }
+}
+
+impl Default for Order2MatchModel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Model for Order2MatchModel {
+    #[inline]
+    fn predict(&mut self) -> u16 {
+        let p0 = self.order2.predict();
+        let len = self.match_m.match_len();
+        if len < MIN_MIX_LEN {
+            return p0;
+        }
+        let p1 = self.match_m.predict();
+        Self::mix(p0, p1, len)
+    }
+
+    #[inline]
+    fn update(&mut self, bit: u8) {
+        self.order2.update(bit);
+        self.match_m.update(bit);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn bits_of(bytes: &[u8]) -> Vec<u8> {
+        bytes
+            .iter()
+            .flat_map(|b| (0..8).rev().map(move |i| (b >> i) & 1))
+            .collect()
+    }
+
+    #[test]
+    fn match_predict_update_lockstep() {
+        let data = b"abcabracadabra abracadabra abracadabra!";
+        let bits = bits_of(data);
+        let mut a = MatchModel::new();
+        let mut b = MatchModel::new();
+        let mut preds = Vec::new();
+        for &bit in &bits {
+            preds.push(a.predict());
+            a.update(bit);
+        }
+        for (i, &bit) in bits.iter().enumerate() {
+            assert_eq!(b.predict(), preds[i], "predict mismatch at bit {i}");
+            b.update(bit);
+        }
+    }
+
+    #[test]
+    fn match_finds_repetition() {
+        let mut block = Vec::new();
+        let phrase = b"The quick brown fox jumps over the lazy dog. ";
+        for _ in 0..40 {
+            block.extend_from_slice(phrase);
+        }
+        let bits = bits_of(&block);
+        let mut m = MatchModel::new();
+        let mut max_len = 0u32;
+        let mut strong = 0u32;
+        for &bit in &bits {
+            let p = m.predict();
+            if m.match_len() >= MIN_MIX_LEN {
+                max_len = max_len.max(m.match_len());
+                if !(30000..=35000).contains(&p) {
+                    strong += 1;
+                }
+            }
+            m.update(bit);
+        }
+        assert!(max_len >= 8, "expected long match, got max_len={max_len}");
+        assert!(strong > 100, "expected many confident predictions, got {strong}");
+    }
+
+    #[test]
+    fn order2_match_lockstep() {
+        let data = b"<title>Wikipedia</title><text>repeat repeat repeat</text>";
+        let bits = bits_of(data);
+        let mut a = Order2MatchModel::new();
+        let mut b = Order2MatchModel::new();
+        let mut preds = Vec::new();
+        for &bit in &bits {
+            preds.push(a.predict());
+            a.update(bit);
+        }
+        for (i, &bit) in bits.iter().enumerate() {
+            assert_eq!(b.predict(), preds[i], "ensemble mismatch at bit {i}");
+            b.update(bit);
+        }
+    }
+
+    #[test]
+    fn order2_match_matches_order2_without_match() {
+        let mut ens = Order2MatchModel::new();
+        let mut o2 = Order2Model::new();
+        let bits = bits_of(b"xyz");
+        for &bit in &bits {
+            assert_eq!(ens.predict(), o2.predict());
+            ens.update(bit);
+            o2.update(bit);
+        }
+    }
+
+    #[test]
+    fn order2_match_beats_order2_on_repeats() {
+        use crate::arithmetic::{ArithmeticDecoder, ArithmeticEncoder};
+        use std::io::Cursor;
+
+        let mut data = Vec::new();
+        let phrase = b"<mediawiki><page><title>Foo</title><text>bar baz qux</text></page>";
+        for _ in 0..200 {
+            data.extend_from_slice(phrase);
+        }
+
+        fn compressed_size<M: Model>(mut model: M, data: &[u8]) -> usize {
+            let mut enc = ArithmeticEncoder::new(Cursor::new(Vec::new()));
+            for &byte in data {
+                for i in (0..8).rev() {
+                    let bit = (byte >> i) & 1;
+                    let p = model.predict();
+                    enc.encode_bit(bit, p).unwrap();
+                    model.update(bit);
+                }
+            }
+            enc.finish().unwrap().into_inner().len()
+        }
+
+        let s_o2 = compressed_size(Order2Model::new(), &data);
+        let s_m = compressed_size(Order2MatchModel::new(), &data);
+        assert!(
+            s_m < s_o2,
+            "match ensemble should beat order-2 on repeats: match={s_m} o2={s_o2}"
+        );
+
+        // Roundtrip sanity with ensemble.
+        let mut model = Order2MatchModel::new();
+        let mut enc = ArithmeticEncoder::new(Cursor::new(Vec::new()));
+        for &byte in &data {
+            for i in (0..8).rev() {
+                let bit = (byte >> i) & 1;
+                let p = model.predict();
+                enc.encode_bit(bit, p).unwrap();
+                model.update(bit);
+            }
+        }
+        let blob = enc.finish().unwrap().into_inner();
+        let mut model = Order2MatchModel::new();
+        let mut dec = ArithmeticDecoder::new(Cursor::new(blob)).unwrap();
+        let mut out = Vec::with_capacity(data.len());
+        for _ in 0..data.len() {
+            let mut byte = 0u8;
+            for _ in 0..8 {
+                let p = model.predict();
+                let bit = dec.decode_bit(p).unwrap();
+                model.update(bit);
+                byte = (byte << 1) | bit;
+            }
+            out.push(byte);
+        }
+        assert_eq!(out, data);
+    }
+}
