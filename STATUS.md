@@ -1,32 +1,30 @@
 # STATUS
 
-**Current phase:** 2 (parallel context/mixer/preprocessor builders)  
-**Current best SCORE:** **38254897** (enwik8, order-2)  
+**Current phase:** 2 (parallel builders; merging winners)  
+**Current best SCORE:** **37298715** (enwik8, order-2 + match)  
 **Best measured on:** enwik8  
-**Best line:** `ROUNDTRIP=OK COMPRESSED=37955033 DECOMPRESSOR=299864 SCORE=38254897 COMPRESS_SECONDS=12.11 DECOMPRESS_SECONDS=13.33 PEAK_RSS_MB=113`  
-**Ratio vs raw:** ~2.62× (compressed alone); SCORE/1e8 ≈ 0.38  
-**Agent runs used:** 2 / 40  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=36994755 DECOMPRESSOR=303960 SCORE=37298715 COMPRESS_SECONDS=23.74 DECOMPRESS_SECONDS=25.70 PEAK_RSS_MB=161`  
+**Agent runs used:** 7 / 40 (P0, P1, P2×5 spawned; MATCH+PRE measured)  
 **Wall clock budget:** 8 hours from Phase 0 start  
 
-## Running tasks
+## Running / pending
 
-| Task ID | Agent | Status |
+| Task ID | Status | SCORE |
 |---|---|---|
-| P2-ORDERS | BUILDER | spawning |
-| P2-MATCH | BUILDER | spawning |
-| P2-WORD | BUILDER | spawning |
-| P2-MIXER | BUILDER | spawning |
-| P2-PRE | BUILDER | spawning |
+| P2-MATCH | MERGED | 37298715 |
+| P2-PRE | PASS pending rebase | 37469938 |
+| P2-ORDERS | running | — |
+| P2-WORD | running | — |
+| P2-MIXER | running | — |
 
 ## Known risks
 
-- **NixOS:** `nix develop -c …` only.
-- Parallel Phase 2 merge conflicts likely on `model.rs` / mains — merge one-at-a-time with rebase.
-- Decompressor still ~300KB; size optimization later.
-- Do not claim enwik9 results yet.
+- Nix required. Parallel branches conflict on model.rs — rebase losers onto new main.
+- PRE improves vs Phase1 but loses to MATCH; rebase+combine later.
+- Do not claim enwik9 yet.
 
 ## Next three tasks
 
-1. Merge each Phase 2 builder that improves SCORE.
-2. Phase 3 reviewer after merge batch.
-3. Phase 3 tuner on enwik8.
+1. Finish ORDERS/WORD/MIXER; merge any that beat 37298715.
+2. Rebase PRE onto match (or combine preprocessor + match).
+3. Phase 3 reviewer after merge batch.
