@@ -1,12 +1,14 @@
-//! PROMETHEUS shared core: Model trait, order-2 + match CM, 32-bit arithmetic coder.
+//! PROMETHEUS shared core: Model trait, multi-order / match CM, 32-bit arithmetic coder.
 
 mod arithmetic;
+mod contexts;
 mod match_model;
 mod model;
 
 pub use arithmetic::{ArithmeticDecoder, ArithmeticEncoder};
+pub use contexts::OrdersModel;
 pub use match_model::{MatchModel, Order2MatchModel};
 pub use model::{Model, Order2Model};
 
-/// Archive magic for Phase 1 (order-2 + arithmetic coding).
+/// Archive magic (context model + arithmetic coding).
 pub const MAGIC: &[u8; 4] = b"PRM1";
