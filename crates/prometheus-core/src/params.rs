@@ -74,7 +74,7 @@ pub const INDIRECT_BITS: usize = 24;
 pub const INDIRECT_MIX_WEIGHT: u32 = 40;
 
 /// Blend weight (0..=255) of match×indirect cross model into CM mix.
-pub const MATCH_IND_CROSS_WEIGHT: u32 = 16;
+pub const MATCH_IND_CROSS_WEIGHT: u32 = 22;
 
 /// Third-stage APM blend weight (0..=255) into final p after SSE2.
 pub const APM_MIX_WEIGHT: u32 = 224;

@@ -923,3 +923,39 @@ ROUNDTRIP=OK COMPRESSED=21826291 DECOMPRESSOR=37560 SCORE=21863851 COMPRESS_SECO
 | SCORE | 21887167 | **21863851** | **−23316** |
 
 Gap to 20.5e6 ≈ 1.33 MB. Adversarial: **10/10 PASS**
+
+## Attempt 5 — MATCH_IND_CROSS_WEIGHT retune (KEEP)
+
+Slice sweep vs ind2-cross base 5636937:
+
+| MIX | Slice | Δ |
+|----:|------:|--:|
+| 12 | 5638555 | +1618 |
+| 16 | 5636937 | 0 |
+| 20 | 5635672 | −1265 |
+| **22** | **5635389** | **−1548** |
+| 24 | 5635428 | −1509 |
+| 26 | 5635544 | −1393 |
+| 28 | 5635766 | −1171 |
+| 32 | 5637021 | +84 |
+
+Full enwik8 (MIX=22):
+```
+ROUNDTRIP=OK COMPRESSED=21819876 DECOMPRESSOR=37544 SCORE=21857420 COMPRESS_SECONDS=370.43 DECOMPRESS_SECONDS=358.17 PEAK_RSS_MB=1854
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21826291 | 21819876 | **−6415** |
+| DECOMPRESSOR | 37560 | 37544 | −16 |
+| SCORE | 21863851 | **21857420** | **−6431** |
+
+Gap to 20.5e6 ≈ 1.32 MB. Adversarial: **10/10 PASS**.
+
+## Attempt 6 — STRETCH static reclaim (REJECT / N/A)
+
+Const-evaluated static LUT vs heap OnceLock: slice **5635389** (delta 0). Values already bit-identical; historical +2 KB COMPRESSED drift not reproducible. Keep heap (smaller DECOMPRESSOR).
+
+## Attempt 7 — Cross + ind3 2-bit expand (REJECT)
+
+`CROSS_SIZE` 524288→2097152 with ind3>>6. Slice **5635913** vs 5635389 (**+524**). Reverted.
