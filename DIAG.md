@@ -1050,3 +1050,50 @@ Gap to 20.5e6: **≈1.24 MB** (was 1.35 MB).
 3. Word / o5 Laplace→hybrid dual-rate without full StateMap (o5 SM rejected).
 4. RSS trim: pack match `ht_prev` / shrink HASH_BITS before enwik9 (PEAK_RSS ~1.85 GB).
 5. Mixer weight retune after soft-reset=1 (ORDER3/5/6, SSE, APM).
+
+# DIAG-R6
+
+Branch: `agent/diag-r6`  
+Agent: DIAG-R6  
+Start: 2026-11-24  
+Baseline to beat: `ROUNDTRIP=OK COMPRESSED=21740866 DECOMPRESSOR=37544 SCORE=21778410`
+
+## Plan
+
+1. Soft-reset schedule (per-order / decay / asymptotic) vs fixed n→1.
+2. Mixer weight retune after new schedule (ORDER3/5/6, SSE, APM, CROSS).
+3. Word / o5 Laplace→hybrid dual-rate (no full StateMap on o5).
+4. RSS trim only if SCORE-neutral+.
+
+Slice baseline (first 20e6 enwik8): **4510861**.
+
+## Attempt 1 — Soft-reset schedule variants (REJECT modes 1–3; KEEP asymptotic)
+
+| Mode | Description | Slice | Δ |
+|-----:|-------------|------:|--:|
+| 0 | fixed n→1 (R5) | 4510861 | 0 |
+| 1 | surprise-scaled reset | 4515432 | +4571 |
+| 2 | mispred-gated | 4512093 | +1232 |
+| 3 | halve →127 | 4520958 | +10097 |
+| 4 | asym n+=1-(n>>6) eq≈64 | 4502012 | −8849 |
+| 5 | asym >>5 eq≈32 | 4487900 | −22961 |
+| 6 | asym >>4 eq≈16 | 4477478 | −33383 |
+| **7** | **asym >>3 eq≈8** | **4476865** | **−33996** |
+| 8 | asym >>2 eq≈4 | 4488669 | −22192 |
+| 9 | asym >>1 eq≈2 | 4509359 | −1502 |
+
+Per-order fixed resets (o2/o3/o4/cross): best was cross=16 (−907); noise / reject vs asymptotic.
+
+Full enwik8 (asym >>3):
+```
+ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876 COMPRESS_SECONDS=346.95 DECOMPRESS_SECONDS=339.65 PEAK_RSS_MB=1853
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21740866 | **21546316** | **−194550** |
+| DECOMPRESSOR | 37544 | 37560 | +16 |
+| SCORE | 21778410 | **21583876** | **−194534** |
+
+Gap to 20.5e6 ≈ 1.05 MB. Adversarial: **10/10 PASS**.
+

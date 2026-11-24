@@ -21,6 +21,9 @@ pub fn sm_predict(cell: u32) -> u16 {
     }
 }
 
+/// StateMap update. Count schedule: asymptotic `n += 1 - (n>>3)` (eq ≈ 8).
+/// DIAG-R6: beats fixed soft-reset n→1 (R5) by keeping a steady dual-rate
+/// instead of bouncing 255→1.
 #[inline]
 pub fn sm_update(cell: u32, bit: u8) -> u32 {
     let mut p = (cell >> 16) as i32;
@@ -28,12 +31,7 @@ pub fn sm_update(cell: u32, bit: u8) -> u32 {
     let tgt = if bit != 0 { 65535i32 } else { 0i32 };
     // paq-ish dual-rate: step ≈ 3/(n+4) of the residual
     p += ((tgt - p) * 3) / (n + 4);
-    // Soft reset when saturated so nonstationary contexts can re-adapt.
-    // n→1 keeps near-max adaptation after saturation (208 was too sticky).
-    let n2 = if n < 255 {
-        (n + 1) as u32
-    } else {
-        1
-    };
+    // Asymptotic count: n' = n + 1 - (n>>3) → equilibrium ≈ 8.
+    let n2 = (n + 1 - (n >> 3)).clamp(0, 255) as u32;
     ((p.clamp(1, 65534) as u32) << 16) | n2
 }
