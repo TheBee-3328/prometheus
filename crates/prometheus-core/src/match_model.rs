@@ -221,12 +221,17 @@ impl Order2MatchModel {
             word: WordModel::new(),
             sse: Sse::new(SSE_MIX_WEIGHT),
             sse2: Sse2::new(SSE2_MIX_WEIGHT),
-            // 256 last-byte × 8 match buckets = 2048 contexts.
-            apm: Apm::new(2048).with_rate_shift(APM_RATE_SHIFT),
+            // 256 last-byte × 8 bit_pos × 8 match buckets = 16384 contexts.
+            apm: Apm::new(16384).with_rate_shift(APM_RATE_SHIFT),
             bit_cxt: 1,
             last_class: 8,
             last_byte: 0,
         }
+    }
+
+    #[inline]
+    fn bits_seen(bit_cxt: u16) -> u8 {
+        (15u32.saturating_sub(bit_cxt.leading_zeros() as u32)) as u8
     }
 
     #[inline]
@@ -296,9 +301,10 @@ impl Model for Order2MatchModel {
         };
         let p = self.sse.refine(p, self.bit_cxt, len);
         let p = self.sse2.refine(p, self.bit_cxt, self.last_class);
-        // APM context: previous byte × match-length bucket (distinct from SSE bit_cxt).
+        // APM: last_byte × bit_pos × match_bucket (richer than SSE bit_cxt alone).
         let mb = Sse::match_bucket(len) as usize;
-        let cxt = ((self.last_byte as usize) << 3) | mb;
+        let bp = (Self::bits_seen(self.bit_cxt) as usize) & 7;
+        let cxt = ((self.last_byte as usize) << 6) | (bp << 3) | mb;
         let p12 = self.apm.predict(p16_to_p12(p), cxt);
         Self::mix_w(p, p12_to_p16(p12), APM_MIX_WEIGHT)
     }
