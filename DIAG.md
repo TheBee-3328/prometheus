@@ -126,7 +126,9 @@ Avg cost by byte class (approx mbits/bit; relative only — estimator coarse):
 | broken adaptive mixer + o6 | b/g | — | slice 7.98e6 (worse) | **REJECT** | — |
 | o6 fixed mix any weight | g | — | slice worse vs w6=0 | **REJECT** | — |
 | **bigger o3/o4 tables** (bits 23/24) | a/j | 26380505 | **26143788** | **KEEP** | `29097b6` |
-| **SSE layer** (mix=224) | i | 26143788 | **25548485** | **KEEP** | *(pending)* |
+| **SSE layer** (mix=224) | i | 26143788 | **25548485** | **KEEP** | `b1eb4ae` |
+| MATCH_CONF graduated | f | — | slice worse | **REJECT** (max conf best) | — |
+| **word model** (bits=22, mix=64) | g | 25548485 | **25300821** | **KEEP** | *(pending)* |
 
 ### Fix detail: add order-1 + hashed order-3/4
 
@@ -174,6 +176,24 @@ ROUNDTRIP=OK COMPRESSED=25517693 DECOMPRESSOR=30792 SCORE=25548485 COMPRESS_SECO
 
 20 MB slice: 5439385 → 5260907 (−3.28%).
 
+### Fix detail: word model
+
+```
+ROUNDTRIP=OK COMPRESSED=25269357 DECOMPRESSOR=31464 SCORE=25300821 COMPRESS_SECONDS=101.74 DECOMPRESS_SECONDS=96.27 PEAK_RSS_MB=639
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 25517693 | 25269357 | **-248336** |
+| SCORE | 25548485 | 25300821 | **-247664** |
+| bpB | 2.04142 | 2.02155 | |
+
+20 MB slice: 5260907 → 5210195 (−0.96%).
+
+## Re-ablation note (after 3 keeps; pre-word)
+
+Diag tool modes `no-match`/`no-struct`/`order2-only` still bypass o3/o4/SSE/word — numbers not comparable to `full=5260907`. Caveat recorded; not used for merge decisions.
+
 ## FINAL REPORT
 
-*(in progress — more hyps remain; re-ablate after 3 keeps)*
+*(in progress)*

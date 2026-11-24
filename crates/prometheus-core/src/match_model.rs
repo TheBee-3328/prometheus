@@ -8,10 +8,11 @@ use crate::model::{HashOrderModel, Model, Order1Model, Order2Model};
 use crate::params::{
     match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
     ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS, ORDER4_MIX_WEIGHT,
-    SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT,
+    SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
 };
 use crate::sparse::SparseModel;
 use crate::sse::Sse;
+use crate::word::WordModel;
 
 /// LZ match model: buffer + hash → expected next bits.
 pub struct MatchModel {
@@ -176,6 +177,7 @@ pub struct Order2MatchModel {
     order4: HashOrderModel,
     match_m: MatchModel,
     sparse: SparseModel,
+    word: WordModel,
     sse: Sse,
     /// Shared bit path for SSE context (mirrors order2 bit_cxt).
     bit_cxt: u16,
@@ -190,6 +192,7 @@ impl Order2MatchModel {
             order4: HashOrderModel::new(4, ORDER4_BITS),
             match_m: MatchModel::new(),
             sparse: SparseModel::new(),
+            word: WordModel::new(),
             sse: Sse::new(SSE_MIX_WEIGHT),
             bit_cxt: 1,
         }
@@ -229,6 +232,8 @@ impl Model for Order2MatchModel {
         let mut p0 = Self::mix_w(p2, p1, ORDER1_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p3, ORDER3_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p4, ORDER4_MIX_WEIGHT);
+        let pw = self.word.predict();
+        p0 = Self::mix_w(p0, pw, WORD_MIX_WEIGHT);
         let len = self.match_m.match_len();
         let p = if len >= MIN_MIX_LEN {
             let pm = self.match_m.predict();
@@ -247,6 +252,7 @@ impl Model for Order2MatchModel {
         self.order2.update(bit);
         self.order3.update(bit);
         self.order4.update(bit);
+        self.word.update(bit);
         self.match_m.update(bit);
         self.sparse.update(bit);
         self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);

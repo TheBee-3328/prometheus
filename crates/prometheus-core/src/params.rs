@@ -41,6 +41,11 @@ pub const ORDER4_MIX_WEIGHT: u32 = 48;
 
 /// SSE blend weight (0..=255) of secondary estimate into final p.
 pub const SSE_MIX_WEIGHT: u32 = 224;
+
+/// Word-model hash table bits.
+pub const WORD_BITS: usize = 22;
+/// Blend weight (0..=255) of word model into CM mix (before match/SSE).
+pub const WORD_MIX_WEIGHT: u32 = 64;
 // === END TUNABLE ===
 
 pub const BUF_SIZE: usize = 1 << BUF_BITS;
