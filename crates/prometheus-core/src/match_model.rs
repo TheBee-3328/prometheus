@@ -242,7 +242,7 @@ impl Model for Order2MatchModel {
             let px = self.sparse.predict_struct();
             Self::mix_w(p0, px, STRUCT_MIX_WEIGHT)
         };
-        self.sse.refine(p, self.bit_cxt)
+        self.sse.refine(p, self.bit_cxt, len)
     }
 
     #[inline]

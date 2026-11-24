@@ -4,7 +4,8 @@
 
 use crate::params::ORDER2_RESCALE;
 
-const N_CXT: usize = 256;
+/// bit_cxt (8) × match_bucket (8) = 2048 contexts
+const N_CXT: usize = 2048;
 const N_BUCKET: usize = 64; // p >> 10
 const SIZE: usize = N_CXT * N_BUCKET;
 
@@ -42,10 +43,26 @@ impl Sse {
         }
     }
 
-    /// Refine `p` using `bit_cxt` (1..255 during a byte). Stores index for update.
+    /// Match length → 0..7 bucket for SSE context.
     #[inline]
-    pub fn refine(&mut self, p: u16, bit_cxt: u16) -> u16 {
-        let cxt = (bit_cxt as usize) & (N_CXT - 1);
+    pub fn match_bucket(match_len: u32) -> u16 {
+        match match_len {
+            0..=4 => 0,
+            5..=6 => 1,
+            7..=10 => 2,
+            11..=20 => 3,
+            21..=40 => 4,
+            41..=80 => 5,
+            81..=160 => 6,
+            _ => 7,
+        }
+    }
+
+    /// Refine `p` using `bit_cxt` and match-length bucket. Stores index for update.
+    #[inline]
+    pub fn refine(&mut self, p: u16, bit_cxt: u16, match_len: u32) -> u16 {
+        let mb = Self::match_bucket(match_len) as usize;
+        let cxt = ((bit_cxt as usize) & 255) | (mb << 8);
         let bucket = (p as usize) >> 10; // 0..63
         let bucket = bucket.min(N_BUCKET - 1);
         let i = cxt * N_BUCKET + bucket;
