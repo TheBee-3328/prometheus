@@ -445,3 +445,64 @@ ROUNDTRIP=OK COMPRESSED=22531741 DECOMPRESSOR=42760 SCORE=22574501 COMPRESS_SECO
 | SCORE | 22610206 | **22574501** | **−35705** |
 
 Gap to 20.5e6 ≈ 2.03 MB.
+
+## Attempt 6 — paq-style SSE cell updates (REJECT)
+
+Replace Laplace n0/n1 in SSE/SSE2 with single-u16 `(tgt-cur)>>6` updates.
+Slice **4731280** vs o7 **4663521** (**+67759**). Reverted.
+
+APM mix/rate sweep: current 224/7 near-optimal (best alt MIX=192 RATE=6 only −63 B on slice).
+
+## FINAL REPORT (DIAG-R2)
+
+### Verdict: **partial**
+
+Clear SCORE win vs post-DIAG-FIX baseline; **≤20.5e6 COMPRESSED not reached**.
+
+### Best judge line
+
+```
+ROUNDTRIP=OK COMPRESSED=22531741 DECOMPRESSOR=42760 SCORE=22574501 COMPRESS_SECONDS=260.00 DECOMPRESS_SECONDS=256.14 PEAK_RSS_MB=905
+```
+
+| | Baseline | Best | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 23036149 | **22531741** | **−504408** |
+| DECOMPRESSOR | 33016 | 42760 | +9744 |
+| SCORE | 23069165 | **22574501** | **−494664** |
+| bpB | 1.84289 | 1.80254 | |
+
+vs zstd 26395074 / xz 24831656: still ahead. Gap to 20.5e6: **≈2.03 MB**.
+
+### Commits (agent/diag-r2)
+
+| Commit | Change | SCORE |
+|--------|--------|------:|
+| `669042b` | paq-style APM after SSE2 | 22808869 |
+| `e18070b` | richer APM cxt (byte×bit_pos×match) | 22610206 |
+| `35d2a63` | hashed order-7 mix=16 | **22574501** |
+
+### Acceptance
+
+- Judge ROUNDTRIP=OK and SCORE < 23069165: **YES**
+- ≤20.5e6 COMPRESSED: **NO**
+- Adversarial: **10/10 PASS** (re-verified clean; one false FAIL was concurrent rebuild race)
+
+### Rejected
+
+| Hyp | Evidence |
+|-----|----------|
+| APM2 class×bit_cxt | slice +2342 |
+| Tiny 2-input logistic mixer | slice +170172 |
+| u16 hash-order counters | all rescale worse |
+| paq-style SSE updates | slice +67759 |
+| APM mix/rate retune | ≤63 B, not worth judge |
+
+### Next ideas (toward 20.5e6)
+
+1. Multi-candidate / longer match + soft conf (not binary max).
+2. Indirect / record / sparse-gap models (cmix-class).
+3. Runtime-built STRETCH (reclaim ~8 KB DECOMPRESSOR) + more APM contexts (order-1×class).
+4. State-map / dual-rate counters (paq8) instead of plain u16 rescale.
+5. Deeper preprocessor (wiki dict / entity / UTF-8) — early ablation was weak but may compound now.
+6. Speed: compress ~260s; optimize before heavier models for enwik9.
