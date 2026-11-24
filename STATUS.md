@@ -1,15 +1,15 @@
 # STATUS
 
 **Current phase:** LIVE — DIAG-R4 continuing toward 20.5e6  
-**Current best SCORE:** **21908733** (enwik8)  
-**Best line:** `ROUNDTRIP=OK COMPRESSED=21871189 DECOMPRESSOR=37544 SCORE=21908733 …`  
-**bpB:** ≈ **1.750**  
-**Gap to 20.5e6:** ≈ 1.37 MB  
+**Current best SCORE:** **21887167** (enwik8)  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=21849655 DECOMPRESSOR=37512 SCORE=21887167 …`  
+**bpB:** ≈ **1.748**  
+**Gap to 20.5e6:** ≈ 1.35 MB  
 **Stop policy:** Operator manual stop.  
 
 ## Recent
 
 | Task | SCORE |
 |---|---|
-| StateMap soft-reset | 21951209 |
-| **StateMap Order-3** | **21908733** |
+| StateMap Order-3 | 21908733 |
+| **StateMap Order-4** | **21887167** |
