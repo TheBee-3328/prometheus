@@ -35,6 +35,7 @@ DEFAULTS = {
     "MIN_MIX_LEN": 5,
     "MATCH_CONF": [14000, 20000, 26000, 30000, 32000],
     "MIX_WEIGHT": [100, 160, 200, 230, 245],
+    "STRUCT_MIX_WEIGHT": 14,
 }
 
 # Discrete search domains (RAM-safe: BUF<=26, HASH<=26 → ~64+256 MB tables).
@@ -76,6 +77,9 @@ def load_seed() -> dict:
             "MIX_WEIGHT": [int(x) for x in re.search(
                 r"MIX_WEIGHT:\s*\[u32;\s*5\]\s*=\s*\[([^\]]+)\]", text
             ).group(1).split(",")],
+            "STRUCT_MIX_WEIGHT": int(
+                re.search(r"STRUCT_MIX_WEIGHT:\s*u32\s*=\s*(\d+)", text).group(1)
+            ),
         }
         print(f"seed: parsed {PARAMS_RS}", flush=True)
         return normalize(p)
@@ -89,7 +93,7 @@ def normalize(p: dict) -> dict:
     q.update(p)
     q["MATCH_CONF"] = [clamp_conf(x) for x in list(q["MATCH_CONF"])]
     q["MIX_WEIGHT"] = [clamp_mix(x) for x in list(q["MIX_WEIGHT"])]
-    for k in ("ORDER2_RESCALE", "BUF_BITS", "HASH_BITS", "HASH_ORDER", "MIN_MIX_LEN"):
+    for k in ("ORDER2_RESCALE", "BUF_BITS", "HASH_BITS", "HASH_ORDER", "MIN_MIX_LEN", "STRUCT_MIX_WEIGHT"):
         q[k] = int(q[k])
     return q
 

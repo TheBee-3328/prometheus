@@ -1,0 +1,210 @@
+[
+  {
+    "size": 7161276,
+    "note": "m2=192",
+    "params": {
+      "ORDER2_RESCALE": 102,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        123,
+        160,
+        192,
+        230,
+        245
+      ],
+      "STRUCT_MIX_WEIGHT": 15
+    }
+  },
+  {
+    "size": 7161276,
+    "note": "m1=160",
+    "params": {
+      "ORDER2_RESCALE": 102,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        123,
+        160,
+        192,
+        230,
+        245
+      ],
+      "STRUCT_MIX_WEIGHT": 15
+    }
+  },
+  {
+    "size": 7161276,
+    "note": "m3=230",
+    "params": {
+      "ORDER2_RESCALE": 102,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        123,
+        160,
+        192,
+        230,
+        245
+      ],
+      "STRUCT_MIX_WEIGHT": 15
+    }
+  },
+  {
+    "size": 7161281,
+    "note": "m2=191",
+    "params": {
+      "ORDER2_RESCALE": 102,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        123,
+        160,
+        191,
+        230,
+        245
+      ],
+      "STRUCT_MIX_WEIGHT": 15
+    }
+  },
+  {
+    "size": 7161289,
+    "note": "combo m0=122,m2=192",
+    "params": {
+      "ORDER2_RESCALE": 102,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        122,
+        160,
+        192,
+        230,
+        245
+      ],
+      "STRUCT_MIX_WEIGHT": 15
+    }
+  },
+  {
+    "size": 7161294,
+    "note": "combo m0=122,m2=191",
+    "params": {
+      "ORDER2_RESCALE": 102,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        122,
+        160,
+        191,
+        230,
+        245
+      ],
+      "STRUCT_MIX_WEIGHT": 15
+    }
+  },
+  {
+    "size": 7161295,
+    "note": "combo m0=124,m2=192",
+    "params": {
+      "ORDER2_RESCALE": 102,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        124,
+        160,
+        192,
+        230,
+        245
+      ],
+      "STRUCT_MIX_WEIGHT": 15
+    }
+  },
+  {
+    "size": 7161301,
+    "note": "combo m0=124,m2=191",
+    "params": {
+      "ORDER2_RESCALE": 102,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        124,
+        160,
+        191,
+        230,
+        245
+      ],
+      "STRUCT_MIX_WEIGHT": 15
+    }
+  }
+]

@@ -19,6 +19,7 @@ DEFAULTS = {
     "MIN_MIX_LEN": 5,
     "MATCH_CONF": [14000, 20000, 26000, 30000, 32000],
     "MIX_WEIGHT": [100, 160, 200, 230, 245],
+    "STRUCT_MIX_WEIGHT": 14,
 }
 
 BLOCK_RE = re.compile(
@@ -49,6 +50,9 @@ pub const MATCH_CONF: [u32; 5] = [{conf}];
 
 /// Ensemble mix weight (0..=255) for match vs order-2, same buckets.
 pub const MIX_WEIGHT: [u32; 5] = [{mix}];
+
+/// When match is inactive: blend weight (0..=255) of XML/wiki structure into the mix.
+pub const STRUCT_MIX_WEIGHT: u32 = {int(p['STRUCT_MIX_WEIGHT'])};
 // === END TUNABLE ==="""
 
 
