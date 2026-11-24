@@ -1022,7 +1022,7 @@ Gap to 20.5e6: **≈1.24 MB** (was 1.35 MB).
 |--------|--------|------:|
 | `ab9ee4e` | richer match×indirect cross ind2 nibble | 21863851 |
 | `54e707f` | MATCH_IND_CROSS_WEIGHT=22 | 21857420 |
-| `COMMIT` | StateMap soft-reset n→1 | **21778410** |
+| `d0c7e04` | StateMap soft-reset n→1 | **21778410** |
 
 ### Acceptance
 
