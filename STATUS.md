@@ -1,22 +1,17 @@
 # STATUS
 
-**Current phase:** 3 complete → next: combine held models / size pass / more tune  
+**Current phase:** 4 (size pass after orders-mix FAIL)  
 **Current best SCORE:** **28355431** (enwik8)  
-**Best line:** `ROUNDTRIP=OK COMPRESSED=28051471 DECOMPRESSOR=303960 SCORE=28355431 COMPRESS_SECONDS=37.04 DECOMPRESS_SECONDS=28.11 PEAK_RSS_MB=584`  
-**Ratio:** compressed ≈ 3.57× vs raw; SCORE/1e8 ≈ 0.284  
-**Agent runs used:** 11 / 40  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=28051471 DECOMPRESSOR=303960 SCORE=28355431 … PEAK_RSS_MB=584`  
+**Agent runs used:** 12 / 40  
 
-## Scoreboard
+## Recent
 
-| Build | SCORE |
-|---|---|
-| Store | 100299876 |
-| Order-2 | 38254897 |
-| Match+pre | 36483469 |
-| **Tuned match+pre** | **28355431** |
+- P4-ORDERS-MIX abandoned after 2 attempts worse than best (30.9M, 28.8M).
+- Next: shrink decompressor (every byte counts) and/or tune round 2.
 
 ## Next three tasks
 
-1. Second tune round OR integrate held P2-ORDERS/MIXER onto tuned base.
-2. Decompressor size pass (build-std / eh_frame).
-3. enwik9 milestone only after another enwik8 improvement batch.
+1. Size-optimize decompressor (eh_frame / panic_abort / LTO already on — push further).
+2. Second tuner round on params.
+3. enwik9 only after another clear enwik8 win.
