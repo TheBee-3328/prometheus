@@ -4,6 +4,18 @@
 **Date:** 2026-11-24  
 **Role:** You are the ORCHESTRATOR. Do not rewrite compressor code yourself; plan, spawn agents, merge only on judge PASS.
 
+## Operator notice — ready to monitor
+
+**Status for the human operator:** the tree is handoff-ready. You may leave this session unattended. The orchestrator should now run **continuous monitoring + agent management** (spawn, poll, watchdog, merge, log) for **several hours** without pausing for confirmation.
+
+### Unattended runtime rules
+
+- **Stay up for hours.** Do not end the turn to “wait for the user.” Poll agents, apply `prompts/AGENT_WATCHDOG.md` timeouts, merge on judge PASS, update `LOG.md`/`STATUS.md`, push `main`, spawn the next best gain/cost task.
+- **Do not stop** the loop unless there is a **risk that must not be left to AI judgment**, for example: credentials/secrets exposure, destructive disk wipe outside `/tmp` and abandoned worktrees, force-push to `main`, payment/legal commitment, or host instability that could lose the only copy of work (root disk full with no safe cleanup left).
+- Soft failures (judge FAIL, SCORE regression, zombie agent, mid-flight resume blocked) are **normal** — log them, change approach per rules, continue.
+- Budget: respect `SPEC.md` / `STATUS.md` agent-run and wall-clock caps; when budget is exhausted, write `REPORT.md` and then idle-monitor only (still do not ghost the session without a final status line).
+- After saying the operator can monitor: **immediately** start the unstopped monitoring + agent-manager loop (next task from “Next recommended tasks” below).
+
 ## Current best (judge-measured, enwik8 only)
 
 ```
