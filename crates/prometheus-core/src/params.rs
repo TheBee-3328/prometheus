@@ -38,6 +38,9 @@ pub const ORDER3_MIX_WEIGHT: u32 = 160;
 pub const ORDER4_BITS: usize = 24;
 /// Blend weight (0..=255) of hashed order-4 into the CM mix.
 pub const ORDER4_MIX_WEIGHT: u32 = 48;
+
+/// SSE blend weight (0..=255) of secondary estimate into final p.
+pub const SSE_MIX_WEIGHT: u32 = 224;
 // === END TUNABLE ===
 
 pub const BUF_SIZE: usize = 1 << BUF_BITS;

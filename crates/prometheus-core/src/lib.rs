@@ -6,6 +6,7 @@ mod model;
 pub mod params;
 mod preprocessor;
 mod sparse;
+mod sse;
 
 pub use arithmetic::{ArithmeticDecoder, ArithmeticEncoder};
 pub use match_model::{MatchModel, Order2MatchModel};

@@ -125,7 +125,8 @@ Avg cost by byte class (approx mbits/bit; relative only — estimator coarse):
 | **o1+hashed o3/o4** (w=8/160/48, bits 22/23) | g | 28011142 | **26380505** | **KEEP** | `1d9837d` |
 | broken adaptive mixer + o6 | b/g | — | slice 7.98e6 (worse) | **REJECT** | — |
 | o6 fixed mix any weight | g | — | slice worse vs w6=0 | **REJECT** | — |
-| **bigger o3/o4 tables** (bits 23/24) | a/j | 26380505 | **26143788** | **KEEP** | *(pending)* |
+| **bigger o3/o4 tables** (bits 23/24) | a/j | 26380505 | **26143788** | **KEEP** | `29097b6` |
+| **SSE layer** (mix=224) | i | 26143788 | **25548485** | **KEEP** | *(pending)* |
 
 ### Fix detail: add order-1 + hashed order-3/4
 
@@ -159,6 +160,20 @@ ROUNDTRIP=OK COMPRESSED=26113540 DECOMPRESSOR=30248 SCORE=26143788 COMPRESS_SECO
 
 20 MB slice: 5475423 → 5439385 (−0.66%).
 
+### Fix detail: SSE (secondary symbol estimation)
+
+```
+ROUNDTRIP=OK COMPRESSED=25517693 DECOMPRESSOR=30792 SCORE=25548485 COMPRESS_SECONDS=93.54 DECOMPRESS_SECONDS=85.22 PEAK_RSS_MB=631
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 26113540 | 25517693 | **-595847** |
+| SCORE | 26143788 | 25548485 | **-595303** |
+| bpB | 2.08908 | 2.04142 | |
+
+20 MB slice: 5439385 → 5260907 (−3.28%).
+
 ## FINAL REPORT
 
-*(in progress — more hyps remain)*
+*(in progress — more hyps remain; re-ablate after 3 keeps)*
