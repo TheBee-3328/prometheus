@@ -19,3 +19,10 @@ version = "0.1.0"
 dependencies = [
  "prometheus-core",
 ]
+
+[[package]]
+name = "prometheus-diag"
+version = "0.1.0"
+dependencies = [
+ "prometheus-core",
+]

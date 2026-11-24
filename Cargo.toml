@@ -6,6 +6,7 @@ members = [
     "crates/prometheus-core",
     "crates/prometheus-compress",
     "crates/prometheus-decompress",
+    "crates/prometheus-diag",
 ]
 
 [profile.release]

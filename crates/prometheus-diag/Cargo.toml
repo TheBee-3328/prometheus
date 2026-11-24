@@ -1,0 +1,13 @@
+[package]
+name = "prometheus-diag"
+version = "0.1.0"
+edition = "2021"
+description = "Debug ablation + instrumentation (NOT part of SCORE decompressor)"
+publish = false
+
+[[bin]]
+name = "prometheus-diag"
+path = "src/main.rs"
+
+[dependencies]
+prometheus-core = { path = "../prometheus-core" }
