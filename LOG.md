@@ -34,3 +34,4 @@ Append-only. Every agent result (success or failure) goes here.
 | 2026-11-24 | ORCH-WATCH | Document mid-flight resume = platform limit; watchdog timeouts | — | — | — | — | — | — | ok |
 | 2026-11-24 | ORCH-HANDOFF | HANDOFF.md+SETUP.md; enwik8×2 + enwik9×20 parts @50MB; reconstruct OK | 28051471 | 28872 | 28080343 | — | — | — | ready |
 | 2026-11-24 | ORCH-LIVE | Operator notified; starting unattended monitor + TUNER-R2 | — | — | 28080343 | — | — | — | live |
+| 2026-11-24 | ORCH-STOP | Operator cancelled auto-start; killed orch loop + TUNER-R2 spawn | — | — | 28080343 | — | — | — | stopped |
