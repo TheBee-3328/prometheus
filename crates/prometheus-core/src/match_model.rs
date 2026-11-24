@@ -280,7 +280,7 @@ impl Order2MatchModel {
             order1: Order1Model::new(),
             order2: Order2Model::new(),
             order3: HashOrderModel::new_statemap(3, ORDER3_BITS),
-            order4: HashOrderModel::new(4, ORDER4_BITS),
+            order4: HashOrderModel::new_statemap(4, ORDER4_BITS),
             order5: HashOrderModel::new(5, ORDER5_BITS),
             order6: HashOrderModel::new(6, ORDER6_BITS),
             order7: HashOrderModel::new(7, ORDER7_BITS),
