@@ -5,7 +5,7 @@
 
 // === BEGIN TUNABLE ===
 /// Order-2 counter rescale when n0+n1 reaches this (adaptation rate).
-pub const ORDER2_RESCALE: u16 = 120;
+pub const ORDER2_RESCALE: u16 = 100;
 
 /// Match history buffer size = 1 << BUF_BITS.
 pub const BUF_BITS: usize = 25;
@@ -21,7 +21,7 @@ pub const MIN_MIX_LEN: u32 = 6;
 pub const MATCH_CONF: [u32; 5] = [32700, 32700, 32700, 32700, 32700];
 
 /// Ensemble mix weight (0..=255) for match vs order-2, same buckets.
-pub const MIX_WEIGHT: [u32; 5] = [100, 160, 200, 230, 245];
+pub const MIX_WEIGHT: [u32; 5] = [120, 160, 190, 230, 245];
 // === END TUNABLE ===
 
 pub const BUF_SIZE: usize = 1 << BUF_BITS;

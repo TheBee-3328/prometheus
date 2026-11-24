@@ -1,0 +1,252 @@
+[
+  {
+    "size": 7171321,
+    "note": "mix2=190",
+    "params": {
+      "ORDER2_RESCALE": 100,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        120,
+        160,
+        190,
+        230,
+        245
+      ]
+    }
+  },
+  {
+    "size": 7171626,
+    "note": "mix2=195",
+    "params": {
+      "ORDER2_RESCALE": 100,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        120,
+        160,
+        195,
+        230,
+        245
+      ]
+    }
+  },
+  {
+    "size": 7173546,
+    "note": "mix0=122",
+    "params": {
+      "ORDER2_RESCALE": 100,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        122,
+        160,
+        200,
+        230,
+        245
+      ]
+    }
+  },
+  {
+    "size": 7173597,
+    "note": "mix0=125",
+    "params": {
+      "ORDER2_RESCALE": 100,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        125,
+        160,
+        200,
+        230,
+        245
+      ]
+    }
+  },
+  {
+    "size": 7173748,
+    "note": "mix4=250",
+    "params": {
+      "ORDER2_RESCALE": 100,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        120,
+        160,
+        200,
+        230,
+        250
+      ]
+    }
+  },
+  {
+    "size": 7173913,
+    "note": "mix0=118",
+    "params": {
+      "ORDER2_RESCALE": 100,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        118,
+        160,
+        200,
+        230,
+        245
+      ]
+    }
+  },
+  {
+    "size": 7173996,
+    "note": "res=90",
+    "params": {
+      "ORDER2_RESCALE": 90,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        120,
+        160,
+        200,
+        230,
+        245
+      ]
+    }
+  },
+  {
+    "size": 7174046,
+    "note": "mix3=225",
+    "params": {
+      "ORDER2_RESCALE": 100,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        120,
+        160,
+        200,
+        225,
+        245
+      ]
+    }
+  },
+  {
+    "size": 7174085,
+    "note": "mix3=235",
+    "params": {
+      "ORDER2_RESCALE": 100,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        120,
+        160,
+        200,
+        235,
+        245
+      ]
+    }
+  },
+  {
+    "size": 7174181,
+    "note": "res=105",
+    "params": {
+      "ORDER2_RESCALE": 105,
+      "BUF_BITS": 25,
+      "HASH_BITS": 26,
+      "HASH_ORDER": 6,
+      "MIN_MIX_LEN": 6,
+      "MATCH_CONF": [
+        32700,
+        32700,
+        32700,
+        32700,
+        32700
+      ],
+      "MIX_WEIGHT": [
+        120,
+        160,
+        200,
+        230,
+        245
+      ]
+    }
+  }
+]

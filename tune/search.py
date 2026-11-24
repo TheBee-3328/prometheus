@@ -3,6 +3,8 @@
 
 Uses a fixed 25 MB enwik8 slice (offset 8_000_000). Logs every trial to
 tune/trials.csv. Budget controlled by --minutes / --max-trials.
+
+Seeds from tune/best_params.json when present (else params.rs / DEFAULTS).
 """
 from __future__ import annotations
 
@@ -12,6 +14,7 @@ import json
 import os
 import pathlib
 import random
+import re
 import subprocess
 import sys
 import time
@@ -19,9 +22,11 @@ import time
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 TRIALS = ROOT / "tune" / "trials.csv"
 BEST_JSON = ROOT / "tune" / "best_params.json"
+PARAMS_RS = ROOT / "crates" / "prometheus-core" / "src" / "params.rs"
 WRITE = ROOT / "tune" / "write_params.py"
 SLICE_EVAL = ROOT / "tune" / "slice_eval.sh"
 
+# Legacy fallback only — never use as search origin when best_params.json exists.
 DEFAULTS = {
     "ORDER2_RESCALE": 250,
     "BUF_BITS": 24,
@@ -33,12 +38,13 @@ DEFAULTS = {
 }
 
 # Discrete search domains (RAM-safe: BUF<=26, HASH<=26 → ~64+256 MB tables).
+# Tuned around known-best: BUF=25 HASH=26 HASH_ORDER=6 MIN_MIX_LEN=6 max-conf.
 DOMAINS = {
-    "ORDER2_RESCALE": [120, 160, 200, 220, 250, 280, 320, 400],
-    "BUF_BITS": [22, 23, 24, 25, 26],
-    "HASH_BITS": [21, 22, 23, 24, 25, 26],
-    "HASH_ORDER": [3, 4, 5, 6],
-    "MIN_MIX_LEN": [3, 4, 5, 6, 7, 8],
+    "ORDER2_RESCALE": [80, 100, 110, 120, 130, 140, 160, 200, 250],
+    "BUF_BITS": [24, 25, 26],
+    "HASH_BITS": [24, 25, 26],
+    "HASH_ORDER": [5, 6],  # 7+ already lost on this slice; avoid P4-style thrash
+    "MIN_MIX_LEN": [5, 6, 7],
 }
 
 
@@ -48,6 +54,44 @@ def clamp_conf(v: int) -> int:
 
 def clamp_mix(v: int) -> int:
     return max(20, min(250, int(v)))
+
+
+def load_seed() -> dict:
+    """Prefer best_params.json, then parse params.rs, else DEFAULTS."""
+    if BEST_JSON.exists():
+        p = json.loads(BEST_JSON.read_text())
+        print(f"seed: loaded {BEST_JSON}", flush=True)
+        return normalize(p)
+    text = PARAMS_RS.read_text()
+    try:
+        p = {
+            "ORDER2_RESCALE": int(re.search(r"ORDER2_RESCALE:\s*u16\s*=\s*(\d+)", text).group(1)),
+            "BUF_BITS": int(re.search(r"BUF_BITS:\s*usize\s*=\s*(\d+)", text).group(1)),
+            "HASH_BITS": int(re.search(r"HASH_BITS:\s*usize\s*=\s*(\d+)", text).group(1)),
+            "HASH_ORDER": int(re.search(r"HASH_ORDER:\s*usize\s*=\s*(\d+)", text).group(1)),
+            "MIN_MIX_LEN": int(re.search(r"MIN_MIX_LEN:\s*u32\s*=\s*(\d+)", text).group(1)),
+            "MATCH_CONF": [int(x) for x in re.search(
+                r"MATCH_CONF:\s*\[u32;\s*5\]\s*=\s*\[([^\]]+)\]", text
+            ).group(1).split(",")],
+            "MIX_WEIGHT": [int(x) for x in re.search(
+                r"MIX_WEIGHT:\s*\[u32;\s*5\]\s*=\s*\[([^\]]+)\]", text
+            ).group(1).split(",")],
+        }
+        print(f"seed: parsed {PARAMS_RS}", flush=True)
+        return normalize(p)
+    except Exception as e:
+        print(f"seed: fallback DEFAULTS ({e})", flush=True)
+        return normalize(DEFAULTS)
+
+
+def normalize(p: dict) -> dict:
+    q = dict(DEFAULTS)
+    q.update(p)
+    q["MATCH_CONF"] = [clamp_conf(x) for x in list(q["MATCH_CONF"])]
+    q["MIX_WEIGHT"] = [clamp_mix(x) for x in list(q["MIX_WEIGHT"])]
+    for k in ("ORDER2_RESCALE", "BUF_BITS", "HASH_BITS", "HASH_ORDER", "MIN_MIX_LEN"):
+        q[k] = int(q[k])
+    return q
 
 
 def ensure_header() -> None:
@@ -101,8 +145,10 @@ def log_trial(trial: int, t0: float, size: int, best: int, p: dict, note: str) -
 
 def mutate(rng: random.Random, p: dict) -> dict:
     q = json.loads(json.dumps(p))
+    # Bias toward MIX_WEIGHT / ORDER2_RESCALE — MATCH_CONF already maxed at best.
     kind = rng.choice(
         [
+            "ORDER2_RESCALE",
             "ORDER2_RESCALE",
             "BUF_BITS",
             "HASH_BITS",
@@ -110,7 +156,8 @@ def mutate(rng: random.Random, p: dict) -> dict:
             "MIN_MIX_LEN",
             "MATCH_CONF",
             "MIX_WEIGHT",
-            "MATCH_CONF",
+            "MIX_WEIGHT",
+            "MIX_WEIGHT",
             "MIX_WEIGHT",
         ]
     )
@@ -118,21 +165,21 @@ def mutate(rng: random.Random, p: dict) -> dict:
         q[kind] = rng.choice(DOMAINS[kind])
     elif kind == "MATCH_CONF":
         i = rng.randrange(5)
-        step = rng.choice([-4000, -2000, -1000, 1000, 2000, 4000])
+        # Prefer high-conf region near 32700.
+        step = rng.choice([-800, -400, -200, -100, 100, 200])
         q["MATCH_CONF"][i] = clamp_conf(q["MATCH_CONF"][i] + step)
-        # Keep non-decreasing-ish for longer matches (soft).
         for j in range(1, 5):
             if q["MATCH_CONF"][j] < q["MATCH_CONF"][j - 1] - 2000:
                 q["MATCH_CONF"][j] = q["MATCH_CONF"][j - 1]
     else:
         i = rng.randrange(5)
-        step = rng.choice([-40, -20, -10, 10, 20, 40])
+        step = rng.choice([-30, -20, -10, -5, 5, 10, 20, 30])
         q["MIX_WEIGHT"][i] = clamp_mix(q["MIX_WEIGHT"][i] + step)
         for j in range(1, 5):
             if q["MIX_WEIGHT"][j] < q["MIX_WEIGHT"][j - 1] - 20:
                 q["MIX_WEIGHT"][j] = q["MIX_WEIGHT"][j - 1]
-    # Soft RAM guard: huge tables only with smaller partner.
-    if q["BUF_BITS"] + q["HASH_BITS"] > 50:
+    # Soft RAM guard.
+    if q["BUF_BITS"] + q["HASH_BITS"] > 51:
         if rng.random() < 0.5:
             q["BUF_BITS"] = min(q["BUF_BITS"], 25)
         else:
@@ -152,16 +199,18 @@ def coordinate_neighbors(p: dict) -> list[tuple[str, dict]]:
                 q = json.loads(json.dumps(p))
                 q[key] = vals[j]
                 out.append((f"{key}={vals[j]}", q))
-    # MIX / CONF steps around current.
+    # Finer MIX / near-max CONF steps around current.
     for i in range(5):
-        for step in (-2000, 2000):
+        for step in (-400, -200, 200):
             q = json.loads(json.dumps(p))
             q["MATCH_CONF"][i] = clamp_conf(q["MATCH_CONF"][i] + step)
-            out.append((f"MATCH_CONF[{i}]{step:+d}", q))
-        for step in (-20, 20):
+            if q["MATCH_CONF"] != p["MATCH_CONF"]:
+                out.append((f"MATCH_CONF[{i}]{step:+d}", q))
+        for step in (-15, -10, -5, 5, 10, 15):
             q = json.loads(json.dumps(p))
             q["MIX_WEIGHT"][i] = clamp_mix(q["MIX_WEIGHT"][i] + step)
-            out.append((f"MIX_WEIGHT[{i}]{step:+d}", q))
+            if q["MIX_WEIGHT"] != p["MIX_WEIGHT"]:
+                out.append((f"MIX_WEIGHT[{i}]{step:+d}", q))
     return out
 
 
@@ -170,7 +219,11 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=3328)
     ap.add_argument("--minutes", type=float, default=45.0)
     ap.add_argument("--max-trials", type=int, default=80)
-    ap.add_argument("--skip-baseline", action="store_true")
+    ap.add_argument(
+        "--skip-baseline",
+        action="store_true",
+        help="Skip re-logging baseline (still measures seed once for deltas).",
+    )
     args = ap.parse_args()
 
     ensure_header()
@@ -194,19 +247,17 @@ def main() -> None:
             cwd=str(ROOT),
         )
 
-    best_p = dict(DEFAULTS)
-    best_p["MATCH_CONF"] = list(DEFAULTS["MATCH_CONF"])
-    best_p["MIX_WEIGHT"] = list(DEFAULTS["MIX_WEIGHT"])
+    best_p = load_seed()
     trial = 0
 
-    if not args.skip_baseline:
-        apply_params(best_p)
-        best_size = eval_slice()
-        trial += 1
-        log_trial(trial, t0, best_size, best_size, best_p, "baseline")
-        print(f"baseline slice={best_size}", flush=True)
-    else:
-        best_size = 10**18
+    # Always apply + measure seed so deltas are vs real best, not DEFAULTS.
+    apply_params(best_p)
+    best_size = eval_slice()
+    trial += 1
+    note = "seed_baseline" if args.skip_baseline else "baseline"
+    log_trial(trial, t0, best_size, best_size, best_p, note)
+    print(f"seed baseline slice={best_size} params={json.dumps(best_p)}", flush=True)
+    BEST_JSON.write_text(json.dumps(best_p, indent=2))
 
     # Phase 1: coordinate descent
     improved = True
