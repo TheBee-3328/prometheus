@@ -5,7 +5,7 @@
 
 // === BEGIN TUNABLE ===
 /// Order-2 counter rescale when n0+n1 reaches this (adaptation rate).
-pub const ORDER2_RESCALE: u16 = 100;
+pub const ORDER2_RESCALE: u16 = 250;
 
 /// Match history buffer size = 1 << BUF_BITS.
 pub const BUF_BITS: usize = 25;
@@ -30,12 +30,12 @@ pub const STRUCT_MIX_WEIGHT: u32 = 14;
 pub const ORDER1_MIX_WEIGHT: u32 = 8;
 
 /// Hashed order-3 table bits (size = 1 << this).
-pub const ORDER3_BITS: usize = 23;
+pub const ORDER3_BITS: usize = 24;
 /// Blend weight (0..=255) of hashed order-3 into the CM mix.
 pub const ORDER3_MIX_WEIGHT: u32 = 160;
 
 /// Hashed order-4 table bits.
-pub const ORDER4_BITS: usize = 24;
+pub const ORDER4_BITS: usize = 25;
 /// Blend weight (0..=255) of hashed order-4 into the CM mix.
 pub const ORDER4_MIX_WEIGHT: u32 = 48;
 
@@ -43,7 +43,7 @@ pub const ORDER4_MIX_WEIGHT: u32 = 48;
 pub const SSE_MIX_WEIGHT: u32 = 224;
 
 /// Word-model hash table bits.
-pub const WORD_BITS: usize = 22;
+pub const WORD_BITS: usize = 23;
 /// Blend weight (0..=255) of word model into CM mix (before match/SSE).
 pub const WORD_MIX_WEIGHT: u32 = 64;
 
