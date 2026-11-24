@@ -3,6 +3,7 @@
 mod arithmetic;
 mod match_model;
 mod model;
+pub mod params;
 mod preprocessor;
 
 pub use arithmetic::{ArithmeticDecoder, ArithmeticEncoder};

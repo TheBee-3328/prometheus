@@ -5,19 +5,9 @@
 //! that prior occurrence. Mixed with order-2 only for sufficiently long matches.
 
 use crate::model::{Model, Order2Model};
-
-const BUF_BITS: usize = 24; // 16 MiB history
-const BUF_SIZE: usize = 1 << BUF_BITS;
-const BUF_MASK: usize = BUF_SIZE - 1;
-
-const HASH_BITS: usize = 23; // 8M slots
-const HASH_SIZE: usize = 1 << HASH_BITS;
-const HASH_MASK: usize = HASH_SIZE - 1;
-
-/// How many trailing bytes form the hash context.
-const HASH_ORDER: usize = 4;
-/// Minimum match length before ensemble uses match probabilities.
-const MIN_MIX_LEN: u32 = 5;
+use crate::params::{
+    match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
+};
 
 /// LZ match model: buffer + hash → expected next bits.
 pub struct MatchModel {
@@ -82,14 +72,7 @@ impl MatchModel {
         }
         let bit_index = Self::bits_seen(self.bit_cxt);
         let expected_bit = (self.expected >> (7 - bit_index)) & 1;
-        let conf: u32 = match self.match_len {
-            0..=4 => 0,
-            5..=6 => 14000,
-            7..=10 => 20000,
-            11..=20 => 26000,
-            21..=40 => 30000,
-            _ => 32000,
-        };
+        let conf = match_conf(self.match_len);
         let p = if expected_bit == 1 {
             32768u32 + conf
         } else {
@@ -196,14 +179,7 @@ impl Order2MatchModel {
 
     #[inline]
     fn mix(p_o2: u16, p_m: u16, match_len: u32) -> u16 {
-        let w = match match_len {
-            0..=4 => 0u32,
-            5..=6 => 100,
-            7..=10 => 160,
-            11..=20 => 200,
-            21..=40 => 230,
-            _ => 245,
-        };
+        let w = mix_weight(match_len);
         let p = (p_o2 as u32 * (256 - w) + p_m as u32 * w) / 256;
         if p < 1 {
             1

@@ -12,8 +12,16 @@ enwik9
 /judge_work/
 
 # Tune / local
-tune/trials.csv
+tune/enwik8.slice
+tune/*.slice
+tune/*.slice.compressed
+tune/validate_*.out
+tune/search.log
+tune/validate.log
+tune/adversarial.out
+tune/__pycache__/
 *.log
+__pycache__/
 
 # IDE / OS
 .DS_Store

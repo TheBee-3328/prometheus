@@ -1,5 +1,7 @@
 //! Context models. Integer / fixed-point only; no FP, no HashMap.
 
+use crate::params::ORDER2_RESCALE;
+
 /// Bit predictor: returns p(bit=1) on a 0..=65535 scale, then learns `bit`.
 pub trait Model {
     fn predict(&mut self) -> u16;
@@ -78,7 +80,7 @@ impl Model for Order2Model {
             self.n1[i] = v;
         }
         // Rescale for adaptation when counts get large.
-        if (self.n0[i] as u16) + (self.n1[i] as u16) >= 250 {
+        if (self.n0[i] as u16) + (self.n1[i] as u16) >= ORDER2_RESCALE {
             self.n0[i] >>= 1;
             self.n1[i] >>= 1;
         }

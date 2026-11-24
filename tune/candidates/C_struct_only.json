@@ -1,0 +1,21 @@
+{
+  "ORDER2_RESCALE": 120,
+  "BUF_BITS": 25,
+  "HASH_BITS": 26,
+  "HASH_ORDER": 5,
+  "MIN_MIX_LEN": 8,
+  "MATCH_CONF": [
+    14000,
+    20000,
+    26000,
+    30000,
+    32000
+  ],
+  "MIX_WEIGHT": [
+    100,
+    160,
+    200,
+    230,
+    245
+  ]
+}
