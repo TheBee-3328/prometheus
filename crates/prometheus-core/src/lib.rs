@@ -2,6 +2,7 @@
 
 mod apm;
 mod arithmetic;
+mod indirect;
 mod match_model;
 mod model;
 mod order0;
