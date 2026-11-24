@@ -350,3 +350,49 @@ Scale ×10 on COMPRESSED ≈ **230 MB**; time ×10–12 ≈ **30–40 min** comp
 - Beats zstd/xz floors.
 - Adversarial: **10/10 PASS** (at o5; re-verify after o6).
 - Target 20.5e6 **not** reached — **partial** vs stop criterion.
+
+---
+
+# DIAG-R2
+
+Branch: `agent/diag-r2`  
+Agent: DIAG-R2  
+Start: 2026-11-24  
+Baseline to beat: `ROUNDTRIP=OK COMPRESSED=23036149 DECOMPRESSOR=33016 SCORE=23069165`
+
+## Plan
+
+1. Careful APM (paq-style stretch/squash + slow integer update) after SSE2 — **not** the rejected naive logistic mixer.
+2. If APM stalls: tiny-LR context-selected mixer on 2–3 pre-blended signals.
+3. If both regress: u16 counters on high-order CMs / APM-only path.
+
+## Slice baseline (first 20e6 enwik8)
+
+`COMPRESSED=4764551` (release compress, ~39s).
+
+## Attempt 1 — paq-style APM after SSE2 (KEEP)
+
+Design (careful, not naive mixer):
+- `apm.rs`: stretch/squash + interpolated 33-bin APM, rate_shift=7
+- Context: `last_byte × match_bucket` (2048) — distinct from SSE bit_cxt / SSE2 class
+- Blend `APM_MIX_WEIGHT=224` into post-SSE2 p
+- Fixed CM/match blends unchanged
+
+| | Slice COMPRESSED | Δ |
+|--|--:|--:|
+| baseline | 4764551 | |
+| +APM | **4708020** | **−56531 (−1.19%)** |
+
+Full enwik8 judge:
+```
+ROUNDTRIP=OK COMPRESSED=22766317 DECOMPRESSOR=42552 SCORE=22808869 COMPRESS_SECONDS=206.63 DECOMPRESS_SECONDS=201.26 PEAK_RSS_MB=888
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 23036149 | 22766317 | **−269832** |
+| DECOMPRESSOR | 33016 | 42552 | +9536 (mostly STRETCH LUT) |
+| SCORE | 23069165 | **22808869** | **−260296** |
+| bpB | 1.84289 | 1.82131 | |
+
+vs 20.5e6: gap ≈ 2.27 MB (was 2.54 MB).

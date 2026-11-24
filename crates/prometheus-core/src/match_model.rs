@@ -4,13 +4,15 @@
 //! context verifies, subsequent bits are predicted from the byte that followed
 //! that prior occurrence. Mixed with order-2 only for sufficiently long matches.
 
+use crate::apm::{p12_to_p16, p16_to_p12, Apm};
 use crate::model::{HashOrderModel, Model, Order1Model, Order2Model};
 use crate::order0::Order0Model;
 use crate::params::{
-    match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
-    ORDER0_MIX_WEIGHT, ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS,
-    ORDER4_MIX_WEIGHT, ORDER5_BITS, ORDER5_MIX_WEIGHT, ORDER6_BITS, ORDER6_MIX_WEIGHT,
-    SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
+    match_conf, mix_weight, APM_MIX_WEIGHT, APM_RATE_SHIFT, BUF_MASK, BUF_SIZE, HASH_MASK,
+    HASH_ORDER, HASH_SIZE, MIN_MIX_LEN, ORDER0_MIX_WEIGHT, ORDER1_MIX_WEIGHT, ORDER3_BITS,
+    ORDER3_MIX_WEIGHT, ORDER4_BITS, ORDER4_MIX_WEIGHT, ORDER5_BITS, ORDER5_MIX_WEIGHT,
+    ORDER6_BITS, ORDER6_MIX_WEIGHT, SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT,
+    WORD_MIX_WEIGHT,
 };
 use crate::sparse::SparseModel;
 use crate::sse::{Sse, Sse2};
@@ -196,9 +198,12 @@ pub struct Order2MatchModel {
     word: WordModel,
     sse: Sse,
     sse2: Sse2,
+    /// Third-stage paq-style APM (order-1 byte × match bucket).
+    apm: Apm,
     /// Shared bit path for SSE context (mirrors order2 bit_cxt).
     bit_cxt: u16,
     last_class: u8,
+    last_byte: u8,
 }
 
 impl Order2MatchModel {
@@ -216,8 +221,11 @@ impl Order2MatchModel {
             word: WordModel::new(),
             sse: Sse::new(SSE_MIX_WEIGHT),
             sse2: Sse2::new(SSE2_MIX_WEIGHT),
+            // 256 last-byte × 8 match buckets = 2048 contexts.
+            apm: Apm::new(2048).with_rate_shift(APM_RATE_SHIFT),
             bit_cxt: 1,
             last_class: 8,
+            last_byte: 0,
         }
     }
 
@@ -287,11 +295,17 @@ impl Model for Order2MatchModel {
             Self::mix_w(p0, px, STRUCT_MIX_WEIGHT)
         };
         let p = self.sse.refine(p, self.bit_cxt, len);
-        self.sse2.refine(p, self.bit_cxt, self.last_class)
+        let p = self.sse2.refine(p, self.bit_cxt, self.last_class);
+        // APM context: previous byte × match-length bucket (distinct from SSE bit_cxt).
+        let mb = Sse::match_bucket(len) as usize;
+        let cxt = ((self.last_byte as usize) << 3) | mb;
+        let p12 = self.apm.predict(p16_to_p12(p), cxt);
+        Self::mix_w(p, p12_to_p16(p12), APM_MIX_WEIGHT)
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
+        self.apm.update(bit);
         self.sse.update(bit);
         self.sse2.update(bit);
         self.order0.update(bit);
@@ -308,6 +322,7 @@ impl Model for Order2MatchModel {
         if self.bit_cxt >= 256 {
             let byte = (self.bit_cxt & 0xff) as u8;
             self.last_class = Self::byte_class(byte);
+            self.last_byte = byte;
             self.bit_cxt = 1;
         }
     }

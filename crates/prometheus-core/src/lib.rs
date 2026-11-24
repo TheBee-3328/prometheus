@@ -1,5 +1,6 @@
 //! PROMETHEUS shared core: Model trait, order-2 + match CM, 32-bit arithmetic coder.
 
+mod apm;
 mod arithmetic;
 mod match_model;
 mod model;
