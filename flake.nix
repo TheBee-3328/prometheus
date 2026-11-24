@@ -59,6 +59,7 @@
               findutils
               bash
               git
+              python3           # adversarial_roundtrip.sh fixture generation
             ];
             RUST_SRC_PATH = "${fenix.packages.${system}.complete.rust-src}/lib/rustlib/src/rust/library";
             # Env RUSTFLAGS replaces config rustflags; keep size + CPU flags together.

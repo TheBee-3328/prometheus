@@ -77,9 +77,9 @@ dd if=/dev/zero of="${WORK}/zeros.bin" bs=4096 count=1 status=none
 run_case "all_zeros_4k" "${WORK}/zeros.bin"
 
 # 4. cap-marker control bytes (0x01–0x08) + escape (0x7F) — preprocessor collision guard
-python3 - <<'PY'
+python3 - <<PY
 from pathlib import Path
-p = Path("/run/media/thebee/T7 Shield/PROMETHEUS/PROMETHEUS v2/judge_work/adversarial/ctrl_markers.bin")
+p = Path("${WORK}/ctrl_markers.bin")
 p.write_bytes(bytes(range(0x01, 0x09)) + b"\x7f" + bytes(range(0x00, 0x20)) * 64)
 PY
 run_case "ctrl_markers" "${WORK}/ctrl_markers.bin"
@@ -93,9 +93,9 @@ printf '\xff\xfe\x80\xc0\xc1\xf5\xff\x00\xed\xa0\x80' > "${WORK}/bad_utf8.bin"
 run_case "invalid_utf8" "${WORK}/bad_utf8.bin"
 
 # 7. 1MB repeated line
-python3 - <<'PY'
+python3 - <<PY
 line = b"The quick brown fox jumps over the lazy dog.\n"
-open("/run/media/thebee/T7 Shield/PROMETHEUS/PROMETHEUS v2/judge_work/adversarial/repeat_1mb.bin", "wb").write(line * ((1 << 20) // len(line)))
+open("${WORK}/repeat_1mb.bin", "wb").write(line * ((1 << 20) // len(line)))
 PY
 run_case "repeat_1mb" "${WORK}/repeat_1mb.bin"
 
