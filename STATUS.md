@@ -1,28 +1,24 @@
 # STATUS
 
-**Current phase:** PAUSED — waiting for DIAG-R6 agent exit; no new spawns  
+**Current phase:** LIVE — PRE-V2 word-dict trial → TEMPLATE-MINER → orch  
 **Current best SCORE (enwik8):** **21583876**  
 **Best line:** `ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876`  
 **bpB:** ≈ **1.724**  
 **Gap to 20.5e6:** ≈ 1.05 MB  
-**Stop policy:** Operator pause (see PAUSE.md).  
+**Stop policy:** Operator manual stop. Unpaused for PRE-V2 dual trials.
 
 ## Session SCORE path (abbrev)
 
-28080343 → … → 21887167 → 21778410 → **21583876**
+28080343 → … → 21778410 → **21583876**
 
-## Merged
+## In flight
 
-- DIAG-R6 (`73ab3c8`): asymptotic StateMap `n+=1-(n>>3)` (eq≈8)
+1. **PRE-V2 word dict** (`prompts/PRE_V2_WORD_DICT_CONTINUE.md`) — first  
+2. **PRE-V2 TEMPLATE-MINER** (`prompts/PRE_V2_TEMPLATE_MINER_CONTINUE.md`) — after word verdict  
+3. Continue DIAG/tuner after both KEEP/THROW
 
-## enwik9 (pre-R5/R6 binary — remeasure on resume)
+## Rules
 
-```
-ROUNDTRIP=OK COMPRESSED=186549457 DECOMPRESSOR=37512 SCORE=186586969
-```
-
-## On resume
-
-1. Confirm DIAG-R6 agent exited; no orphan judges.
-2. Re-judge enwik9 on current main.
-3. Continue toward ≤20.5e6 (mixer retune after eq8, etc.).
+- Separate keep/throw; THROW on one does not cancel the other  
+- enwik8 only for gate; one heavy compress at a time; `nix develop -c …`  
+- Merge only ROUNDTRIP=OK and SCORE ≤ 21583876 (or newer main best)

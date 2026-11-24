@@ -94,3 +94,7 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-24T23:15:41Z Merge DIAG-R6 eq8
 - Merged `73ab3c8` → main. SCORE **21583876** (−194534 vs R5).
 - Gap to 20.5e6 ≈1.05 MB. Operator pause after agent exits.
+
+## 2026-11-24T23:57:16Z Unpause — PRE-V2 dual trials
+- Operator: run word-dict then TEMPLATE-MINER; continue after THROW.
+- Baseline SCORE **21583876**. Worktree `agent/pre-v2`.
