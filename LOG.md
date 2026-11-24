@@ -49,3 +49,5 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | TUNER-R3 | Interrupted; best measured R3_r102_only beats main; commit pending | 27981140 | 29752 | 28010892 | 32.49 | 22.66 | 583 | UNFINISHED pause |
 | 2026-11-24 | ORCH-RESUME | Tmux resume; R3_r102_only re-measure FAIL 28013201; spawn DIAG-FIX | 27983449 | 29752 | 28013201 | — | — | — | R3 invalid |
 | 2026-11-24 | DIAG-FIX | Spawning diagnose-and-fix (ablation + hypothesis loop) | — | — | 28011126 | — | — | — | in progress |
+| 2026-11-24 | DIAG-FIX | o0–o6+word+SSE; merged c3404fa @ 4327fea | 23036149 | 33016 | 23069165 | 192.52 | 185.69 | 888 | PASS merge |
+| 2026-11-24 | ORCH-NEXT | Spawn DIAG-R2 mixer/APM toward ≤20.5e6 | — | — | 23069165 | — | — | — | in progress |
