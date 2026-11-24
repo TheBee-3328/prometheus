@@ -578,3 +578,18 @@ ROUNDTRIP=OK COMPRESSED=22037144 DECOMPRESSOR=44168 SCORE=22081312 COMPRESS_SECO
 | SCORE | 22482437 | **22081312** | **−401125** |
 
 Gap to 20.5e6 ≈ 1.54 MB.
+
+## Attempt 3 — runtime heap STRETCH LUT (KEEP)
+
+Replace compile-time `static STRETCH[4096]` with `OnceLock<Box<[i16]>>` built once via the same binary-search. Slice COMPRESSED unchanged (4785692).
+
+Full enwik8:
+```
+ROUNDTRIP=OK COMPRESSED=22039256 DECOMPRESSOR=36680 SCORE=22075936 COMPRESS_SECONDS=321.50 DECOMPRESS_SECONDS=311.63 PEAK_RSS_MB=1705
+```
+
+| | Before (indirect) | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 22037144 | 22039256 | +2112 (stretch path drift) |
+| DECOMPRESSOR | 44168 | 36680 | **−7488** |
+| SCORE | 22081312 | **22075936** | **−5376** |

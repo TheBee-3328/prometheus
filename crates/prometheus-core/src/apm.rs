@@ -1,43 +1,50 @@
 //! Adaptive Probability Map (paq-style APM) with stretch/squash.
 //! Integer / fixed-point only. Internal probabilities use 12-bit scale 0..=4095.
 
-/// Stretch lookup: p in 0..4096 → roughly -2047..2047.
-static STRETCH: [i16; 4096] = {
-    let mut t = [0i16; 4096];
-    let mut i = 0usize;
-    while i < 4096 {
-        let p = if i == 0 {
-            1i32
-        } else if i == 4095 {
-            4095i32
-        } else {
-            i as i32
-        };
-        let mut lo = -2047i32;
-        let mut hi = 2047i32;
-        let mut k = 0;
-        while k < 16 {
-            let mid = (lo + hi) / 2;
-            let s = squash_const(mid);
-            if s < p {
-                lo = mid + 1;
-            } else {
-                hi = mid;
+use std::sync::OnceLock;
+
+/// Stretch lookup heap-built once (keeps ~8 KB out of the decompressor image).
+fn stretch_table() -> &'static [i16] {
+    static STRETCH: OnceLock<Box<[i16]>> = OnceLock::new();
+    STRETCH
+        .get_or_init(|| {
+            let mut t = vec![0i16; 4096];
+            let mut i = 0usize;
+            while i < 4096 {
+                let p = if i == 0 {
+                    1i32
+                } else if i == 4095 {
+                    4095i32
+                } else {
+                    i as i32
+                };
+                let mut lo = -2047i32;
+                let mut hi = 2047i32;
+                let mut k = 0;
+                while k < 16 {
+                    let mid = (lo + hi) / 2;
+                    let s = squash_const(mid);
+                    if s < p {
+                        lo = mid + 1;
+                    } else {
+                        hi = mid;
+                    }
+                    k += 1;
+                }
+                let clamped = if lo < -2047 {
+                    -2047
+                } else if lo > 2047 {
+                    2047
+                } else {
+                    lo
+                };
+                t[i] = clamped as i16;
+                i += 1;
             }
-            k += 1;
-        }
-        let clamped = if lo < -2047 {
-            -2047
-        } else if lo > 2047 {
-            2047
-        } else {
-            lo
-        };
-        t[i] = clamped as i16;
-        i += 1;
-    }
-    t
-};
+            t.into_boxed_slice()
+        })
+        .as_ref()
+}
 
 /// Const squash used to build STRETCH (paq8-style knots).
 const fn squash_const(d: i32) -> i32 {
@@ -77,7 +84,7 @@ pub fn squash(d: i32) -> u16 {
 #[inline]
 pub fn stretch(p: u16) -> i32 {
     let i = (p as usize).min(4095);
-    STRETCH[i] as i32
+    stretch_table()[i] as i32
 }
 
 /// Convert 12-bit p to 16-bit p1 for the arithmetic coder (clamped away from ends).
