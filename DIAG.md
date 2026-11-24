@@ -396,3 +396,36 @@ ROUNDTRIP=OK COMPRESSED=22766317 DECOMPRESSOR=42552 SCORE=22808869 COMPRESS_SECO
 | bpB | 1.84289 | 1.82131 | |
 
 vs 20.5e6: gap ≈ 2.27 MB (was 2.54 MB).
+
+Adversarial: **10/10 PASS**. Pushed `669042b`.
+
+## Attempt 2a — APM2 class×bit_cxt (REJECT)
+
+Chained second APM after APM1. Slice **4710362** vs APM1 **4708020** (**+2342**). Reverted.
+
+## Attempt 2b — tiny 2-input logistic mixer (REJECT)
+
+CM↔match/struct only, 64 sets (match_bucket×bit_pos), rate=2, init≈fixed MIX/STRUCT.
+Slice **4878192** vs APM1 **4708020** (**+170172**, ~+3.6%). Reverted.
+→ Two mixer-path regressions; switch to **u16 counters** on hashed orders.
+
+## Attempt 3 — u16 hash-order counters (REJECT)
+
+`HashOrderModel` n0/n1 → u16; `HASH_ORDER_RESCALE` sweep 400–3072 all **worse** than u8+APM1 (best delta +1716 at 400). Reverted.
+
+## Attempt 4 — richer APM context (KEEP)
+
+Expand APM cxt to `last_byte × bit_pos × match_bucket` (16384).
+Slice **4668167** vs APM1 **4708020** (**−39853**).
+
+```
+ROUNDTRIP=OK COMPRESSED=22567638 DECOMPRESSOR=42568 SCORE=22610206 COMPRESS_SECONDS=217.53 DECOMPRESS_SECONDS=207.27 PEAK_RSS_MB=889
+```
+
+| | Before (APM1) | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 22766317 | 22567638 | **−198679** |
+| DECOMPRESSOR | 42552 | 42568 | +16 |
+| SCORE | 22808869 | **22610206** | **−198663** |
+
+vs post-DIAG-FIX baseline SCORE 23069165: **−458959**. Gap to 20.5e6 ≈ 2.07 MB.
