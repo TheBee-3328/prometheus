@@ -1,17 +1,24 @@
 # STATUS
 
-**Current phase:** 4 (size pass after orders-mix FAIL)  
-**Current best SCORE:** **28355431** (enwik8)  
-**Best line:** `ROUNDTRIP=OK COMPRESSED=28051471 DECOMPRESSOR=303960 SCORE=28355431 … PEAK_RSS_MB=584`  
-**Agent runs used:** 12 / 40  
+**Current phase:** 4 (size pass MERGED; handoff notes next)  
+**Current best SCORE:** **28080343** (enwik8)  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=28051471 DECOMPRESSOR=28872 SCORE=28080343 COMPRESS_SECONDS=35.15 DECOMPRESS_SECONDS=27.11 PEAK_RSS_MB=583`  
+**Agent runs used:** 13 / 40  
 
-## Recent
+## Checkpoints
 
-- P4-ORDERS-MIX abandoned after 2 attempts worse than best (30.9M, 28.8M).
-- Next: shrink decompressor (every byte counts) and/or tune round 2.
+| Checkpoint | Commit | SCORE | Notes |
+|---|---|---|---|
+| CHKP-tuned | a61e773 / 1a39eee | 28355431 | params search |
+| CHKP-size | fa7446b | **28080343** | build-std decomp 28872 B |
+| UNFINISHED | agent/p4-orders-mix | — | abandoned / watchdog; do not merge |
+
+## Platform note
+
+Cannot `Task.resume` while subagent still running (Cursor limit). See `prompts/AGENT_WATCHDOG.md`.
 
 ## Next three tasks
 
-1. Size-optimize decompressor (eh_frame / panic_abort / LTO already on — push further).
-2. Second tuner round on params.
-3. enwik9 only after another clear enwik8 win.
+1. Write HANDOFF.md + SETUP.md (unattended Cursor); slice enwik9 for GitHub.
+2. Kill/close P4-ORDERS zombie if still alive; mark checked.
+3. Second tuner OR sparse features only after REVIEW if <0.5% gains stack.

@@ -30,3 +30,5 @@ Append-only. Every agent result (success or failure) goes here.
 | 2026-11-24 | P3-TUNER | params search; merged a61e773; SCORE 28355431 | 28051471 | 303960 | 28355431 | 37.04 | 28.11 | 584 | PASS merge |
 | 2026-11-24 | P4-ORDERS-MIX | port orders onto tuned base; A=30912214 B=28809463 both worse than 28355431 | — | — | 28355431 | — | — | — | FAIL ×2 abandon |
 | 2026-11-24 | ORCH-P4B | Change approach: decompressor size pass | — | — | — | — | — | — | in progress |
+| 2026-11-24 | P4-SIZE | build-std+immediate-abort; merged fa7446b | 28051471 | 28872 | 28080343 | 35.15 | 27.11 | 583 | PASS merge |
+| 2026-11-24 | ORCH-WATCH | Document mid-flight resume = platform limit; watchdog timeouts | — | — | — | — | — | — | ok |
