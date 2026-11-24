@@ -58,3 +58,4 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | ORCH-NEXT | Spawn DIAG-R3 multi-match / indirect / state-map | — | — | 22574501 | — | — | — | in progress |
 | 2026-11-24 | DIAG-R3 | multi-candidate match×4; merged cda121b | 22439085 | 43352 | 22482437 | 281.75 | 273.51 | 1673 | PASS merge |
 | 2026-11-24 | DIAG-R3 | indirect/record MIX=40; merged 6eecaa2 | 22037144 | 44168 | 22081312 | 320.73 | 317.10 | 1705 | PASS merge |
+| 2026-11-24 | DIAG-R3 | STRETCH heap LUT; merged 5f645c4 | 22039256 | 36680 | 22075936 | 321.50 | 311.63 | 1705 | PASS merge |
