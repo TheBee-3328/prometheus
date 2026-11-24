@@ -11,8 +11,8 @@ use crate::params::{
     match_conf, mix_weight, APM_MIX_WEIGHT, APM_RATE_SHIFT, BUF_MASK, BUF_SIZE, HASH_MASK,
     HASH_ORDER, HASH_SIZE, MIN_MIX_LEN, ORDER0_MIX_WEIGHT, ORDER1_MIX_WEIGHT, ORDER3_BITS,
     ORDER3_MIX_WEIGHT, ORDER4_BITS, ORDER4_MIX_WEIGHT, ORDER5_BITS, ORDER5_MIX_WEIGHT,
-    ORDER6_BITS, ORDER6_MIX_WEIGHT, SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT,
-    WORD_MIX_WEIGHT,
+    ORDER6_BITS, ORDER6_MIX_WEIGHT, ORDER7_BITS, ORDER7_MIX_WEIGHT, SSE2_MIX_WEIGHT,
+    SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
 };
 use crate::sparse::SparseModel;
 use crate::sse::{Sse, Sse2};
@@ -193,6 +193,7 @@ pub struct Order2MatchModel {
     order4: HashOrderModel,
     order5: HashOrderModel,
     order6: HashOrderModel,
+    order7: HashOrderModel,
     match_m: MatchModel,
     sparse: SparseModel,
     word: WordModel,
@@ -216,6 +217,7 @@ impl Order2MatchModel {
             order4: HashOrderModel::new(4, ORDER4_BITS),
             order5: HashOrderModel::new(5, ORDER5_BITS),
             order6: HashOrderModel::new(6, ORDER6_BITS),
+            order7: HashOrderModel::new(7, ORDER7_BITS),
             match_m: MatchModel::new(),
             sparse: SparseModel::new(),
             word: WordModel::new(),
@@ -283,11 +285,13 @@ impl Model for Order2MatchModel {
         let p4 = self.order4.predict();
         let p5 = self.order5.predict();
         let p6 = self.order6.predict();
+        let p7 = self.order7.predict();
         let mut p0 = Self::mix_w(p2, p1, ORDER1_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p3, ORDER3_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p4, ORDER4_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p5, ORDER5_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p6, ORDER6_MIX_WEIGHT);
+        p0 = Self::mix_w(p0, p7, ORDER7_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p0u, ORDER0_MIX_WEIGHT);
         let pw = self.word.predict();
         p0 = Self::mix_w(p0, pw, WORD_MIX_WEIGHT);
@@ -321,6 +325,7 @@ impl Model for Order2MatchModel {
         self.order4.update(bit);
         self.order5.update(bit);
         self.order6.update(bit);
+        self.order7.update(bit);
         self.word.update(bit);
         self.match_m.update(bit);
         self.sparse.update(bit);
