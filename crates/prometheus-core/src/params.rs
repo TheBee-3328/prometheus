@@ -24,7 +24,7 @@ pub const MATCH_CONF: [u32; 5] = [32700, 32700, 32700, 32700, 32700];
 pub const MIX_WEIGHT: [u32; 5] = [120, 160, 190, 230, 245];
 
 /// When match is inactive: blend weight (0..=255) of XML/wiki structure into the mix.
-pub const STRUCT_MIX_WEIGHT: u32 = 14;
+pub const STRUCT_MIX_WEIGHT: u32 = 24;
 
 /// Blend weight (0..=255) of order-1 into order-2 before match/struct mix.
 pub const ORDER1_MIX_WEIGHT: u32 = 8;
@@ -38,6 +38,11 @@ pub const ORDER3_MIX_WEIGHT: u32 = 160;
 pub const ORDER4_BITS: usize = 25;
 /// Blend weight (0..=255) of hashed order-4 into the CM mix.
 pub const ORDER4_MIX_WEIGHT: u32 = 48;
+
+/// Hashed order-5 table bits.
+pub const ORDER5_BITS: usize = 24;
+/// Blend weight (0..=255) of hashed order-5 into the CM mix.
+pub const ORDER5_MIX_WEIGHT: u32 = 88;
 
 /// SSE blend weight (0..=255) of secondary estimate into final p.
 pub const SSE_MIX_WEIGHT: u32 = 224;

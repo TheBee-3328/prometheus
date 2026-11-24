@@ -257,3 +257,17 @@ ROUNDTRIP=OK COMPRESSED=23599584 DECOMPRESSOR=32872 SCORE=23632456 COMPRESS_SECO
 | bpB | 1.89777 | 1.88797 | |
 
 Checksum alone size-neutral on slice; order0 mix=80 carries the gain.
+
+### Fix detail: order-5 + STRUCT_MIX=24
+
+```
+ROUNDTRIP=OK COMPRESSED=23137005 DECOMPRESSOR=32936 SCORE=23169941 COMPRESS_SECONDS=165.15 DECOMPRESS_SECONDS=158.01 PEAK_RSS_MB=856
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 23599584 | 23137005 | **-462579** |
+| SCORE | 23632456 | 23169941 | **-462515** |
+| bpB | 1.88797 | 1.85096 | |
+
+MIX_WEIGHT / MIN_MIX_LEN sweeps: current best (reject changes).

@@ -9,7 +9,8 @@ use crate::order0::Order0Model;
 use crate::params::{
     match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
     ORDER0_MIX_WEIGHT, ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS,
-    ORDER4_MIX_WEIGHT, SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
+    ORDER4_MIX_WEIGHT, ORDER5_BITS, ORDER5_MIX_WEIGHT, SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT,
+    STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
 };
 use crate::sparse::SparseModel;
 use crate::sse::{Sse, Sse2};
@@ -188,6 +189,7 @@ pub struct Order2MatchModel {
     order2: Order2Model,
     order3: HashOrderModel,
     order4: HashOrderModel,
+    order5: HashOrderModel,
     match_m: MatchModel,
     sparse: SparseModel,
     word: WordModel,
@@ -206,6 +208,7 @@ impl Order2MatchModel {
             order2: Order2Model::new(),
             order3: HashOrderModel::new(3, ORDER3_BITS),
             order4: HashOrderModel::new(4, ORDER4_BITS),
+            order5: HashOrderModel::new(5, ORDER5_BITS),
             match_m: MatchModel::new(),
             sparse: SparseModel::new(),
             word: WordModel::new(),
@@ -263,9 +266,11 @@ impl Model for Order2MatchModel {
         let p2 = self.order2.predict();
         let p3 = self.order3.predict();
         let p4 = self.order4.predict();
+        let p5 = self.order5.predict();
         let mut p0 = Self::mix_w(p2, p1, ORDER1_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p3, ORDER3_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p4, ORDER4_MIX_WEIGHT);
+        p0 = Self::mix_w(p0, p5, ORDER5_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p0u, ORDER0_MIX_WEIGHT);
         let pw = self.word.predict();
         p0 = Self::mix_w(p0, pw, WORD_MIX_WEIGHT);
@@ -290,6 +295,7 @@ impl Model for Order2MatchModel {
         self.order2.update(bit);
         self.order3.update(bit);
         self.order4.update(bit);
+        self.order5.update(bit);
         self.word.update(bit);
         self.match_m.update(bit);
         self.sparse.update(bit);
