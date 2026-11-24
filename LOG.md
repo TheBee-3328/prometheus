@@ -63,3 +63,4 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | ORCH-NEXT | Spawn DIAG-R4 state-map / match×indirect | — | — | 22075936 | — | — | — | in progress |
 | 2026-11-24 | DIAG-R4 | Order-2 StateMap; merged 3163073 | 22008866 | 36744 | 22045610 | 315.71 | 329.03 | 1756 | PASS merge |
 | 2026-11-24 | DIAG-R4 | indirect order-3; merged e405da9 | 21933188 | 36952 | 21970140 | 342.13 | 354.65 | 1756 | PASS merge |
+| 2026-11-24 | DIAG-R4 | match×indirect CROSS=16; merged 896dd9d | 21918203 | 37288 | 21955491 | 346.11 | 341.16 | 1756 | PASS merge |
