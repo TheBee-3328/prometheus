@@ -65,3 +65,4 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | DIAG-R4 | indirect order-3; merged e405da9 | 21933188 | 36952 | 21970140 | 342.13 | 354.65 | 1756 | PASS merge |
 | 2026-11-24 | DIAG-R4 | match×indirect CROSS=16; merged 896dd9d | 21918203 | 37288 | 21955491 | 346.11 | 341.16 | 1756 | PASS merge |
 | 2026-11-24 | DIAG-R4 | StateMap soft-reset; merged 589cfe1 | 21913905 | 37304 | 21951209 | 343.83 | 333.06 | 1756 | PASS merge |
+| 2026-11-24 | DIAG-R4 | StateMap Order-3; merged 15af354 | 21871189 | 37544 | 21908733 | 344.23 | 332.04 | 1788 | PASS merge |
