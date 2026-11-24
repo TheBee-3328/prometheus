@@ -10,11 +10,13 @@ use crate::model::{HashOrderModel, Model, Order1Model, Order2Model};
 use crate::order0::Order0Model;
 use crate::params::{
     match_conf, mix_weight, APM_MIX_WEIGHT, APM_RATE_SHIFT, BUF_MASK, BUF_SIZE, HASH_MASK,
-    HASH_ORDER, HASH_SIZE, INDIRECT_MIX_WEIGHT, MIN_MIX_LEN, ORDER0_MIX_WEIGHT,
-    ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS, ORDER4_MIX_WEIGHT,
-    ORDER5_BITS, ORDER5_MIX_WEIGHT, ORDER6_BITS, ORDER6_MIX_WEIGHT, ORDER7_BITS,
-    ORDER7_MIX_WEIGHT, SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
+    HASH_ORDER, HASH_SIZE, INDIRECT_MIX_WEIGHT, MATCH_IND_CROSS_WEIGHT, MIN_MIX_LEN,
+    ORDER0_MIX_WEIGHT, ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS,
+    ORDER4_MIX_WEIGHT, ORDER5_BITS, ORDER5_MIX_WEIGHT, ORDER6_BITS, ORDER6_MIX_WEIGHT,
+    ORDER7_BITS, ORDER7_MIX_WEIGHT, SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT,
+    WORD_MIX_WEIGHT,
 };
+use crate::statemap::{sm_init, sm_predict, sm_update};
 use crate::sparse::SparseModel;
 use crate::sse::{Sse, Sse2};
 use crate::word::WordModel;
@@ -60,6 +62,16 @@ impl MatchModel {
     #[inline]
     pub fn match_len(&self) -> u32 {
         self.match_len
+    }
+
+    /// Expected next bit under an active match (0 if inactive).
+    #[inline]
+    pub fn expected_bit_pub(&self) -> u8 {
+        if self.match_len == 0 {
+            0
+        } else {
+            self.expected_bit()
+        }
     }
 
     /// Bits completed in the current byte = floor(log2(bit_cxt)).
@@ -230,6 +242,9 @@ impl Model for MatchModel {
     }
 }
 
+/// Match×indirect cross: StateMap over match_bucket × ind1 × bit_pos × expected_bit.
+const CROSS_SIZE: usize = 8 * 256 * 8 * 2; // 32768
+
 /// Mix order-1/2/3/4 + sparse/XML with the match model; match weight grows with length.
 /// Sparse/structure only blend in when match is inactive (do not fight match).
 pub struct Order2MatchModel {
@@ -245,6 +260,9 @@ pub struct Order2MatchModel {
     sparse: SparseModel,
     word: WordModel,
     indirect: IndirectModel,
+    /// Match×indirect cross StateMap cells.
+    cross: Box<[u32]>,
+    cross_i: usize,
     sse: Sse,
     sse2: Sse2,
     /// Third-stage paq-style APM (order-1 byte × match bucket).
@@ -270,6 +288,8 @@ impl Order2MatchModel {
             sparse: SparseModel::new(),
             word: WordModel::new(),
             indirect: IndirectModel::new(),
+            cross: vec![sm_init(); CROSS_SIZE].into_boxed_slice(),
+            cross_i: 0,
             sse: Sse::new(SSE_MIX_WEIGHT),
             sse2: Sse2::new(SSE2_MIX_WEIGHT),
             // 256 last-byte × 8 bit_pos × 8 match buckets = 16384 contexts.
@@ -347,6 +367,14 @@ impl Model for Order2MatchModel {
         let pi = self.indirect.predict();
         p0 = Self::mix_w(p0, pi, INDIRECT_MIX_WEIGHT);
         let len = self.match_m.match_len();
+        // Match×indirect cross: mb × ind1 × bit_pos × expected_bit.
+        let mb = Sse::match_bucket(len) as usize;
+        let bp = (Self::bits_seen(self.bit_cxt) as usize) & 7;
+        let eb = self.match_m.expected_bit_pub() as usize & 1;
+        let ind1 = self.indirect.ind1() as usize;
+        self.cross_i = (((mb << 8) | ind1) << 3 | bp) << 1 | eb;
+        let pc = sm_predict(self.cross[self.cross_i]);
+        p0 = Self::mix_w(p0, pc, MATCH_IND_CROSS_WEIGHT);
         let p = if len >= MIN_MIX_LEN {
             let pm = self.match_m.predict();
             Self::mix_match(p0, pm, len)
@@ -357,8 +385,6 @@ impl Model for Order2MatchModel {
         let p = self.sse.refine(p, self.bit_cxt, len);
         let p = self.sse2.refine(p, self.bit_cxt, self.last_class);
         // APM: last_byte × bit_pos × match_bucket (richer than SSE bit_cxt alone).
-        let mb = Sse::match_bucket(len) as usize;
-        let bp = (Self::bits_seen(self.bit_cxt) as usize) & 7;
         let cxt = ((self.last_byte as usize) << 6) | (bp << 3) | mb;
         let p12 = self.apm.predict(p16_to_p12(p), cxt);
         Self::mix_w(p, p12_to_p16(p12), APM_MIX_WEIGHT)
@@ -366,6 +392,7 @@ impl Model for Order2MatchModel {
 
     #[inline]
     fn update(&mut self, bit: u8) {
+        self.cross[self.cross_i] = sm_update(self.cross[self.cross_i], bit);
         self.apm.update(bit);
         self.sse.update(bit);
         self.sse2.update(bit);

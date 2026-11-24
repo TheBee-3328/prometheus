@@ -711,3 +711,34 @@ ROUNDTRIP=OK COMPRESSED=21933188 DECOMPRESSOR=36952 SCORE=21970140 COMPRESS_SECO
 | SCORE | 22045610 | **21970140** | **−75470** |
 
 Gap to 20.5e6 ≈ 1.43 MB.
+
+## Attempt 4 — StateMap Order-1 (REJECT)
+
+Same p+n StateMap on Order-1: slice **−3** (noise). Reverted.
+
+## Attempt 5 — match×indirect cross StateMap (KEEP)
+
+`CROSS_SIZE=32768` cells: `match_bucket × ind1 × bit_pos × expected_bit`. Blend `MATCH_IND_CROSS_WEIGHT` into CM before match/struct.
+
+Slice vs t3 base 5669982:
+
+| CROSS | Slice | Δ |
+|------:|------:|--:|
+| 0 | 5669982 | |
+| **16** | **5665469** | **−4513** |
+| 24 | 5666217 | −3765 |
+| 32 | 5669294 | −688 |
+| 48 | 5684609 | +14627 |
+
+Full enwik8 (CROSS=16):
+```
+ROUNDTRIP=OK COMPRESSED=21918203 DECOMPRESSOR=37288 SCORE=21955491 COMPRESS_SECONDS=346.11 DECOMPRESS_SECONDS=341.16 PEAK_RSS_MB=1756
+```
+
+| | Before (t3) | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21933188 | 21918203 | **−14985** |
+| DECOMPRESSOR | 36952 | 37288 | +336 |
+| SCORE | 21970140 | **21955491** | **−14649** |
+
+Gap to 20.5e6 ≈ 1.42 MB.
