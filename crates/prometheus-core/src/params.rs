@@ -22,6 +22,9 @@ pub const MATCH_CONF: [u32; 5] = [32700, 32700, 32700, 32700, 32700];
 
 /// Ensemble mix weight (0..=255) for match vs order-2, same buckets.
 pub const MIX_WEIGHT: [u32; 5] = [120, 160, 190, 230, 245];
+
+/// When match is inactive: blend weight (0..=255) of XML/wiki structure into the mix.
+pub const STRUCT_MIX_WEIGHT: u32 = 14;
 // === END TUNABLE ===
 
 pub const BUF_SIZE: usize = 1 << BUF_BITS;
