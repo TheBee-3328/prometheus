@@ -122,7 +122,10 @@ Avg cost by byte class (approx mbits/bit; relative only — estimator coarse):
 | Fix | Hyp | Before SCORE | After SCORE | Keep? | Commit |
 |-----|-----|-------------:|------------:|-------|--------|
 | o1 alone (mix=8) | g | 28011142 | **28007791** (C=27977623) | measured; folded into next | — |
-| **o1+hashed o3/o4** (w=8/160/48, bits 22/23) | g | 28011142 | **26380505** | **KEEP** | *(this commit)* |
+| **o1+hashed o3/o4** (w=8/160/48, bits 22/23) | g | 28011142 | **26380505** | **KEEP** | `1d9837d` |
+| broken adaptive mixer + o6 | b/g | — | slice 7.98e6 (worse) | **REJECT** | — |
+| o6 fixed mix any weight | g | — | slice worse vs w6=0 | **REJECT** | — |
+| **bigger o3/o4 tables** (bits 23/24) | a/j | 26380505 | **26143788** | **KEEP** | *(pending)* |
 
 ### Fix detail: add order-1 + hashed order-3/4
 
@@ -140,6 +143,21 @@ ROUNDTRIP=OK COMPRESSED=26350257 DECOMPRESSOR=30248 SCORE=26380505 COMPRESS_SECO
 | vs zstd 26395074 | worse | **beats by 44817** | |
 
 20 MB slice: 5746507 → 5475423 (−4.72%).
+
+### Fix detail: larger o3/o4 hash tables (23/24 bits)
+
+```
+ROUNDTRIP=OK COMPRESSED=26113540 DECOMPRESSOR=30248 SCORE=26143788 COMPRESS_SECONDS=81.92 DECOMPRESS_SECONDS=77.22 PEAK_RSS_MB=632
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 26350257 | 26113540 | **-236717** |
+| SCORE | 26380505 | 26143788 | **-236717** |
+| bpB | 2.10802 | 2.08908 | |
+| vs zstd | beats | beats by 281534 | |
+
+20 MB slice: 5475423 → 5439385 (−0.66%).
 
 ## FINAL REPORT
 

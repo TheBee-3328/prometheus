@@ -220,19 +220,17 @@ impl Model for Order2MatchModel {
         let p2 = self.order2.predict();
         let p3 = self.order3.predict();
         let p4 = self.order4.predict();
-        // Stack fixed blends: o2←o1←o3←o4 (higher order last so it can dominate lightly).
         let mut p0 = Self::mix_w(p2, p1, ORDER1_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p3, ORDER3_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p4, ORDER4_MIX_WEIGHT);
         let len = self.match_m.match_len();
         if len >= MIN_MIX_LEN {
-            // Match primary: do not dilute with structure/sparse.
             let pm = self.match_m.predict();
-            return Self::mix_match(p0, pm, len);
+            Self::mix_match(p0, pm, len)
+        } else {
+            let px = self.sparse.predict_struct();
+            Self::mix_w(p0, px, STRUCT_MIX_WEIGHT)
         }
-        // No active match: lightly ensemble XML/wiki structure.
-        let px = self.sparse.predict_struct();
-        Self::mix_w(p0, px, STRUCT_MIX_WEIGHT)
     }
 
     #[inline]
