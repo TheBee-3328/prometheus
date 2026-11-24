@@ -51,3 +51,4 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | DIAG-FIX | Spawning diagnose-and-fix (ablation + hypothesis loop) | — | — | 28011126 | — | — | — | in progress |
 | 2026-11-24 | DIAG-FIX | o0–o6+word+SSE; merged c3404fa @ 4327fea | 23036149 | 33016 | 23069165 | 192.52 | 185.69 | 888 | PASS merge |
 | 2026-11-24 | ORCH-NEXT | Spawn DIAG-R2 mixer/APM toward ≤20.5e6 | — | — | 23069165 | — | — | — | in progress |
+| 2026-11-24 | DIAG-R2 | paq-style APM; merged 669042b | 22766317 | 42552 | 22808869 | 206.63 | 201.26 | 888 | PASS merge |
