@@ -1,7 +1,9 @@
-# Data (never commit)
-enwik8
-enwik9
+# Data wholes (never commit) — use data/*.parts + scripts/reconstruct_data.sh
+/enwik8
+/enwik9
 *.enwik*
+!data/
+!data/**
 
 # Judge / build artifacts
 /target/

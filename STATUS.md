@@ -1,24 +1,27 @@
 # STATUS
 
-**Current phase:** 4 (size pass MERGED; handoff notes next)  
+**Current phase:** handoff ready (unattended setup)  
 **Current best SCORE:** **28080343** (enwik8)  
 **Best line:** `ROUNDTRIP=OK COMPRESSED=28051471 DECOMPRESSOR=28872 SCORE=28080343 COMPRESS_SECONDS=35.15 DECOMPRESS_SECONDS=27.11 PEAK_RSS_MB=583`  
 **Agent runs used:** 13 / 40  
 
 ## Checkpoints
 
-| Checkpoint | Commit | SCORE | Notes |
-|---|---|---|---|
-| CHKP-tuned | a61e773 / 1a39eee | 28355431 | params search |
-| CHKP-size | fa7446b | **28080343** | build-std decomp 28872 B |
-| UNFINISHED | agent/p4-orders-mix | — | abandoned / watchdog; do not merge |
+| ID | SCORE | Commit |
+|---|---|---|
+| CHKP-size (best) | 28080343 | fa7446b |
+| CHKP-tuned | 28355431 | a61e773 |
+| UNFINISHED | P4-ORDERS-MIX | abandoned — do not merge |
 
-## Platform note
+## Docs for next session
 
-Cannot `Task.resume` while subagent still running (Cursor limit). See `prompts/AGENT_WATCHDOG.md`.
+- `HANDOFF.md` — orchestrator
+- `SETUP.md` — AI setup agent (Nix, data parts, auto-approve)
+- `prompts/ORCHESTRATOR_UNSTICK.md`, `prompts/AGENT_WATCHDOG.md`
+- `data/README.md` + `scripts/reconstruct_data.sh`
 
 ## Next three tasks
 
-1. Write HANDOFF.md + SETUP.md (unattended Cursor); slice enwik9 for GitHub.
-2. Kill/close P4-ORDERS zombie if still alive; mark checked.
-3. Second tuner OR sparse features only after REVIEW if <0.5% gains stack.
+1. Setup agent: reconstruct data + smoke judge on new machine/session.
+2. Tuner round 2 / REVIEWER per <0.5% rule before big features.
+3. enwik9 judge only after another enwik8 win.

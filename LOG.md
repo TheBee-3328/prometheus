@@ -32,3 +32,4 @@ Append-only. Every agent result (success or failure) goes here.
 | 2026-11-24 | ORCH-P4B | Change approach: decompressor size pass | — | — | — | — | — | — | in progress |
 | 2026-11-24 | P4-SIZE | build-std+immediate-abort; merged fa7446b | 28051471 | 28872 | 28080343 | 35.15 | 27.11 | 583 | PASS merge |
 | 2026-11-24 | ORCH-WATCH | Document mid-flight resume = platform limit; watchdog timeouts | — | — | — | — | — | — | ok |
+| 2026-11-24 | ORCH-HANDOFF | HANDOFF.md+SETUP.md; enwik8×2 + enwik9×20 parts @50MB; reconstruct OK | 28051471 | 28872 | 28080343 | — | — | — | ready |
