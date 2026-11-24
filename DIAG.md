@@ -549,3 +549,32 @@ ROUNDTRIP=OK COMPRESSED=22439085 DECOMPRESSOR=43352 SCORE=22482437 COMPRESS_SECO
 | SCORE | 22574501 | **22482437** | **−92064** |
 
 Gap to 20.5e6 ≈ 1.94 MB (was 2.03 MB). Adversarial: **10/10 PASS**.
+
+## Attempt 2 — indirect / record model (KEEP)
+
+Design: `IndirectModel` — `t1[256]` / `t2[65536]` last-byte-after o1/o2; hashed `(bit_cxt × prev0 × ind1 × ind2)` counters (`INDIRECT_BITS=24`); blend `INDIRECT_MIX_WEIGHT` into CM before match.
+
+Slice vs multi-cand=4 (4872291):
+
+| MIX | Slice COMPRESSED | Δ |
+|----:|-----------------:|--:|
+| 24 | 4800899 | −71392 |
+| 32 | 4789700 | −82591 |
+| 36 | 4786839 | −85452 |
+| **40** | **4785692** | **−86600** |
+| 44 | 4786179 | −86112 |
+| 48 | 4788459 | −83832 |
+| 56 | 4797719 | −74572 |
+
+Full enwik8 (MIX=40):
+```
+ROUNDTRIP=OK COMPRESSED=22037144 DECOMPRESSOR=44168 SCORE=22081312 COMPRESS_SECONDS=327.34 DECOMPRESS_SECONDS=309.37 PEAK_RSS_MB=1705
+```
+
+| | Before (mc×4) | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 22439085 | 22037144 | **−401941** |
+| DECOMPRESSOR | 43352 | 44168 | +816 |
+| SCORE | 22482437 | **22081312** | **−401125** |
+
+Gap to 20.5e6 ≈ 1.54 MB.

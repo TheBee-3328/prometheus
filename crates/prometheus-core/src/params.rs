@@ -68,6 +68,11 @@ pub const SSE2_MIX_WEIGHT: u32 = 192;
 /// Blend weight (0..=255) of order-0 into CM mix.
 pub const ORDER0_MIX_WEIGHT: u32 = 80;
 
+/// Indirect / record model hash table bits.
+pub const INDIRECT_BITS: usize = 24;
+/// Blend weight (0..=255) of indirect model into CM mix.
+pub const INDIRECT_MIX_WEIGHT: u32 = 40;
+
 /// Third-stage APM blend weight (0..=255) into final p after SSE2.
 pub const APM_MIX_WEIGHT: u32 = 224;
 /// APM adaptation shift (larger = slower). Careful default.
