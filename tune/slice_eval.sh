@@ -16,7 +16,12 @@ if [[ ! -f "$SLICE" ]]; then
 fi
 
 cargo build --profile "$PROFILE" -p prometheus-compress -q
-BIN="target/${PROFILE}/prometheus-compress"
+# build-std + [build].target places bins under target/<triple>/<profile>/.
+TRIPLE="${CARGO_BUILD_TARGET:-x86_64-unknown-linux-gnu}"
+BIN="target/${TRIPLE}/${PROFILE}/prometheus-compress"
+if [[ ! -x "$BIN" ]]; then
+  BIN="target/${PROFILE}/prometheus-compress"
+fi
 "$BIN" "$SLICE" "$OUT"
 BYTES=$(wc -c < "$OUT" | tr -d ' ')
 echo "COMPRESSED=${BYTES}"
