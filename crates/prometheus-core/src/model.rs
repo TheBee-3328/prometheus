@@ -154,19 +154,30 @@ impl Model for Order2Model {
 /// Hashed order-N byte context (N≥3) with bit path in the hash.
 ///
 /// Table size = 1 << bits; collisions overwrite counts (no checksum).
+/// `use_statemap`: paq-style p+n cells (not u16 n0/n1 — that was rejected).
 pub struct HashOrderModel {
     order: usize,
     bits: usize,
     mask: usize,
+    use_statemap: bool,
     /// recent bytes, index 0 = most recent
     hist: [u8; 8],
     bit_cxt: u16,
     n0: Box<[u8]>,
     n1: Box<[u8]>,
+    cells: Box<[u32]>,
 }
 
 impl HashOrderModel {
     pub fn new(order: usize, bits: usize) -> Self {
+        Self::new_with(order, bits, false)
+    }
+
+    pub fn new_statemap(order: usize, bits: usize) -> Self {
+        Self::new_with(order, bits, true)
+    }
+
+    fn new_with(order: usize, bits: usize, use_statemap: bool) -> Self {
         assert!((3..=8).contains(&order));
         assert!((12..=28).contains(&bits));
         let size = 1usize << bits;
@@ -174,10 +185,24 @@ impl HashOrderModel {
             order,
             bits,
             mask: size - 1,
+            use_statemap,
             hist: [0u8; 8],
             bit_cxt: 1,
-            n0: vec![0u8; size].into_boxed_slice(),
-            n1: vec![0u8; size].into_boxed_slice(),
+            n0: if use_statemap {
+                Vec::new().into_boxed_slice()
+            } else {
+                vec![0u8; size].into_boxed_slice()
+            },
+            n1: if use_statemap {
+                Vec::new().into_boxed_slice()
+            } else {
+                vec![0u8; size].into_boxed_slice()
+            },
+            cells: if use_statemap {
+                vec![sm_init(); size].into_boxed_slice()
+            } else {
+                Vec::new().into_boxed_slice()
+            },
         }
     }
 
@@ -205,13 +230,21 @@ impl Model for HashOrderModel {
     #[inline]
     fn predict(&mut self) -> u16 {
         let i = self.hash();
-        laplace_prob(self.n0[i], self.n1[i])
+        if self.use_statemap {
+            sm_predict(self.cells[i])
+        } else {
+            laplace_prob(self.n0[i], self.n1[i])
+        }
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
         let i = self.hash();
-        learn_count(&mut self.n0[i], &mut self.n1[i], bit);
+        if self.use_statemap {
+            self.cells[i] = sm_update(self.cells[i], bit);
+        } else {
+            learn_count(&mut self.n0[i], &mut self.n1[i], bit);
+        }
         self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
         if self.bit_cxt >= 256 {
             let byte = (self.bit_cxt & 0xff) as u8;

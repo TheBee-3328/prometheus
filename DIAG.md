@@ -761,3 +761,22 @@ ROUNDTRIP=OK COMPRESSED=21913905 DECOMPRESSOR=37304 SCORE=21951209 COMPRESS_SECO
 | SCORE | 21955491 | **21951209** | **−4282** |
 
 Gap to 20.5e6 ≈ 1.41 MB.
+
+## Attempt 7 — StateMap on hashed Order-3 (KEEP)
+
+`HashOrderModel::new_statemap` for o3 only (p+n cells, soft-reset). Distinct from rejected blanket u16 n0/n1 rescale.
+
+Slice: **5650925** vs 5664646 (−13721).
+
+Full enwik8:
+```
+ROUNDTRIP=OK COMPRESSED=21871189 DECOMPRESSOR=37544 SCORE=21908733 COMPRESS_SECONDS=344.23 DECOMPRESS_SECONDS=332.04 PEAK_RSS_MB=1788
+```
+
+| | Before (reset) | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21913905 | 21871189 | **−42716** |
+| DECOMPRESSOR | 37304 | 37544 | +240 |
+| SCORE | 21951209 | **21908733** | **−42476** |
+
+Gap to 20.5e6 ≈ 1.37 MB.
