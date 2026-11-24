@@ -593,3 +593,58 @@ ROUNDTRIP=OK COMPRESSED=22039256 DECOMPRESSOR=36680 SCORE=22075936 COMPRESS_SECO
 | COMPRESSED | 22037144 | 22039256 | +2112 (stretch path drift) |
 | DECOMPRESSOR | 44168 | 36680 | **−7488** |
 | SCORE | 22081312 | **22075936** | **−5376** |
+
+## Attempt 4 — sparse-gap model (REJECT)
+
+`GapModel` hashed (hist[0,1,2,4] × bit_cxt), GAP_BITS=22.
+Slice vs 4785692: MIX=32 → **4811629 (+25937)**; MIX=16 → **4786423 (+731)**. Reverted.
+
+## FINAL REPORT (DIAG-R3)
+
+### Verdict: **partial**
+
+Clear SCORE wins vs DIAG-R2 baseline; **≤20.5e6 COMPRESSED not reached**.
+
+### Best judge line
+
+```
+ROUNDTRIP=OK COMPRESSED=22039256 DECOMPRESSOR=36680 SCORE=22075936 COMPRESS_SECONDS=321.50 DECOMPRESS_SECONDS=311.63 PEAK_RSS_MB=1705
+```
+
+| | Baseline (R2) | Best (R3) | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 22531741 | **22039256** | **−492485** |
+| DECOMPRESSOR | 42760 | 36680 | −6080 |
+| SCORE | 22574501 | **22075936** | **−498565** |
+| bpB | 1.80254 | 1.76314 | |
+
+Gap to 20.5e6: **≈1.54 MB** (was 2.03 MB).
+
+### Commits (agent/diag-r3)
+
+| Commit | Change | SCORE |
+|--------|--------|------:|
+| `cda121b` | multi-candidate match chain×4 | 22482437 |
+| `6eecaa2` | indirect/record model MIX=40 | 22081312 |
+| `5f645c4` | heap-built STRETCH LUT | **22075936** |
+
+### Acceptance
+
+- Judge ROUNDTRIP=OK and SCORE < 22574501: **YES**
+- ≤20.5e6 COMPRESSED: **NO**
+- Adversarial: **10/10 PASS** on each kept commit
+
+### Rejected
+
+| Hyp | Evidence |
+|-----|----------|
+| Sparse-gap MIX=32/16 | slice +25937 / +731 |
+
+### Next ideas (toward 20.5e6)
+
+1. State-map / dual-rate bit-history (paq8) on selected contexts — not tried this round.
+2. Match secondary hash (order-4 / alt salt) beyond chain depth.
+3. Deeper indirect (order-3 last-byte table) or match×indirect cross context.
+4. Fix STRETCH drift (+2 KB COMPRESSED) — restore bit-identical stretch vs static LUT.
+5. Preprocessor deepen only with fresh ablation under current ensemble.
+6. Speed: compress ~320s / RSS ~1.7 GB — trim match chain memory before enwik9.
