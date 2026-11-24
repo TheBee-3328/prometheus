@@ -7,7 +7,9 @@
 use crate::model::{Model, Order2Model};
 use crate::params::{
     match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
+    STRUCT_MIX_WEIGHT,
 };
+use crate::sparse::SparseModel;
 
 /// LZ match model: buffer + hash → expected next bits.
 pub struct MatchModel {
@@ -163,10 +165,12 @@ impl Model for MatchModel {
     }
 }
 
-/// Mix order-2 CM with the match model; match weight grows with match length.
+/// Mix order-2 + sparse/XML with the match model; match weight grows with length.
+/// Sparse/structure only blend in when match is inactive (do not fight match).
 pub struct Order2MatchModel {
     order2: Order2Model,
     match_m: MatchModel,
+    sparse: SparseModel,
 }
 
 impl Order2MatchModel {
@@ -174,13 +178,13 @@ impl Order2MatchModel {
         Self {
             order2: Order2Model::new(),
             match_m: MatchModel::new(),
+            sparse: SparseModel::new(),
         }
     }
 
     #[inline]
-    fn mix(p_o2: u16, p_m: u16, match_len: u32) -> u16 {
-        let w = mix_weight(match_len);
-        let p = (p_o2 as u32 * (256 - w) + p_m as u32 * w) / 256;
+    fn mix_w(p_a: u16, p_b: u16, w: u32) -> u16 {
+        let p = (p_a as u32 * (256 - w) + p_b as u32 * w) / 256;
         if p < 1 {
             1
         } else if p > 65534 {
@@ -188,6 +192,11 @@ impl Order2MatchModel {
         } else {
             p as u16
         }
+    }
+
+    #[inline]
+    fn mix_match(p_o2: u16, p_m: u16, match_len: u32) -> u16 {
+        Self::mix_w(p_o2, p_m, mix_weight(match_len))
     }
 }
 
@@ -202,17 +211,21 @@ impl Model for Order2MatchModel {
     fn predict(&mut self) -> u16 {
         let p0 = self.order2.predict();
         let len = self.match_m.match_len();
-        if len < MIN_MIX_LEN {
-            return p0;
+        if len >= MIN_MIX_LEN {
+            // Match primary: do not dilute with structure/sparse.
+            let p1 = self.match_m.predict();
+            return Self::mix_match(p0, p1, len);
         }
-        let p1 = self.match_m.predict();
-        Self::mix(p0, p1, len)
+        // No active match: lightly ensemble XML/wiki structure.
+        let px = self.sparse.predict_struct();
+        Self::mix_w(p0, px, STRUCT_MIX_WEIGHT)
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
         self.order2.update(bit);
         self.match_m.update(bit);
+        self.sparse.update(bit);
     }
 }
 
