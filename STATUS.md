@@ -1,29 +1,27 @@
 # STATUS
 
-**Current phase:** LIVE unattended — TUNER-R2 in flight  
-**Current best SCORE:** **28080343** (enwik8)  
-**Best line:** `ROUNDTRIP=OK COMPRESSED=28051471 DECOMPRESSOR=28872 SCORE=28080343 …`  
-**Agent runs used:** 14 / 40 (TUNER-R2 spawned)  
-**Wall clock:** session started 2026-11-24 ~03:04 UTC+1  
+**Current phase:** LIVE unattended — next: P5-SPARSE-XML  
+**Current best SCORE:** **28042709** (enwik8)  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=28013837 DECOMPRESSOR=28872 SCORE=28042709 …`  
+**Agent runs used:** 15 / 40 (TUNER-R2 merged)  
+**Prior:** 28080343 → 28042709 (−37634, −0.13%)  
 
 ## Operator
 
-Unattended orch loop **RUNNING**. Monitor freely. Soft failures logged and continued; stop only on critical risk.
+Unattended orch loop **RUNNING**. Monitor freely.
 
-## In flight
+## Last merge
 
-| Task | Branch | Soft/Hard | Goal |
+| Task | Commit | SCORE | Notes |
 |---|---|---|---|
-| TUNER-R2 | `agent/tuner-r2` | 50 / 70 min | Beat SCORE 28080343 via params search seeded from current best |
+| TUNER-R2 | `b8465d4` / merge on main | **28042709** | ORDER2_RESCALE=100, MIX_WEIGHT=[120,160,190,230,245]; adv 10/10 |
 
-## Next queue
+## In flight / next
 
-1. Merge TUNER-R2 if PASS else log FAIL
-2. If <0.5% gain: REVIEWER+TUNER again before big features; else sparse/XML ensemble with match
+1. **P5-SPARSE-XML** — sparse/XML contexts that *ensemble with* match (not replace; P4-ORDERS lesson)
+2. If <0.5% again → REVIEWER + another TUNER before more features
 3. enwik9 only after clear enwik8 win
 
-## Docs
+## Caps
 
-- `HANDOFF.md` — orch rules
-- `SETUP.md` — environment / auto-approve
-- `prompts/AGENT_WATCHDOG.md` — timeouts
+Budget 40 agent runs / 8 wall hours. Do not retry P2-WORD or P4-ORDERS-MIX briefs.
