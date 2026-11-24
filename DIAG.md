@@ -130,6 +130,7 @@ Avg cost by byte class (approx mbits/bit; relative only — estimator coarse):
 | MATCH_CONF graduated | f | — | slice worse | **REJECT** (max conf best) | — |
 | **word model** (bits=22, mix=64) | g | 25548485 | **25300821** | **KEEP** | `bde3516` |
 | **SSE+match-bucket cxt** | i | 25300821 | **24476305** | **KEEP** | `e12b068` |
+| **SSE2 byte-class** | i | 24476305 | **24235975** | **KEEP** | *(pending)* |
 
 ### Fix detail: add order-1 + hashed order-3/4
 
@@ -213,3 +214,17 @@ Diag tool modes `no-match`/`no-struct`/`order2-only` still bypass o3/o4/SSE/word
 ## FINAL REPORT
 
 *(in progress)*
+
+### Fix detail: SSE2 byte-class context
+
+```
+ROUNDTRIP=OK COMPRESSED=24203663 DECOMPRESSOR=32312 SCORE=24235975 COMPRESS_SECONDS=116.87 DECOMPRESS_SECONDS=110.47 PEAK_RSS_MB=640
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 24444761 | 24203663 | **-241098** |
+| SCORE | 24476305 | 24235975 | **-240330** |
+| bpB | 1.95558 | 1.93629 | |
+
+20 MB slice: 5032793 → 4975376 (−1.14%).

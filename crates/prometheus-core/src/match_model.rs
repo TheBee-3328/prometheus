@@ -8,10 +8,10 @@ use crate::model::{HashOrderModel, Model, Order1Model, Order2Model};
 use crate::params::{
     match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
     ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS, ORDER4_MIX_WEIGHT,
-    SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
+    SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
 };
 use crate::sparse::SparseModel;
-use crate::sse::Sse;
+use crate::sse::{Sse, Sse2};
 use crate::word::WordModel;
 
 /// LZ match model: buffer + hash → expected next bits.
@@ -179,8 +179,10 @@ pub struct Order2MatchModel {
     sparse: SparseModel,
     word: WordModel,
     sse: Sse,
+    sse2: Sse2,
     /// Shared bit path for SSE context (mirrors order2 bit_cxt).
     bit_cxt: u16,
+    last_class: u8,
 }
 
 impl Order2MatchModel {
@@ -194,7 +196,24 @@ impl Order2MatchModel {
             sparse: SparseModel::new(),
             word: WordModel::new(),
             sse: Sse::new(SSE_MIX_WEIGHT),
+            sse2: Sse2::new(SSE2_MIX_WEIGHT),
             bit_cxt: 1,
+            last_class: 8,
+        }
+    }
+
+    #[inline]
+    fn byte_class(b: u8) -> u8 {
+        match b {
+            b' ' | b'\n' | b'\t' | b'\r' => 0,
+            b'a'..=b'z' | b'A'..=b'Z' => 1,
+            b'0'..=b'9' => 2,
+            b'<' => 3,
+            b'>' => 4,
+            b'&' | b';' => 5,
+            b'[' | b']' | b'{' | b'}' => 6,
+            0x80..=0xfe => 7,
+            _ => 8,
         }
     }
 
@@ -242,12 +261,14 @@ impl Model for Order2MatchModel {
             let px = self.sparse.predict_struct();
             Self::mix_w(p0, px, STRUCT_MIX_WEIGHT)
         };
-        self.sse.refine(p, self.bit_cxt, len)
+        let p = self.sse.refine(p, self.bit_cxt, len);
+        self.sse2.refine(p, self.bit_cxt, self.last_class)
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
         self.sse.update(bit);
+        self.sse2.update(bit);
         self.order1.update(bit);
         self.order2.update(bit);
         self.order3.update(bit);
@@ -257,6 +278,8 @@ impl Model for Order2MatchModel {
         self.sparse.update(bit);
         self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
         if self.bit_cxt >= 256 {
+            let byte = (self.bit_cxt & 0xff) as u8;
+            self.last_class = Self::byte_class(byte);
             self.bit_cxt = 1;
         }
     }

@@ -93,3 +93,74 @@ impl Sse {
         }
     }
 }
+
+/// Second-stage SSE: contexts from last byte class × bit_cxt × coarse p.
+const N2_CLASS: usize = 9;
+const N2_BIT: usize = 256;
+const N2_BUCKET: usize = 32; // p >> 11
+const SIZE2: usize = N2_CLASS * N2_BIT * N2_BUCKET;
+
+pub struct Sse2 {
+    n0: Box<[u8]>,
+    n1: Box<[u8]>,
+    last_i: usize,
+    mix_w: u32,
+}
+
+impl Sse2 {
+    pub fn new(mix_w: u32) -> Self {
+        Self {
+            n0: vec![0u8; SIZE2].into_boxed_slice(),
+            n1: vec![0u8; SIZE2].into_boxed_slice(),
+            last_i: 0,
+            mix_w,
+        }
+    }
+
+    #[inline]
+    fn prob(n0: u8, n1: u8) -> u16 {
+        let a = n1 as u32 + 1;
+        let b = n0 as u32 + n1 as u32 + 2;
+        let p = (a * 65535) / b;
+        if p < 1 {
+            1
+        } else if p > 65534 {
+            65534
+        } else {
+            p as u16
+        }
+    }
+
+    #[inline]
+    pub fn refine(&mut self, p: u16, bit_cxt: u16, last_class: u8) -> u16 {
+        let c = (last_class as usize).min(N2_CLASS - 1);
+        let bxt = (bit_cxt as usize) & (N2_BIT - 1);
+        let bucket = ((p as usize) >> 11).min(N2_BUCKET - 1);
+        let i = (c * N2_BIT + bxt) * N2_BUCKET + bucket;
+        self.last_i = i;
+        let ps = Self::prob(self.n0[i], self.n1[i]);
+        let w = self.mix_w;
+        let out = (p as u32 * (256 - w) + ps as u32 * w) / 256;
+        if out < 1 {
+            1
+        } else if out > 65534 {
+            65534
+        } else {
+            out as u16
+        }
+    }
+
+    #[inline]
+    pub fn update(&mut self, bit: u8) {
+        let i = self.last_i;
+        if bit == 0 {
+            self.n0[i] = self.n0[i].saturating_add(1);
+        } else {
+            self.n1[i] = self.n1[i].saturating_add(1);
+        }
+        if (self.n0[i] as u16) + (self.n1[i] as u16) >= ORDER2_RESCALE {
+            self.n0[i] >>= 1;
+            self.n1[i] >>= 1;
+        }
+    }
+}

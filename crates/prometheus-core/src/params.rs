@@ -46,6 +46,9 @@ pub const SSE_MIX_WEIGHT: u32 = 224;
 pub const WORD_BITS: usize = 22;
 /// Blend weight (0..=255) of word model into CM mix (before match/SSE).
 pub const WORD_MIX_WEIGHT: u32 = 64;
+
+/// Second SSE (byte-class context) blend weight.
+pub const SSE2_MIX_WEIGHT: u32 = 192;
 // === END TUNABLE ===
 
 pub const BUF_SIZE: usize = 1 << BUF_BITS;
