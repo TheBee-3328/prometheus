@@ -45,3 +45,5 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | P5-SPARSE-XML | struct CM ensemble w/ match; merged 0f57ac6 | 27981374 | 29752 | 28011126 | 32.48 | 22.46 | 583 | PASS merge |
 | 2026-11-24 | ORCH-P5R | Two <0.5% wins → spawn REVIEWER + TUNER-R3 | — | — | 28011126 | — | — | — | in progress |
 | 2026-11-24 | P5-REVIEW | REVIEW.md refresh; adv 10/10; merged bc05942 | — | — | 28011126 | — | — | — | PASS merge |
+| 2026-11-24 | ORCH-PAUSE | Operator tmux reload; killed compute; R3_r102_only SCORE=28010892 unmerged | 27981140 | 29752 | 28010892 | — | — | — | paused |
+| 2026-11-24 | TUNER-R3 | Interrupted; best measured R3_r102_only beats main; commit pending | 27981140 | 29752 | 28010892 | 32.49 | 22.66 | 583 | UNFINISHED pause |
