@@ -271,3 +271,82 @@ ROUNDTRIP=OK COMPRESSED=23137005 DECOMPRESSOR=32936 SCORE=23169941 COMPRESS_SECO
 | bpB | 1.88797 | 1.85096 | |
 
 MIX_WEIGHT / MIN_MIX_LEN sweeps: current best (reject changes).
+
+### Fix detail: order-6 (mix=32) with SSE stack
+
+```
+ROUNDTRIP=OK COMPRESSED=23036149 DECOMPRESSOR=33016 SCORE=23069165 COMPRESS_SECONDS=192.52 DECOMPRESS_SECONDS=185.69 PEAK_RSS_MB=888
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 23137005 | 23036149 | **-100856** |
+| SCORE | 23169941 | 23069165 | **-100776** |
+| bpB | 1.85096 | 1.84289 | |
+
+Note: earlier o6 without SSE was rejected; with SSE it helps.
+
+## FINAL REPORT
+
+### Before / after
+
+| | Judge line | bpB |
+|--|---|---:|
+| **Baseline (start)** | `ROUNDTRIP=OK COMPRESSED=27981374 DECOMPRESSOR=29768 SCORE=28011142` | 2.23851 |
+| **Best (end)** | `ROUNDTRIP=OK COMPRESSED=23036149 DECOMPRESSOR=33016 SCORE=23069165` | 1.84289 |
+
+SCORE Δ: **−4,941,977** (−17.6%). Beats zstd floor (26395074) and xz (24831656).
+
+### Floors
+
+| Tool | Size | Time |
+|------|-----:|-----:|
+| zstd -19 --long=27 | 26395074 | ~32.5s |
+| xz -9e | 24831656 | ~61.5s |
+| PROMETHEUS best | **23036149** | ~193s compress / ~186s decompress |
+
+### Ranked causes (measured SCORE gains)
+
+| Rank | Cause | Approx SCORE gain | Commit |
+|-----:|-------|------------------:|--------|
+| 1 | Missing o1+o3+o4 contexts | −1,630,637 | `1d9837d` |
+| 2 | SSE match-bucket context | −824,516 | `e12b068` |
+| 3 | SSE primary layer | −595,303 | `b1eb4ae` |
+| 4 | Larger tables + rescale 250 | −481,488 | `37ba74e` |
+| 5 | Order-5 + STRUCT=24 | −462,515 | `4c2e6b5` |
+| 6 | Word model | −247,664 | `bde3516` |
+| 7 | SSE2 byte-class | −240,330 | `4e6866a` |
+| 8 | Bigger o3/o4 (23/24) | −236,717 | `29097b6` |
+| 9 | Order-0 + match fingerprint | −122,031 | `6aecd02` |
+| 10 | Order-6 (with SSE) | −100,776 | *(this)* |
+
+### Rejected with evidence
+
+| Hyp | Evidence |
+|-----|----------|
+| Adaptive logistic mixer (naive) | Slice 7.98e6 vs 5.47e6 |
+| o6 without SSE | Any weight worse on slice |
+| MATCH_CONF graduated | All worse than max-32700 |
+| MIX_WEIGHT retune | Current best on slice |
+| MIN_MIX_LEN ≠ 6 | 7/8 worse; 4/5 noop (HASH_ORDER=6) |
+| Judge double-count | Verified: SCORE=C+exe, no aux |
+
+### Remaining suspects / unexplained (~2.54 MB to 20.5e6 target)
+
+1. **No working adaptive mixer / APM chain** — fixed linear blends leave correlation on the table (lpaq/paq8/cmix gap).
+2. **u8 counters** — saturate; u16 + state maps (paq) unused.
+3. **Preprocessor weak** (+0.09% early) — dict/cap still shallow vs wiki-aware transforms.
+4. **Match model** — single hash chain, no multi-candidate; conf still binary-max.
+5. **Missing record/indirect/sparse-gap models** common in cmix-class compressors.
+6. Soft time: compress already ~193s; room for heavier models before 20min if optimized.
+
+### enwik9 projection
+
+Scale ×10 on COMPRESSED ≈ **230 MB**; time ×10–12 ≈ **30–40 min** compress (above typical 20 min mid-weight budget unless sped up). RSS ~0.9 GB → may need ~1–2 GB on enwik9.
+
+### Merge readiness
+
+- SCORE **23069165** ≪ baseline **28011126** — ready on SCORE.
+- Beats zstd/xz floors.
+- Adversarial: **10/10 PASS** (at o5; re-verify after o6).
+- Target 20.5e6 **not** reached — **partial** vs stop criterion.
