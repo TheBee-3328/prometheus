@@ -1,13 +1,15 @@
-//! PROMETHEUS shared core: Model trait, order-2 + match CM, 32-bit arithmetic coder.
+//! PROMETHEUS shared core: Model trait, multi-order + match CM, 32-bit arithmetic coder.
 
 mod arithmetic;
+mod contexts;
 mod match_model;
 mod model;
 pub mod params;
 mod preprocessor;
 
 pub use arithmetic::{ArithmeticDecoder, ArithmeticEncoder};
-pub use match_model::{MatchModel, Order2MatchModel};
+pub use contexts::HashedOrders;
+pub use match_model::{MatchModel, Order2MatchModel, OrdersMatchModel};
 pub use model::{Model, Order2Model};
 pub use preprocessor::{decode, encode};
 

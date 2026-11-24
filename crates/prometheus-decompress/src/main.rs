@@ -1,6 +1,6 @@
 //! Decompressor: order-2 + LZ match model + arithmetic coding, then preprocessor decode.
 
-use prometheus_core::{decode, ArithmeticDecoder, Model, Order2MatchModel, MAGIC};
+use prometheus_core::{decode, ArithmeticDecoder, Model, OrdersMatchModel, MAGIC};
 use std::env;
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Read, Write};
@@ -34,7 +34,7 @@ fn decompress(input_path: &std::ffi::OsStr, output_path: &std::ffi::OsStr) -> io
     len_bytes.copy_from_slice(&header[4..12]);
     let declared = u64::from_le_bytes(len_bytes) as usize;
 
-    let mut model = Order2MatchModel::new();
+    let mut model = OrdersMatchModel::new();
     let mut dec = ArithmeticDecoder::new(input)?;
     let mut pre = vec![0u8; declared];
     for b in pre.iter_mut() {

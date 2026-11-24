@@ -7,6 +7,21 @@
 /// Order-2 counter rescale when n0+n1 reaches this (adaptation rate).
 pub const ORDER2_RESCALE: u16 = 120;
 
+/// Hashed o3–o6 counter rescale.
+pub const ORDERS_RESCALE: u16 = 120;
+
+/// Hashed order table sizes = 1 << Ox_BITS (slots per n0/n1/chk).
+pub const O3_BITS: usize = 23;
+pub const O4_BITS: usize = 23;
+pub const O5_BITS: usize = 22;
+pub const O6_BITS: usize = 22;
+
+/// Per-order bias for o3..o6 confidence mixing.
+pub const HI_BIAS: [u32; 4] = [4, 6, 8, 12];
+
+/// Max blend weight (0..=255) of hashed orders into order-2.
+pub const HI_MIX_MAX: u32 = 80;
+
 /// Match history buffer size = 1 << BUF_BITS.
 pub const BUF_BITS: usize = 25;
 /// Match hash table size = 1 << HASH_BITS.
@@ -20,7 +35,7 @@ pub const MIN_MIX_LEN: u32 = 6;
 /// [5..=6, 7..=10, 11..=20, 21..=40, 41+].
 pub const MATCH_CONF: [u32; 5] = [32700, 32700, 32700, 32700, 32700];
 
-/// Ensemble mix weight (0..=255) for match vs order-2, same buckets.
+/// Ensemble mix weight (0..=255) for match vs CM, same buckets.
 pub const MIX_WEIGHT: [u32; 5] = [100, 160, 200, 230, 245];
 // === END TUNABLE ===
 

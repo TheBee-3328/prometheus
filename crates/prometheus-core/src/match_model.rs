@@ -4,6 +4,7 @@
 //! context verifies, subsequent bits are predicted from the byte that followed
 //! that prior occurrence. Mixed with order-2 only for sufficiently long matches.
 
+use crate::contexts::HashedOrders;
 use crate::model::{Model, Order2Model};
 use crate::params::{
     match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
@@ -163,6 +164,14 @@ impl Model for MatchModel {
     }
 }
 
+
+#[inline]
+fn mix_cm_match(p_cm: u16, p_m: u16, match_len: u32) -> u16 {
+    let w = mix_weight(match_len);
+    let p = (p_cm as u32 * (256 - w) + p_m as u32 * w) / 256;
+    if p < 1 { 1 } else if p > 65534 { 65534 } else { p as u16 }
+}
+
 /// Mix order-2 CM with the match model; match weight grows with match length.
 pub struct Order2MatchModel {
     order2: Order2Model,
@@ -177,18 +186,6 @@ impl Order2MatchModel {
         }
     }
 
-    #[inline]
-    fn mix(p_o2: u16, p_m: u16, match_len: u32) -> u16 {
-        let w = mix_weight(match_len);
-        let p = (p_o2 as u32 * (256 - w) + p_m as u32 * w) / 256;
-        if p < 1 {
-            1
-        } else if p > 65534 {
-            65534
-        } else {
-            p as u16
-        }
-    }
 }
 
 impl Default for Order2MatchModel {
@@ -206,13 +203,48 @@ impl Model for Order2MatchModel {
             return p0;
         }
         let p1 = self.match_m.predict();
-        Self::mix(p0, p1, len)
+        mix_cm_match(p0, p1, len)
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
         self.order2.update(bit);
         self.match_m.update(bit);
+    }
+}
+
+
+pub struct OrdersMatchModel {
+    order2: Order2Model,
+    hi: HashedOrders,
+    match_m: MatchModel,
+}
+impl OrdersMatchModel {
+    pub fn new() -> Self {
+        Self { order2: Order2Model::new(), hi: HashedOrders::new(), match_m: MatchModel::new() }
+    }
+    #[inline]
+    fn cm_predict(&mut self) -> u16 {
+        let p2 = self.order2.predict();
+        let p_hi = self.hi.predict();
+        let w = self.hi.mix_weight_vs_o2();
+        if w == 0 { return p2; }
+        let p = (p2 as u32 * (256 - w) + p_hi as u32 * w) / 256;
+        if p < 1 { 1 } else if p > 65534 { 65534 } else { p as u16 }
+    }
+}
+impl Default for OrdersMatchModel { fn default() -> Self { Self::new() } }
+impl Model for OrdersMatchModel {
+    #[inline]
+    fn predict(&mut self) -> u16 {
+        let p0 = self.cm_predict();
+        let len = self.match_m.match_len();
+        if len < MIN_MIX_LEN { return p0; }
+        mix_cm_match(p0, self.match_m.predict(), len)
+    }
+    #[inline]
+    fn update(&mut self, bit: u8) {
+        self.order2.update(bit); self.hi.update(bit); self.match_m.update(bit);
     }
 }
 
