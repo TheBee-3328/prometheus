@@ -10,6 +10,7 @@ pub mod params;
 mod preprocessor;
 mod sparse;
 mod sse;
+mod statemap;
 mod word;
 
 pub use arithmetic::{ArithmeticDecoder, ArithmeticEncoder};

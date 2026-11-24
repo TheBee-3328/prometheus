@@ -1,6 +1,7 @@
 //! Context models. Integer / fixed-point only; no FP, no HashMap.
 
 use crate::params::ORDER2_RESCALE;
+use crate::statemap::{sm_init, sm_predict, sm_update};
 
 /// Bit predictor: returns p(bit=1) on a 0..=65535 scale, then learns `bit`.
 pub trait Model {
@@ -95,12 +96,14 @@ impl Model for Order1Model {
 ///
 /// Context index = `(prev1 << 8 | prev0) * 256 + bit_cxt` where `bit_cxt`
 /// starts at 1 and grows with each bit until a byte completes.
+///
+/// Paq-style count-dependent StateMap (p + n) — dual-rate via 3/(n+4) step.
 pub struct Order2Model {
     prev0: u8,
     prev1: u8,
     bit_cxt: u16,
-    n0: Box<[u8]>,
-    n1: Box<[u8]>,
+    /// Packed StateMap cells: hi16=p, lo8=n.
+    cells: Box<[u32]>,
 }
 
 impl Order2Model {
@@ -109,8 +112,7 @@ impl Order2Model {
             prev0: 0,
             prev1: 0,
             bit_cxt: 1,
-            n0: vec![0u8; O2 * BIT_STATES].into_boxed_slice(),
-            n1: vec![0u8; O2 * BIT_STATES].into_boxed_slice(),
+            cells: vec![sm_init(); O2 * BIT_STATES].into_boxed_slice(),
         }
     }
 
@@ -119,7 +121,6 @@ impl Order2Model {
         let o2 = ((self.prev1 as usize) << 8) | (self.prev0 as usize);
         o2 * BIT_STATES + (self.bit_cxt as usize)
     }
-
 }
 
 impl Default for Order2Model {
@@ -132,13 +133,13 @@ impl Model for Order2Model {
     #[inline]
     fn predict(&mut self) -> u16 {
         let i = self.index();
-        laplace_prob(self.n0[i], self.n1[i])
+        sm_predict(self.cells[i])
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
         let i = self.index();
-        learn_count(&mut self.n0[i], &mut self.n1[i], bit);
+        self.cells[i] = sm_update(self.cells[i], bit);
 
         self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
         if self.bit_cxt >= 256 {

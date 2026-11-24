@@ -648,3 +648,41 @@ Gap to 20.5e6: **≈1.54 MB** (was 2.03 MB).
 4. Fix STRETCH drift (+2 KB COMPRESSED) — restore bit-identical stretch vs static LUT.
 5. Preprocessor deepen only with fresh ablation under current ensemble.
 6. Speed: compress ~320s / RSS ~1.7 GB — trim match chain memory before enwik9.
+
+# DIAG-R4
+
+Branch: `agent/diag-r4`  
+Agent: DIAG-R4  
+Start: 2026-11-24  
+Baseline to beat: `ROUNDTRIP=OK COMPRESSED=22039256 DECOMPRESSOR=36680 SCORE=22075936`
+
+## Plan
+
+1. State-map / dual-rate bit-history (not blanket u16 hash counters) — priority.
+2. Match secondary hash beyond chain.
+3. Deeper indirect / match×indirect cross.
+4. Fix STRETCH drift if cheap.
+5. RSS trim for match chain if SCORE-neutral.
+
+## Attempt 1 — Order-2 count-dependent StateMap (KEEP)
+
+Design: replace Order-2 Laplace n0/n1 with paq-style packed StateMap cells (`p<<16|n`), update `p += ((tgt-p)*3)/(n+4)`. Dual-rate via count-dependent step (not fixed-shift dual p, which regressed +910 KB on slice). Not hashed-order u16 counters.
+
+Rejected precursors (same attempt, reverted before judge):
+- Fixed dual-rate p_fast/p_slow replacing Laplace: slice +910 KB.
+- Global bit-history StateProb mix into Laplace: slice gains looked large but deferred (shared 256-state map).
+
+Slice (25 MiB @ offset 8M): Laplace≈5695274 → StateMap **5686155** (−9119).
+
+Full enwik8:
+```
+ROUNDTRIP=OK COMPRESSED=22008866 DECOMPRESSOR=36744 SCORE=22045610 COMPRESS_SECONDS=315.71 DECOMPRESS_SECONDS=329.03 PEAK_RSS_MB=1756
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 22039256 | 22008866 | **−30390** |
+| DECOMPRESSOR | 36680 | 36744 | +64 |
+| SCORE | 22075936 | **22045610** | **−30326** |
+
+Gap to 20.5e6 ≈ 1.51 MB. Adversarial: **10/10 PASS**.
