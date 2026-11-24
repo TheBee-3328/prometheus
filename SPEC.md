@@ -4,7 +4,7 @@
 
 **Realistic targets:** 6×–7× first; ~9× stretch. Current official Hutter record (as of late 2026): ~100 424 672 total under their S formula — our internal SCORE is the simpler sum above.
 
-**Overall budget:** 40 agent runs or 8 wall-clock hours, whichever comes first. Check budget before each spawn.
+**Overall budget:** **No auto-stop.** Operator will halt the orch manually (target window ~15 h from 2026-11-24 ~03:33 UTC+1). Still log agent-run counts in `STATUS.md` for visibility; do **not** stop spawning or write end-of-budget `REPORT.md` solely because of old 40-run / 8-hour caps. Soft failures and watchdog timeouts still apply per task.
 
 **Nix (mandatory):** This machine is NixOS/Nix. All builds, tests, and judge runs must use the project flake:
 

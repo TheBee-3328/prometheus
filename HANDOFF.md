@@ -15,7 +15,7 @@ When the operator **does** start it: say that they can monitor, then run **conti
 - **Stay up for hours.** Do not end the turn to “wait for the user.” Poll agents, apply `prompts/AGENT_WATCHDOG.md` timeouts, merge on judge PASS, update `LOG.md`/`STATUS.md`, push `main`, spawn the next best gain/cost task.
 - **Do not stop** the loop unless there is a **risk that must not be left to AI judgment**, for example: credentials/secrets exposure, destructive disk wipe outside `/tmp` and abandoned worktrees, force-push to `main`, payment/legal commitment, or host instability that could lose the only copy of work (root disk full with no safe cleanup left).
 - Soft failures (judge FAIL, SCORE regression, zombie agent, mid-flight resume blocked) are **normal** — log them, change approach per rules, continue.
-- Budget: respect `SPEC.md` / `STATUS.md` agent-run and wall-clock caps; when budget is exhausted, write `REPORT.md` and then idle-monitor only (still do not ghost the session without a final status line).
+- Budget: **operator override — no 40-run / 8-hour auto-stop.** Keep going until the operator stops the session manually (~15 h window). Track run counts in STATUS for visibility only. Still stop on critical risk (secrets, destructive wipe, force-push main, disk-full with no cleanup left).
 - **Gate:** never auto-start on handoff alone — wait for the operator’s go.
 
 ## Current best (judge-measured, enwik8 only)

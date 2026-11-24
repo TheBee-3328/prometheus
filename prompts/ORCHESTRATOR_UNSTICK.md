@@ -24,7 +24,7 @@ Then choose the **single** next task with the best expected gain per cost, write
 Rules:
 - Merge only if `./judge.sh enwik8 .` improves SCORE (or equal with smaller code) and ROUNDTRIP=OK.
 - If two consecutive phases produced under 0.5% SCORE improvement, run a REVIEWER and a TUNER before adding any new feature.
-- Cap budget (STATUS.md agent runs / wall clock). Check before each spawn.
+- No auto budget cap (operator manual stop). Track STATUS.md run counts for visibility; do not idle out on old 40/8 limits.
 - Never claim enwik9 results without `nix develop -c ./judge.sh enwik9 .`.
 - After the next merge or hard FAIL, update LOG.md and STATUS.md and push main.
 
