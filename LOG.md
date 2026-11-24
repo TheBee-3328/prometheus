@@ -90,3 +90,7 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-24T23:12:47Z Operator pause requested
 - Pause after DIAG-R6 finishes. No new spawns. See PAUSE.md.
 - Told R6 to commit/push eq8 keep (SCORE 21583876, adv 10/10) then stop.
+
+## 2026-11-24T23:15:41Z Merge DIAG-R6 eq8
+- Merged `73ab3c8` → main. SCORE **21583876** (−194534 vs R5).
+- Gap to 20.5e6 ≈1.05 MB. Operator pause after agent exits.

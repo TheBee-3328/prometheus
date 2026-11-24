@@ -1,28 +1,28 @@
 # STATUS
 
-**Current phase:** PAUSE_AFTER_CURRENT — DIAG-R6 wrapping; no new spawns  
-**Current best SCORE (enwik8, main):** **21778410**  
-**Best line:** `ROUNDTRIP=OK COMPRESSED=21740866 DECOMPRESSOR=37544 SCORE=21778410`  
-**bpB:** ≈ **1.739**  
-**Gap to 20.5e6:** ≈ 1.24 MB  
-**Stop policy:** Operator manual stop.  
+**Current phase:** PAUSED — waiting for DIAG-R6 agent exit; no new spawns  
+**Current best SCORE (enwik8):** **21583876**  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876`  
+**bpB:** ≈ **1.724**  
+**Gap to 20.5e6:** ≈ 1.05 MB  
+**Stop policy:** Operator pause (see PAUSE.md).  
 
 ## Session SCORE path (abbrev)
 
-28080343 → … → 21887167 → **21778410** (main) · R6 pending **21583876** (uncommitted)
+28080343 → … → 21887167 → 21778410 → **21583876**
 
-## enwik9 (pre-R5 / pre-R6 binary, DECOMP=37512)
+## Merged
+
+- DIAG-R6 (`73ab3c8`): asymptotic StateMap `n+=1-(n>>3)` (eq≈8)
+
+## enwik9 (pre-R5/R6 binary — remeasure on resume)
 
 ```
 ROUNDTRIP=OK COMPRESSED=186549457 DECOMPRESSOR=37512 SCORE=186586969
-COMPRESS_SECONDS=3427.58 DECOMPRESS_SECONDS=3403.97 PEAK_RSS_MB=4347
 ```
-≈1.492 bpB · beats ~205e6 zstd-style floor on COMPRESSED alone.
 
-## In flight
+## On resume
 
-- DIAG-R6: asymptotic soft-reset eq8 judged SCORE **21583876** (−194534 vs main); awaiting commit + adversarial before merge.
-
-## Next (DIAG-R6)
-
-Mixer retune / further keep validation; re-measure enwik9 after merge.
+1. Confirm DIAG-R6 agent exited; no orphan judges.
+2. Re-judge enwik9 on current main.
+3. Continue toward ≤20.5e6 (mixer retune after eq8, etc.).
