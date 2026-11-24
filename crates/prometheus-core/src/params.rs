@@ -49,6 +49,11 @@ pub const ORDER6_BITS: usize = 24;
 /// Blend weight (0..=255) of hashed order-6 into the CM mix.
 pub const ORDER6_MIX_WEIGHT: u32 = 32;
 
+/// Hashed order-7 table bits.
+pub const ORDER7_BITS: usize = 23;
+/// Blend weight (0..=255) of hashed order-7 into the CM mix.
+pub const ORDER7_MIX_WEIGHT: u32 = 16;
+
 /// SSE blend weight (0..=255) of secondary estimate into final p.
 pub const SSE_MIX_WEIGHT: u32 = 224;
 
