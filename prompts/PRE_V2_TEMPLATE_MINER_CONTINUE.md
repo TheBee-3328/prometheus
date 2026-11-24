@@ -5,16 +5,18 @@
 **Do not** auto-start enwik9 for the keep/throw gate. **enwik8 judge only** until templates are kept or discarded.  
 **Dedicated server:** use this host for full-corpus mining (`enwik8` + full `enwik9`) and long judges; one heavy compress at a time.
 
+**Companion:** Also run `prompts/PRE_V2_WORD_DICT_CONTINUE.md`. **Both trials must happen.** Separate keep/throw verdicts; THROW on one does **not** cancel the other. Prefer **word dict first**, then this TEMPLATE-MINER trial. After each THROW or KEEP, **continue autonomous orch** — do not stop the loop.
+
 ## Goal
 
 Finish **TEMPLATE-MINER**: measure structural compressed cost, mine a template dictionary, merge it with the static markup DICT in one tokenizer pass, and decide whether it earns SCORE. If not within a fixed budget, **throw it out** and **continue autonomous orch without templates** (normal DIAG / tuner) — do **not** stop the loop after THROW.
 
 ## Baseline (beat or match this)
 
-Re-measure from current `main` / `STATUS.md` tip before starting (tip moves). As of handoff, post–DIAG-R6:
+Re-measure from current `main` / `STATUS.md` tip before starting (tip moves). Prefer the SCORE **after** the word-dict trial if that trial KEEP-merged; otherwise post–DIAG-R6:
 
 ```
-ROUNDTRIP=OK COMPRESSED=… DECOMPRESSOR=… SCORE=21583876
+ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876
 ```
 
 (Confirm exact line with `nix develop -c ./judge.sh enwik8 .` on clean `main` if STATUS disagrees.)
@@ -107,7 +109,7 @@ On a prior laptop session (`agent/pre-v2` WIP — **discarded / not on main**):
 ## Out of scope for this prompt
 
 - Do **not** require enwik9 for the keep/throw gate (except optional confirm after KEEP).  
-- Do **not** conflate with the **word/phrase dict** trial (`prompts/PRE_V2_WORD_DICT_CONTINUE.md`) — separate verdicts.  
+- Word/phrase dict is the **companion** trial — run it too (`PRE_V2_WORD_DICT_CONTINUE.md`); don’t conflate verdicts.  
 - Do **not** retry abandoned briefs (P2-WORD model, P4-ORDERS-MIX).  
 - Don’t touch `judge.sh` / judge contract files.
 
@@ -131,5 +133,6 @@ Write a short block at the end of `DIAG.md`:
 - Best SCORE with templates: …
 - Baseline: …
 - Verdict: KEEP | THROW
-- Next: continue orch with|without templates (… )
+- Next: continue orch with|without templates; word-dict trial status: …
 ```
+
