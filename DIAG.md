@@ -959,3 +959,94 @@ Const-evaluated static LUT vs heap OnceLock: slice **5635389** (delta 0). Values
 ## Attempt 7 — Cross + ind3 2-bit expand (REJECT)
 
 `CROSS_SIZE` 524288→2097152 with ind3>>6. Slice **5635913** vs 5635389 (**+524**). Reverted.
+
+## Attempt 8 — APM cxt × ind1 nibble (REJECT)
+
+Fold ind1 high nibble into APM `last_byte` nibble. Slice **+41550**. Reverted.
+
+## Attempt 9 — StateMap soft-reset n→1 (KEEP)
+
+Retune soft-reset target after saturation (was 208). Slice sweep (vs MIX22 base 5635389):
+
+| n | Δ |
+|--:|--:|
+| 224 | +588 |
+| 208 | 0 |
+| 192 | −492 |
+| 144 | −2783 |
+| 96 | −5636 |
+| 48 | −9773 |
+| 16 | −15016 |
+| 4 | −17593 |
+| **1** | **−18027** |
+| 2 | −17953 |
+| 0 | −17646 |
+
+Full enwik8 (n=1):
+```
+ROUNDTRIP=OK COMPRESSED=21740866 DECOMPRESSOR=37544 SCORE=21778410 COMPRESS_SECONDS=362.03 DECOMPRESS_SECONDS=382.10 PEAK_RSS_MB=1853
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21819876 | 21740866 | **−79010** |
+| DECOMPRESSOR | 37544 | 37544 | 0 |
+| SCORE | 21857420 | **21778410** | **−79010** |
+
+Gap to 20.5e6 ≈ 1.24 MB. Adversarial: **10/10 PASS**.
+
+## FINAL REPORT (DIAG-R5)
+
+### Verdict: **partial**
+
+Clear SCORE wins vs DIAG-R4 baseline; **≤20.5e6 COMPRESSED not reached**.
+
+### Best judge line
+
+```
+ROUNDTRIP=OK COMPRESSED=21740866 DECOMPRESSOR=37544 SCORE=21778410 COMPRESS_SECONDS=362.03 DECOMPRESS_SECONDS=382.10 PEAK_RSS_MB=1853
+```
+
+| | Baseline (R4) | Best (R5) | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21849655 | **21740866** | **−108789** |
+| DECOMPRESSOR | 37512 | 37544 | +32 |
+| SCORE | 21887167 | **21778410** | **−108757** |
+| bpB | 1.74797 | 1.73927 | |
+
+Gap to 20.5e6: **≈1.24 MB** (was 1.35 MB).
+
+### Commits (agent/diag-r5)
+
+| Commit | Change | SCORE |
+|--------|--------|------:|
+| `ab9ee4e` | richer match×indirect cross ind2 nibble | 21863851 |
+| `54e707f` | MATCH_IND_CROSS_WEIGHT=22 | 21857420 |
+| `COMMIT` | StateMap soft-reset n→1 | **21778410** |
+
+### Acceptance
+
+- Judge ROUNDTRIP=OK and SCORE < 21887167: **YES**
+- ≤20.5e6 COMPRESSED: **NO**
+- Adversarial: **10/10 PASS** on each kept commit
+
+### Rejected
+
+| Hyp | Evidence |
+|-----|----------|
+| StateMap hashed Order-6 | slice +1938 |
+| StateMap hashed Order-7 | slice +377 |
+| Alt-salt match on primary miss | slice Δ0, +RSS |
+| Cross XOR-fold ind2/ind3 into ind1 | slice +2474 |
+| Cross ind2^ind3 nibble | slice −299 (worse than pure ind2) |
+| Cross + ind3 2-bit expand | slice +524 |
+| STRETCH static reclaim | slice Δ0 (already identical) |
+| APM cxt × ind1 nibble | slice +41550 |
+
+### Next ideas (toward 20.5e6)
+
+1. Soft-reset schedule (per-order or decay toward mid) vs fixed n→1.
+2. Match chain depth / fingerprint on prev slots (alt-salt miss was neutral).
+3. Word / o5 Laplace→hybrid dual-rate without full StateMap (o5 SM rejected).
+4. RSS trim: pack match `ht_prev` / shrink HASH_BITS before enwik9 (PEAK_RSS ~1.85 GB).
+5. Mixer weight retune after soft-reset=1 (ORDER3/5/6, SSE, APM).
