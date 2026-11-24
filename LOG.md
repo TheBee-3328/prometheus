@@ -69,3 +69,8 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | DIAG-R4 | StateMap Order-4; merged 94c24eb | 21849655 | 37512 | 21887167 | 373.35 | 345.21 | 1852 | PASS merge |
 | 2026-11-24 | DIAG-R4 | FINAL REPORT partial; merged 99a0a66 | 21849655 | 37512 | 21887167 | — | — | — | done |
 | 2026-11-24 | ORCH-NEXT | Spawn DIAG-R5 StateMap o6/o7 / alt-match | — | — | 21887167 | — | — | — | in progress |
+
+## 2026-11-24T21:59:53Z Merge DIAG-R5
+- Merged origin/agent/diag-r5 → main. SCORE **21778410** (COMPRESSED=21740866 DECOMP=37544).
+- Δ vs R4: SCORE −108757. Gap to 20.5e6 ≈1.24 MB.
+- enwik9 judge still finishing on pre-R5 binary (~186.5 MB compressed first pass).
