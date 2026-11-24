@@ -42,3 +42,5 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | TUNER-R2 | MIX/RESCALE seed search; merged b8465d4 | 28013837 | 28872 | 28042709 | 27.24 | 19.97 | 583 | PASS merge |
 | 2026-11-24 | ORCH-P5 | Spawning P5-SPARSE-XML ensemble-with-match | — | — | 28042709 | — | — | — | in progress |
 | 2026-11-24 | ORCH-BUDGET | Operator removed 40-run/8h auto-stop; manual halt ~15h | — | — | 28042709 | — | — | — | override |
+| 2026-11-24 | P5-SPARSE-XML | struct CM ensemble w/ match; merged 0f57ac6 | 27981374 | 29752 | 28011126 | 32.48 | 22.46 | 583 | PASS merge |
+| 2026-11-24 | ORCH-P5R | Two <0.5% wins → spawn REVIEWER + TUNER-R3 | — | — | 28011126 | — | — | — | in progress |
