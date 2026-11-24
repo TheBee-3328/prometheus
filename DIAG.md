@@ -867,3 +867,59 @@ Gap to 20.5e6: **≈1.35 MB** (was 1.54 MB).
 4. Richer match×indirect (ind2/ind3 in cross) or APM cxt × ind nibble.
 5. Bit-history state machine per dense context + dual-rate map (hybrid with Laplace).
 6. RSS trim: pack match chain / shrink HASH_BITS before enwik9 (PEAK_RSS ~1.85 GB).
+
+# DIAG-R5
+
+Branch: `agent/diag-r5`  
+Agent: DIAG-R5  
+Start: 2026-11-24  
+Baseline to beat: `ROUNDTRIP=OK COMPRESSED=21849655 DECOMPRESSOR=37512 SCORE=21887167`
+
+## Plan
+
+1. StateMap on hashed o6/o7 carefully (o3/o4 worked; o5 rejected; prove determinism).
+2. Alt-salt match when primary misses.
+3. STRETCH bit-identical reclaim (fix +2KB COMPRESSED drift vs static LUT).
+4. Richer ind2/ind3 cross.
+5. RSS trim if SCORE-neutral.
+
+## Attempt 1 — StateMap on hashed Order-6 (REJECT)
+
+`HashOrderModel::new_statemap(6, ORDER6_BITS)`; leave o5/o7 Laplace.
+
+Slice **5645665** vs 5643727 (**+1938**). Reverted.
+
+## Attempt 2 — StateMap on hashed Order-7 (REJECT)
+
+`new_statemap(7, ORDER7_BITS)` only.
+
+Slice **5644104** vs 5643727 (**+377**). Reverted.
+
+## Attempt 3 — Alt-salt match on primary miss (REJECT)
+
+Secondary `ht2` (HASH2_BITS=24) with ALT_SALT over same HASH_ORDER=6; lookup **only** when primary+chain miss.
+
+Slice **5643727** (delta 0) — SCORE-neutral, +~64 MiB RSS. Reverted.
+
+## Attempt 4 — Richer ind2 cross nibble (KEEP)
+
+Expand cross StateMap: `mb × ind1 × ind2_hi_nibble × bit_pos × expected_bit` (`CROSS_SIZE` 32768→524288). Keep `MATCH_IND_CROSS_WEIGHT=16`.
+
+Rejected variants (same attempt):
+- XOR-fold ind2/ind3 into ind1 byte (same size): slice **+2474**
+- ind2_nibble XOR ind3 (same expanded size): slice **-299** (worse than pure ind2)
+
+Slice (pure ind2 nibble): **5636937** vs 5643727 (**−6790**).
+
+Full enwik8:
+```
+ROUNDTRIP=OK COMPRESSED=21826291 DECOMPRESSOR=37560 SCORE=21863851 COMPRESS_SECONDS=362.49 DECOMPRESS_SECONDS=337.15 PEAK_RSS_MB=1853
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21849655 | 21826291 | **−23364** |
+| DECOMPRESSOR | 37512 | 37560 | +48 |
+| SCORE | 21887167 | **21863851** | **−23316** |
+
+Gap to 20.5e6 ≈ 1.33 MB. Adversarial: **10/10 PASS**

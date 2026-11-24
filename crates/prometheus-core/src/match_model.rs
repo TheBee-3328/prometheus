@@ -242,8 +242,8 @@ impl Model for MatchModel {
     }
 }
 
-/// Match×indirect cross: StateMap over match_bucket × ind1 × bit_pos × expected_bit.
-const CROSS_SIZE: usize = 8 * 256 * 8 * 2; // 32768
+/// Match×indirect cross: mb × ind1 × ind2_hi_nibble × bit_pos × expected_bit.
+const CROSS_SIZE: usize = 8 * 256 * 16 * 8 * 2; // 524288
 
 /// Mix order-1/2/3/4 + sparse/XML with the match model; match weight grows with length.
 /// Sparse/structure only blend in when match is inactive (do not fight match).
@@ -367,12 +367,13 @@ impl Model for Order2MatchModel {
         let pi = self.indirect.predict();
         p0 = Self::mix_w(p0, pi, INDIRECT_MIX_WEIGHT);
         let len = self.match_m.match_len();
-        // Match×indirect cross: mb × ind1 × bit_pos × expected_bit.
+        // Match×indirect cross: mb × ind1 × ind2_hi_nibble × bit_pos × expected_bit.
         let mb = Sse::match_bucket(len) as usize;
         let bp = (Self::bits_seen(self.bit_cxt) as usize) & 7;
         let eb = self.match_m.expected_bit_pub() as usize & 1;
         let ind1 = self.indirect.ind1() as usize;
-        self.cross_i = (((mb << 8) | ind1) << 3 | bp) << 1 | eb;
+        let ind2n = (self.indirect.ind2() as usize) >> 4;
+        self.cross_i = (((((mb << 8) | ind1) << 4) | ind2n) << 3 | bp) << 1 | eb;
         let pc = sm_predict(self.cross[self.cross_i]);
         p0 = Self::mix_w(p0, pc, MATCH_IND_CROSS_WEIGHT);
         let p = if len >= MIN_MIX_LEN {
