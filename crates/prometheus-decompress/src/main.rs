@@ -7,30 +7,28 @@ use std::io::{self, BufReader, BufWriter, Read, Write};
 use std::process;
 
 fn main() {
-    let mut args = env::args().skip(1);
-    let input = args.next().unwrap_or_else(|| usage());
-    let output = args.next().unwrap_or_else(|| usage());
+    let mut args = env::args_os().skip(1);
+    let Some(input) = args.next() else {
+        process::exit(2);
+    };
+    let Some(output) = args.next() else {
+        process::exit(2);
+    };
     if args.next().is_some() {
-        usage();
+        process::exit(2);
     }
 
-    if let Err(e) = decompress(&input, &output) {
-        eprintln!("prometheus-decompress: {e}");
+    if decompress(&input, &output).is_err() {
         process::exit(1);
     }
 }
 
-fn usage() -> ! {
-    eprintln!("usage: prometheus-decompress <input> <output>");
-    process::exit(2);
-}
-
-fn decompress(input_path: &str, output_path: &str) -> io::Result<()> {
+fn decompress(input_path: &std::ffi::OsStr, output_path: &std::ffi::OsStr) -> io::Result<()> {
     let mut input = BufReader::new(File::open(input_path)?);
     let mut header = [0u8; 12];
     input.read_exact(&mut header)?;
     if &header[0..4] != MAGIC {
-        return Err(io::Error::new(io::ErrorKind::InvalidData, "bad magic"));
+        return Err(io::Error::from(io::ErrorKind::InvalidData));
     }
     let mut len_bytes = [0u8; 8];
     len_bytes.copy_from_slice(&header[4..12]);
