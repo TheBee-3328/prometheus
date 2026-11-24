@@ -40,6 +40,12 @@ impl IndirectModel {
         }
     }
 
+    /// Last byte seen after the current order-1 context (for cross models).
+    #[inline]
+    pub fn ind1(&self) -> u8 {
+        self.t1[self.prev0 as usize]
+    }
+
     #[inline]
     fn o3_idx(&self) -> usize {
         let mut h: u32 = 2166136261;
