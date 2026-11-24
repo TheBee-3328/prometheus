@@ -4,9 +4,10 @@
 //! context verifies, subsequent bits are predicted from the byte that followed
 //! that prior occurrence. Mixed with order-2 only for sufficiently long matches.
 
-use crate::model::{Model, Order2Model};
+use crate::model::{HashOrderModel, Model, Order1Model, Order2Model};
 use crate::params::{
     match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
+    ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS, ORDER4_MIX_WEIGHT,
     STRUCT_MIX_WEIGHT,
 };
 use crate::sparse::SparseModel;
@@ -165,10 +166,13 @@ impl Model for MatchModel {
     }
 }
 
-/// Mix order-2 + sparse/XML with the match model; match weight grows with length.
+/// Mix order-1/2/3/4 + sparse/XML with the match model; match weight grows with length.
 /// Sparse/structure only blend in when match is inactive (do not fight match).
 pub struct Order2MatchModel {
+    order1: Order1Model,
     order2: Order2Model,
+    order3: HashOrderModel,
+    order4: HashOrderModel,
     match_m: MatchModel,
     sparse: SparseModel,
 }
@@ -176,7 +180,10 @@ pub struct Order2MatchModel {
 impl Order2MatchModel {
     pub fn new() -> Self {
         Self {
+            order1: Order1Model::new(),
             order2: Order2Model::new(),
+            order3: HashOrderModel::new(3, ORDER3_BITS),
+            order4: HashOrderModel::new(4, ORDER4_BITS),
             match_m: MatchModel::new(),
             sparse: SparseModel::new(),
         }
@@ -209,12 +216,19 @@ impl Default for Order2MatchModel {
 impl Model for Order2MatchModel {
     #[inline]
     fn predict(&mut self) -> u16 {
-        let p0 = self.order2.predict();
+        let p1 = self.order1.predict();
+        let p2 = self.order2.predict();
+        let p3 = self.order3.predict();
+        let p4 = self.order4.predict();
+        // Stack fixed blends: o2←o1←o3←o4 (higher order last so it can dominate lightly).
+        let mut p0 = Self::mix_w(p2, p1, ORDER1_MIX_WEIGHT);
+        p0 = Self::mix_w(p0, p3, ORDER3_MIX_WEIGHT);
+        p0 = Self::mix_w(p0, p4, ORDER4_MIX_WEIGHT);
         let len = self.match_m.match_len();
         if len >= MIN_MIX_LEN {
             // Match primary: do not dilute with structure/sparse.
-            let p1 = self.match_m.predict();
-            return Self::mix_match(p0, p1, len);
+            let pm = self.match_m.predict();
+            return Self::mix_match(p0, pm, len);
         }
         // No active match: lightly ensemble XML/wiki structure.
         let px = self.sparse.predict_struct();
@@ -223,7 +237,10 @@ impl Model for Order2MatchModel {
 
     #[inline]
     fn update(&mut self, bit: u8) {
+        self.order1.update(bit);
         self.order2.update(bit);
+        self.order3.update(bit);
+        self.order4.update(bit);
         self.match_m.update(bit);
         self.sparse.update(bit);
     }
@@ -300,14 +317,16 @@ mod tests {
     }
 
     #[test]
-    fn order2_match_matches_order2_without_match() {
-        let mut ens = Order2MatchModel::new();
-        let mut o2 = Order2Model::new();
+    fn order2_match_lockstep_short_no_match_window() {
+        // With order-1 in the ensemble, predictions differ from pure order-2;
+        // still require lockstep between two ensemble instances on short input.
+        let mut a = Order2MatchModel::new();
+        let mut b = Order2MatchModel::new();
         let bits = bits_of(b"xyz");
         for &bit in &bits {
-            assert_eq!(ens.predict(), o2.predict());
-            ens.update(bit);
-            o2.update(bit);
+            assert_eq!(a.predict(), b.predict());
+            a.update(bit);
+            b.update(bit);
         }
     }
 

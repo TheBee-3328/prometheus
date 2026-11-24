@@ -8,8 +8,88 @@ pub trait Model {
     fn update(&mut self, bit: u8);
 }
 
+const O1: usize = 256;
 const O2: usize = 65536;
 const BIT_STATES: usize = 256;
+
+#[inline]
+fn laplace_prob(n0: u8, n1: u8) -> u16 {
+    // Laplace +1; clamp away from 0/65535 for the arithmetic coder.
+    let a = n1 as u32 + 1;
+    let b = n0 as u32 + n1 as u32 + 2;
+    let p = (a * 65535) / b;
+    if p < 1 {
+        1
+    } else if p > 65534 {
+        65534
+    } else {
+        p as u16
+    }
+}
+
+#[inline]
+fn learn_count(n0: &mut u8, n1: &mut u8, bit: u8) {
+    if bit == 0 {
+        *n0 = n0.saturating_add(1);
+    } else {
+        *n1 = n1.saturating_add(1);
+    }
+    if (*n0 as u16) + (*n1 as u16) >= ORDER2_RESCALE {
+        *n0 >>= 1;
+        *n1 >>= 1;
+    }
+}
+
+/// Order-1 byte context with intra-byte bit path (MSB first).
+///
+/// Context index = `prev0 * 256 + bit_cxt`.
+pub struct Order1Model {
+    prev0: u8,
+    bit_cxt: u16,
+    n0: Box<[u8]>,
+    n1: Box<[u8]>,
+}
+
+impl Order1Model {
+    pub fn new() -> Self {
+        Self {
+            prev0: 0,
+            bit_cxt: 1,
+            n0: vec![0u8; O1 * BIT_STATES].into_boxed_slice(),
+            n1: vec![0u8; O1 * BIT_STATES].into_boxed_slice(),
+        }
+    }
+
+    #[inline]
+    fn index(&self) -> usize {
+        (self.prev0 as usize) * BIT_STATES + (self.bit_cxt as usize)
+    }
+}
+
+impl Default for Order1Model {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Model for Order1Model {
+    #[inline]
+    fn predict(&mut self) -> u16 {
+        let i = self.index();
+        laplace_prob(self.n0[i], self.n1[i])
+    }
+
+    #[inline]
+    fn update(&mut self, bit: u8) {
+        let i = self.index();
+        learn_count(&mut self.n0[i], &mut self.n1[i], bit);
+        self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
+        if self.bit_cxt >= 256 {
+            self.prev0 = (self.bit_cxt & 0xff) as u8;
+            self.bit_cxt = 1;
+        }
+    }
+}
 
 /// Order-2 byte context with intra-byte bit path (MSB first).
 ///
@@ -40,20 +120,6 @@ impl Order2Model {
         o2 * BIT_STATES + (self.bit_cxt as usize)
     }
 
-    #[inline]
-    fn prob(n0: u8, n1: u8) -> u16 {
-        // Laplace +1; clamp away from 0/65535 for the arithmetic coder.
-        let a = n1 as u32 + 1;
-        let b = n0 as u32 + n1 as u32 + 2;
-        let p = (a * 65535) / b;
-        if p < 1 {
-            1
-        } else if p > 65534 {
-            65534
-        } else {
-            p as u16
-        }
-    }
 }
 
 impl Default for Order2Model {
@@ -66,30 +132,93 @@ impl Model for Order2Model {
     #[inline]
     fn predict(&mut self) -> u16 {
         let i = self.index();
-        Self::prob(self.n0[i], self.n1[i])
+        laplace_prob(self.n0[i], self.n1[i])
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
         let i = self.index();
-        if bit == 0 {
-            let v = self.n0[i].saturating_add(1);
-            self.n0[i] = v;
-        } else {
-            let v = self.n1[i].saturating_add(1);
-            self.n1[i] = v;
-        }
-        // Rescale for adaptation when counts get large.
-        if (self.n0[i] as u16) + (self.n1[i] as u16) >= ORDER2_RESCALE {
-            self.n0[i] >>= 1;
-            self.n1[i] >>= 1;
-        }
+        learn_count(&mut self.n0[i], &mut self.n1[i], bit);
 
         self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
         if self.bit_cxt >= 256 {
             let byte = (self.bit_cxt & 0xff) as u8;
             self.prev1 = self.prev0;
             self.prev0 = byte;
+            self.bit_cxt = 1;
+        }
+    }
+}
+
+/// Hashed order-N byte context (N≥3) with bit path in the hash.
+///
+/// Table size = 1 << bits; collisions overwrite counts (no checksum).
+pub struct HashOrderModel {
+    order: usize,
+    bits: usize,
+    mask: usize,
+    /// recent bytes, index 0 = most recent
+    hist: [u8; 8],
+    bit_cxt: u16,
+    n0: Box<[u8]>,
+    n1: Box<[u8]>,
+}
+
+impl HashOrderModel {
+    pub fn new(order: usize, bits: usize) -> Self {
+        assert!((3..=8).contains(&order));
+        assert!((12..=28).contains(&bits));
+        let size = 1usize << bits;
+        Self {
+            order,
+            bits,
+            mask: size - 1,
+            hist: [0u8; 8],
+            bit_cxt: 1,
+            n0: vec![0u8; size].into_boxed_slice(),
+            n1: vec![0u8; size].into_boxed_slice(),
+        }
+    }
+
+    #[inline]
+    fn hash(&self) -> usize {
+        // FNV-ish over hist[0..order) and bit_cxt (bit position in context).
+        let mut h: u32 = 2166136261;
+        h ^= self.bit_cxt as u32;
+        h = h.wrapping_mul(16777619);
+        for i in 0..self.order {
+            h ^= self.hist[i] as u32;
+            h = h.wrapping_mul(16777619);
+        }
+        // Mix in order id so o3/o4 tables differ even if shared pattern.
+        h ^= (self.order as u32).wrapping_mul(0x9e3779b9);
+        (h as usize) & self.mask
+    }
+
+    pub fn bits(&self) -> usize {
+        self.bits
+    }
+}
+
+impl Model for HashOrderModel {
+    #[inline]
+    fn predict(&mut self) -> u16 {
+        let i = self.hash();
+        laplace_prob(self.n0[i], self.n1[i])
+    }
+
+    #[inline]
+    fn update(&mut self, bit: u8) {
+        let i = self.hash();
+        learn_count(&mut self.n0[i], &mut self.n1[i], bit);
+        self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
+        if self.bit_cxt >= 256 {
+            let byte = (self.bit_cxt & 0xff) as u8;
+            // shift history (most recent at 0)
+            for k in (1..self.order).rev() {
+                self.hist[k] = self.hist[k - 1];
+            }
+            self.hist[0] = byte;
             self.bit_cxt = 1;
         }
     }

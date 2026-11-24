@@ -25,6 +25,19 @@ pub const MIX_WEIGHT: [u32; 5] = [120, 160, 190, 230, 245];
 
 /// When match is inactive: blend weight (0..=255) of XML/wiki structure into the mix.
 pub const STRUCT_MIX_WEIGHT: u32 = 14;
+
+/// Blend weight (0..=255) of order-1 into order-2 before match/struct mix.
+pub const ORDER1_MIX_WEIGHT: u32 = 8;
+
+/// Hashed order-3 table bits (size = 1 << this).
+pub const ORDER3_BITS: usize = 22;
+/// Blend weight (0..=255) of hashed order-3 into the CM mix.
+pub const ORDER3_MIX_WEIGHT: u32 = 160;
+
+/// Hashed order-4 table bits.
+pub const ORDER4_BITS: usize = 23;
+/// Blend weight (0..=255) of hashed order-4 into the CM mix.
+pub const ORDER4_MIX_WEIGHT: u32 = 48;
 // === END TUNABLE ===
 
 pub const BUF_SIZE: usize = 1 << BUF_BITS;

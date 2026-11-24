@@ -9,7 +9,7 @@ mod sparse;
 
 pub use arithmetic::{ArithmeticDecoder, ArithmeticEncoder};
 pub use match_model::{MatchModel, Order2MatchModel};
-pub use model::{Model, Order2Model};
+pub use model::{HashOrderModel, Model, Order1Model, Order2Model};
 pub use preprocessor::{decode, encode};
 pub use sparse::SparseModel;
 

@@ -36,38 +36,111 @@ Existing components only:
 
 | Tool | Command | Size (bytes) | Wall time |
 |------|---------|-------------:|----------:|
-| xz | `-9e` | *(running)* | *(running)* |
+| xz | `-9e` | **24831656** | ~61.5 s real |
 
-### PROMETHEUS judge (enwik8)
+### PROMETHEUS judge (enwik8) — verified this worktree
+
+```
+ROUNDTRIP=OK COMPRESSED=27981374 DECOMPRESSOR=29768 SCORE=28011142 COMPRESS_SECONDS=32.63 DECOMPRESS_SECONDS=22.43 PEAK_RSS_MB=583
+```
 
 | Metric | Value |
 |--------|------:|
-| Judge line | *(running — see below)* |
-| bpB | COMPRESSED×8/1e8 |
+| COMPRESSED | 27981374 |
+| DECOMPRESSOR | 29768 (stripped exe; no judge_aux.txt) |
+| SCORE | 28011142 |
+| bpB | 2.23851 (COMPRESSED×8/1e8) |
+| vs zstd floor | +1,586,300 bytes worse compressed |
+| vs xz | +3,149,718 bytes worse compressed |
+| vs claimed main | DECOMPRESSOR +16 vs 29752 (rebuild); COMPRESSED identical |
 
-Claimed main baseline to verify:  
-`ROUNDTRIP=OK COMPRESSED=27981374 DECOMPRESSOR=29752 SCORE=28011126` (~2.239 bpB)
+**Judge counting check:** COMPRESSED = archive `wc -c`; DECOMPRESSOR = exe only (no aux). No double-count. Compressor size excluded from SCORE (per JUDGE.md).
 
 ---
 
-## STEP 2 — Ablation (20 MB slice)
+## STEP 2 — Ablation (20 MB slice = first 20e6 enwik8 bytes)
 
-*(pending)*
+Tool: `crates/prometheus-diag` (debug only; not in SCORE path).  
+PRE shrinks 20e6 → 18805754 (−6.0%).
 
-## STEP 3 — Instrumentation
+| Component disabled | COMPRESSED | Δ vs full | Gain of component | Flag |
+|--------------------|----------:|----------:|------------------:|------|
+| **full** (all on) | **5746507** | 0 | — | — |
+| no-pre | 5751634 | +5127 | **+0.09%** | SUSPECT (near-zero; wiki dict should help more) |
+| no-match | 7475125 | +1728618 | **+30.08%** | OK (match healthy) |
+| no-struct | 5754557 | +8050 | **+0.14%** | trivial STRUCT_MIX=14 |
+| order2-only | 7437808 | +1691301 | — | o2 alone |
+| match-only | 13105961 | +7359454 | — | match needs o2 |
 
-*(pending)*
+**N/A (not in binary):** order-1, order-3/4/5/6, word model, adaptive mixer, APM/SSE layers.
 
-## STEP 4 — Hypotheses
+Note: `no-match` (o2+struct=7475125) **worse** than `order2-only` (7437808) → struct alone hurts; only helps lightly when match gates it (`full` vs `no-struct`).
 
-*(pending ranking from ablation/instrumentation)*
+## STEP 3 — Instrumentation (same 20 MB, mode=full --stats)
+
+| Stat | Value |
+|------|------:|
+| match_active_bits | 105766386 / 150446032 = **70.30%** |
+| avg match_len (active) | **11.80** |
+| match_hit_bytes | 16020175 / 18805754 ≈ **85.18%** |
+| p pinned at 1 / 65534 | **0 / 0** |
+| stretch/squash clamp | N/A (no stretch/squash in path) |
+| mixer weights | N/A (fixed MIX_WEIGHT / STRUCT_MIX only) |
+| hash | HASH_BITS=26, overwrite replace, no checksum |
+
+Avg cost by byte class (approx mbits/bit; relative only — estimator coarse):
+
+| Class | avg_mbits/bit | Notes |
+|-------|-------------:|-------|
+| bracket | 46582 | easiest |
+| lt | 52801 | easy |
+| gt | 148507 | |
+| alpha | 194069 | bulk of bits |
+| hibyte | 207397 | dict tokens |
+| entity | 211078 | |
+| other | 305792 | |
+| digit | 333881 | expensive |
+| **ws** | **442293** | **hardest** — needs better contexts |
+
+## STEP 4 — Hypotheses (ranked by steps 2–3)
+
+| Rank | Hyp | Evidence | Action |
+|-----:|-----|----------|--------|
+| 1 | **g** Missing contexts (o1/o3/o4/word) | Only o2 exists; ws/digit costly; 2.24 bpB far from lpaq | **Add o1 + hashed o3/o4** |
+| 2 | **b** No adaptive mixer / selector | Fixed mix only; finding not a bug | Implement integer mixer after multi-ctx |
+| 3 | **i** No SSE/APM | Absent | Add after mixer |
+| 4 | **f** Match fire/conf | 70% active, +30% size — healthy; MATCH_CONF all 32700 may overconf | Tune after contexts |
+| 5 | **h** Preprocessor weak | +0.09% only | Keep; improve dict later or disable if regresses |
+| 6 | **e** Counter adaptation | u8 + RESCALE=100 | Try after contexts |
+| 7 | **a** Hash too small / no checksum | Hit rate high @26b; low priority | Optional checksum |
+| 8 | **c/d** p precision / stretch | Already 16-bit p; no stretch path | Add with mixer |
+| 9 | **j** Time headroom | 32s compress, 583 MB RSS | Room for more tables |
+| 10 | **k** Judge counting | Verified OK | Rejected |
 
 ## STEP 5 — Fix log
 
 | Fix | Hyp | Before SCORE | After SCORE | Keep? | Commit |
 |-----|-----|-------------:|------------:|-------|--------|
-| | | | | | |
+| o1 alone (mix=8) | g | 28011142 | **28007791** (C=27977623) | measured; folded into next | — |
+| **o1+hashed o3/o4** (w=8/160/48, bits 22/23) | g | 28011142 | **26380505** | **KEEP** | *(this commit)* |
+
+### Fix detail: add order-1 + hashed order-3/4
+
+Judge after:
+```
+ROUNDTRIP=OK COMPRESSED=26350257 DECOMPRESSOR=30248 SCORE=26380505 COMPRESS_SECONDS=71.26 DECOMPRESS_SECONDS=65.80 PEAK_RSS_MB=607
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 27981374 | 26350257 | **-1631117** |
+| DECOMPRESSOR | 29768 | 30248 | +480 |
+| SCORE | 28011142 | 26380505 | **-1630637** |
+| bpB | 2.23851 | 2.10802 | |
+| vs zstd 26395074 | worse | **beats by 44817** | |
+
+20 MB slice: 5746507 → 5475423 (−4.72%).
 
 ## FINAL REPORT
 
-*(incomplete)*
+*(in progress — more hyps remain)*
