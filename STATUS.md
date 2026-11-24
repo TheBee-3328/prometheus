@@ -1,6 +1,6 @@
 # STATUS
 
-**Current phase:** LIVE — DIAG-R6 toward ≤20.5e6  
+**Current phase:** PAUSE_AFTER_CURRENT — DIAG-R6 wrapping; no new spawns  
 **Current best SCORE (enwik8, main):** **21778410**  
 **Best line:** `ROUNDTRIP=OK COMPRESSED=21740866 DECOMPRESSOR=37544 SCORE=21778410`  
 **bpB:** ≈ **1.739**  

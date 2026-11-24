@@ -86,3 +86,7 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-24T22:51:36Z DIAG-R6 asymptotic eq8 judge
 - `ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876` (−194534 vs main 21778410).
 - Uncommitted; wait adversarial + commit before merge.
+
+## 2026-11-24T23:12:47Z Operator pause requested
+- Pause after DIAG-R6 finishes. No new spawns. See PAUSE.md.
+- Told R6 to commit/push eq8 keep (SCORE 21583876, adv 10/10) then stop.
