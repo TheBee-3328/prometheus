@@ -1,44 +1,51 @@
-# P3-REVIEW — SCORE baseline 36483469 (match + preprocessor)
+# P5-REVIEW — SCORE baseline 28011126 (post P5-SPARSE-XML)
 
-Branch: `agent/p3-review` · Commit under test: `c515919` (main) · Budget: docs + adversarial scripts only.
+Branch: `agent/p5-review` · Commit under test: `c39087f` / merge `86ba16c` (main) · Scope: docs + adversarial verification only (no SCORE chasing).
 
 ## Summary
 
 | # | Checklist item | Result |
 |---|---|---|
 | 1 | Determinism | **PASS** |
-| 2 | Round-trip adversarial | **FAIL** |
+| 2 | Round-trip adversarial (10/10) | **PASS** |
 | 3 | Judge integrity | **PASS** |
 | 4 | Limits (enwik8 measure + enwik9 extrapolate) | **PASS** |
 | 5 | Code size (contributors + removal suggestions) | **PASS** (analysis) |
 
-**Overall:** FAIL (item 2). enwik8 SCORE line remains valid for contest XML; binary / control-byte inputs do not round-trip.
+**Overall:** **PASS** (all five). Baseline line remains valid for merge/tuning:
+
+```
+ROUNDTRIP=OK COMPRESSED=27981374 DECOMPRESSOR=29752 SCORE=28011126
+COMPRESS_SECONDS=32.48 DECOMPRESS_SECONDS=22.46 PEAK_RSS_MB=583
+```
+
+Δ vs TUNER-R2 (28042709): −31583 (−0.11%). Prior P3-REVIEW adversarial FAIL (cap-marker collision) is resolved via `CAP_ESC` (`0x7F`) in the preprocessor.
 
 ---
 
 ## 1. Determinism — PASS
 
-Inspected `crates/prometheus-core` model path (`model.rs`, `match_model.rs`, `arithmetic.rs`, `preprocessor.rs`) and both CLI mains.
+Inspected model path after sparse merge: `model.rs`, `match_model.rs`, `sparse.rs`, `arithmetic.rs`, `preprocessor.rs`, `params.rs`, both CLI mains.
 
 | Risk | Finding |
 |---|---|
-| Floating point | None (`u8`/`u16`/`u32`/`u64` only; Laplace via integer divide) |
+| Floating point | None (`u8`/`u16`/`u32`/`u64` only; Laplace / mix via integer divide) |
 | `HashMap`/`HashSet` iteration | None (arrays / boxed slices; dict is `&[&[u8]]` fixed order) |
 | Threads | None |
-| Unseeded RNG / time / env | None in model path |
+| Unseeded RNG / time / env | None in model path (`std::env` only for CLI argv) |
 | Pointer values as entropy | None |
+| Sparse/XML struct CM | Integer counters + fixed state machine; ensembled only when match inactive (`STRUCT_MIX_WEIGHT`) |
 | Platform-dependent | LE `u64` length in archive header (documented; Linux x86_64 judge only) |
 
-Judge already enforces compress×2 / decompress×2 bit-identity on enwik8 (`ROUNDTRIP=OK`).
+Adversarial suite re-checks compress×2 bit-identity per case. Judge enforces compress×2 / decompress×2 on enwik8 (`ROUNDTRIP=OK`).
 
 ---
 
-## 2. Round-trip adversarial — FAIL
-
-Script: `tests/adversarial_roundtrip.sh`
+## 2. Round-trip adversarial — PASS (10/10)
 
 ```bash
 nix develop -c ./tests/adversarial_roundtrip.sh
+# ADVERSARIAL PASS=10 FAIL=0
 ```
 
 | Case | Result |
@@ -46,32 +53,13 @@ nix develop -c ./tests/adversarial_roundtrip.sh
 | empty | PASS |
 | one byte (`0x42`) | PASS |
 | all zeros (4 KiB) | PASS |
-| random 64 KiB | **FAIL** (cmp mismatch; output shorter) |
+| ctrl_markers (`0x01`–`0x08` + `0x7F` + C0 controls) | PASS |
+| random 64 KiB | PASS |
 | invalid UTF-8 | PASS |
 | 1 MiB repeated line | PASS |
 | enwik8 first 1 / 10 / 100 MB | PASS |
 
-### Reproduction (minimal)
-
-```bash
-nix develop -c bash -c '
-  cargo build --release -p prometheus-compress -p prometheus-decompress
-  printf "\x01" > /tmp/p.bin
-  target/release/prometheus-compress /tmp/p.bin /tmp/p.c
-  target/release/prometheus-decompress /tmp/p.c /tmp/p.o
-  cmp /tmp/p.bin /tmp/p.o || echo FAIL
-  # Observed: input 01 → output 20 (space)
-'
-```
-
-### Root cause
-
-Preprocessor capitalization markers occupy raw bytes `0x01`–`0x08` (`CAP_SPACE` … `CAP_BOS` in `preprocessor.rs`). `encode_capitals` passes those bytes through unchanged; `decode_capitals` treats them as markers and mutates / drops following data.
-
-- enwik8 / sampled enwik9 contain **zero** bytes in `0x01`–`0x08`, so the official corpus still round-trips.
-- Existing unit test `encode_decode_empty_and_edge` includes `0x00,0x80,0xFF` but **not** `0x01`–`0x08`.
-
-**Clarification (docs-only):** losslessness is required for arbitrary byte strings, not only enwik XML. Cap markers must not alias plaintext bytes (escape them, or place markers in an already-escaped high-byte space).
+No script or algorithm changes required this round. Cap-marker escape remains covered by case 4 + unit tests in `preprocessor.rs`.
 
 ---
 
@@ -80,71 +68,63 @@ Preprocessor capitalization markers occupy raw bytes `0x01`–`0x08` (`CAP_SPACE
 | Check | Evidence |
 |---|---|
 | Decompressor never opens original dataset | `prometheus-decompress` opens only CLI `<input>` archive + writes `<output>`; no `enwik*` paths, no side reads |
-| Aux files counted in `DECOMPRESSOR` | No `judge_aux.txt`. Dictionary is `static DICT` **embedded in the stripped binary**, so it is already in the 303960 exe size that `judge.sh` measures |
-| Corrupt archive | `judge_selftest.sh` still requires failure on bad magic / flipped payload |
+| Aux files counted in `DECOMPRESSOR` | No `judge_aux.txt`. Dictionary / tables are embedded or heap-allocated; stripped exe size **29752** matches recorded SCORE |
+| Corrupt archive | `judge_selftest.sh` → `SELFTEST PASS` (bad magic / flipped payload must fail) |
 
 ```bash
 nix develop -c ./judge_selftest.sh
-# expect: SELFTEST PASS
+# SELFTEST PASS
 ```
 
 ---
 
 ## 4. Limits — PASS
 
-Measured (prior judge on this tree; times from `judge_work/time_*.txt`):
+Measured (P5-SPARSE-XML merge judge, logged):
 
 ```
-ROUNDTRIP=OK COMPRESSED=36179509 DECOMPRESSOR=303960 SCORE=36483469
-COMPRESS_SECONDS=30.79 DECOMPRESS_SECONDS=22.12 PEAK_RSS_MB=344
+ROUNDTRIP=OK COMPRESSED=27981374 DECOMPRESSOR=29752 SCORE=28011126
+COMPRESS_SECONDS=32.48 DECOMPRESS_SECONDS=22.46 PEAK_RSS_MB=583
 ```
 
 | Limit | Spec | enwik8 | enwik9 extrapolate | Verdict |
 |---|---|---|---|---|
-| Soft wall (dev) | ≤ 30 min each | 31s / 22s | ~5–8 min each if ~10× linear in *n* | OK |
-| Soft RSS (dev) | ≤ 4 GB | 344 MB | — | OK |
-| Hard RSS | ≤ 10 GB | — | ~2.5–4 GB (model ≈ 80 MB fixed: 16 MiB buf + 8M×u32 ht + order-2 tables; plus ~1 GB decoded + ~0.94× pre buffer) | OK |
+| Soft wall (dev) | ≤ 30 min each | ~32 s / ~22 s | ~5–8 min each if ~10× linear in *n* | OK |
+| Soft RSS (dev) | ≤ 4 GB | 583 MB | — | OK |
+| Hard RSS | ≤ 10 GB | — | ~2.5–4 GB (match buf 32 MiB + hash ~256 MiB u32 + order-2 + sparse ~36 KiB counters; plus full-file buffers) | OK |
 | Hard time target | ≤ ~50 h | — | ≪ 1 h | OK |
 
-**Note (not a FAIL):** both CLIs `read_to_end` / allocate full pre + decoded buffers. Fixed-size match tables help, but full-file buffering is the dominant enwik9 RAM term. Streaming would add headroom, not required to pass current limits.
+**Note (not a FAIL):** both CLIs still `read_to_end` / hold full pre + decoded buffers. Sparse tables are tiny vs match HT; full-file buffering remains the dominant enwik9 RAM term. Streaming would add headroom only.
 
 ---
 
 ## 5. Code size — PASS (analysis)
 
-Stripped `prometheus-decompress`: **303960** bytes (matches judge).
+Stripped `prometheus-decompress`: **29752** bytes (matches judge; +880 vs TUNER-R2 `28872` after sparse `.text`).
+
+`size` (symbols stripped): text≈24821 data≈1744 bss≈1488.
 
 | Contributor | Approx | Notes |
 |---|---|---|
-| `.text` | ~223 KiB | Dominant; mostly Rust std I/O + alloc + model |
-| `.rodata` | ~21 KiB | Includes DICT literals + fmt/panic strings (`strings` ≈ 20 KiB) |
-| `.eh_frame` + hdr | ~24 KiB | Unwind tables despite `panic = "abort"` |
-| DICT payloads | ~269 B | 35 entries; already tiny vs SCORE |
+| Match + order-2 + arithmetic | dominant `.text` | Core path; already size-optimized (`build-std`, `panic=immediate-abort`, no unwind tables) |
+| Sparse/XML (`sparse.rs`) | ~+880 B exe | Struct-state CM; heap tables (~18k×2 counters) not in SCORE |
+| Preprocessor DICT | small `.rodata` | Embedded; already in exe size |
+| Params / mix knobs | tiny | Compile-time constants only |
 
-### Removals that likely save more bytes than they cost in COMPRESSED
+### Removals / size notes (do not chase SCORE here)
 
-1. **Strip unwind / panic fmt** (`-Z build-std=std,panic_abort`, `panic_immediate_abort`, and/or link without eh_frame) — expect tens of KiB off `DECOMPRESSOR` with **zero** model change. Highest ROI.
-2. Drop unused `eprintln!` / usage string paths if a `#![no_main]`-lite CLI is acceptable — small (hundreds of B).
-3. **Do not** drop short DICT entries (`[[`, `  `, …) for size alone — each is ~2 B in the binary but pays for itself many times on enwik.
-
-Not recommended: moving DICT to an aux file (judge would add those bytes 1:1; no win unless shared somehow).
+1. Further panic/fmt stripping is largely done; residual gains are small vs model knobs.
+2. Do **not** drop `STRUCT_MIX_WEIGHT` path for size alone — it paid −31k COMPRESSED for +880 DECOMPRESSOR.
+3. Do not move DICT/tables to aux files (judge adds aux 1:1).
 
 ---
 
-## Prioritized fix list
+## Prioritized notes for TUNER-R3
 
-1. **P0 — preprocessor marker collision**  
-   Escape or relocate `0x01`–`0x08` markers so every byte string round-trips. Add adversarial coverage (control bytes + `/dev/urandom`) to `prometheus-core` tests / `tests/adversarial_roundtrip.sh`.  
-   *Until fixed, claim lossless only for enwik-like text without those controls.*
-
-2. **P1 — unit-test gap**  
-   Extend `encode_decode_empty_and_edge` with `0x01`–`0x08` and a short random blob (would have caught this before merge).
-
-3. **P2 — decompressor size**  
-   Panic-abort + no eh_frame / build-std; target cutting `DECOMPRESSOR` without touching predictions (direct SCORE win).
-
-4. **P3 — RAM shape (optional)**  
-   Stream encode/decode and avoid holding both pre and decoded full files when approaching enwik9; softens peak RSS risk if model tables grow.
+1. **No P0 round-trip blockers.** Safe to tune `params.rs` only (`ORDER2_RESCALE`, `MIX_WEIGHT`, `MATCH_CONF`, `STRUCT_MIX_WEIGHT`, hash/buf bits if in scope).
+2. **Seed from current best:** `STRUCT_MIX_WEIGHT=14`, `ORDER2_RESCALE=100`, `MIX_WEIGHT=[120,160,190,230,245]`, max match conf.
+3. **Watch DECOMPRESSOR:** param-only edits should keep exe size flat; any new code path needs SCORE math vs compressed gain.
+4. **Optional later (not TUNER):** streaming I/O for enwik9 RSS headroom; not required for current limits.
 
 ---
 
