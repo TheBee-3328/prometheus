@@ -686,3 +686,28 @@ ROUNDTRIP=OK COMPRESSED=22008866 DECOMPRESSOR=36744 SCORE=22045610 COMPRESS_SECO
 | SCORE | 22075936 | **22045610** | **−30326** |
 
 Gap to 20.5e6 ≈ 1.51 MB. Adversarial: **10/10 PASS**.
+
+## Attempt 2 — match secondary hash order-4 (REJECT)
+
+Separate `ht2` (HASH2_BITS=24) with order-4 alt-salt. Loose bar (accept ≥4): slice **+80910**. Strict bar (≥HASH_ORDER=6): slice **+24** (neutral). Reverted.
+
+## Attempt 3 — indirect order-3 last-byte table (KEEP)
+
+Add `t3[65536]` last-byte-after hashed o3; fold `ind3` into indirect hash. MIX=40 still best (32/48 worse on slice).
+
+Slice vs StateMap-o2 base 5686155: **5669982** (−16173).
+
+Also tried t3+StateMap-on-indirect cells: slice +8282 — rejected combo.
+
+Full enwik8:
+```
+ROUNDTRIP=OK COMPRESSED=21933188 DECOMPRESSOR=36952 SCORE=21970140 COMPRESS_SECONDS=342.13 DECOMPRESS_SECONDS=354.65 PEAK_RSS_MB=1756
+```
+
+| | Before (SM-o2) | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 22008866 | 21933188 | **−75678** |
+| DECOMPRESSOR | 36744 | 36952 | +208 |
+| SCORE | 22045610 | **21970140** | **−75470** |
+
+Gap to 20.5e6 ≈ 1.43 MB.
