@@ -128,7 +128,8 @@ Avg cost by byte class (approx mbits/bit; relative only — estimator coarse):
 | **bigger o3/o4 tables** (bits 23/24) | a/j | 26380505 | **26143788** | **KEEP** | `29097b6` |
 | **SSE layer** (mix=224) | i | 26143788 | **25548485** | **KEEP** | `b1eb4ae` |
 | MATCH_CONF graduated | f | — | slice worse | **REJECT** (max conf best) | — |
-| **word model** (bits=22, mix=64) | g | 25548485 | **25300821** | **KEEP** | *(pending)* |
+| **word model** (bits=22, mix=64) | g | 25548485 | **25300821** | **KEEP** | `bde3516` |
+| **SSE+match-bucket cxt** | i | 25300821 | **24476305** | **KEEP** | `e12b068` |
 
 ### Fix detail: add order-1 + hashed order-3/4
 
@@ -189,6 +190,21 @@ ROUNDTRIP=OK COMPRESSED=25269357 DECOMPRESSOR=31464 SCORE=25300821 COMPRESS_SECO
 | bpB | 2.04142 | 2.02155 | |
 
 20 MB slice: 5260907 → 5210195 (−0.96%).
+
+### Fix detail: SSE match-length context
+
+```
+ROUNDTRIP=OK COMPRESSED=24444761 DECOMPRESSOR=31544 SCORE=24476305 COMPRESS_SECONDS=107.88 DECOMPRESS_SECONDS=103.58 PEAK_RSS_MB=640
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 25269357 | 24444761 | **-824596** |
+| SCORE | 25300821 | 24476305 | **-824516** |
+| bpB | 2.02155 | 1.95558 | |
+| vs xz 24831656 | worse | **beats by 386895** | |
+
+20 MB slice: 5210195 → 5032793 (−3.41%).
 
 ## Re-ablation note (after 3 keeps; pre-word)
 
