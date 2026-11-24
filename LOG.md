@@ -74,3 +74,15 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 - Merged origin/agent/diag-r5 → main. SCORE **21778410** (COMPRESSED=21740866 DECOMP=37544).
 - Δ vs R4: SCORE −108757. Gap to 20.5e6 ≈1.24 MB.
 - enwik9 judge still finishing on pre-R5 binary (~186.5 MB compressed first pass).
+
+## 2026-11-24T22:00:17Z Spawn DIAG-R6
+- Worktree `prometheus-diag-r6` / branch `agent/diag-r6` from main@76284a3.
+- Brief: soft-reset schedule, mixer retune, word/o5 hybrid, RSS trim. Baseline SCORE 21778410.
+
+## 2026-11-24T22:51:36Z enwik9 judge (pre-R5 binary)
+- `ROUNDTRIP=OK COMPRESSED=186549457 DECOMPRESSOR=37512 SCORE=186586969` (~57+57 min).
+- ≈1.492 bpB; COMPRESSED under ~205e6 floor.
+
+## 2026-11-24T22:51:36Z DIAG-R6 asymptotic eq8 judge
+- `ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876` (−194534 vs main 21778410).
+- Uncommitted; wait adversarial + commit before merge.

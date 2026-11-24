@@ -1,7 +1,7 @@
 # STATUS
 
 **Current phase:** LIVE — DIAG-R6 toward ≤20.5e6  
-**Current best SCORE:** **21778410** (enwik8)  
+**Current best SCORE (enwik8, main):** **21778410**  
 **Best line:** `ROUNDTRIP=OK COMPRESSED=21740866 DECOMPRESSOR=37544 SCORE=21778410`  
 **bpB:** ≈ **1.739**  
 **Gap to 20.5e6:** ≈ 1.24 MB  
@@ -9,20 +9,20 @@
 
 ## Session SCORE path (abbrev)
 
-28080343 → … → 23069165 → 22075936 → 21887167 → **21778410**
+28080343 → … → 21887167 → **21778410** (main) · R6 pending **21583876** (uncommitted)
 
-## Merged
+## enwik9 (pre-R5 / pre-R6 binary, DECOMP=37512)
 
-- DIAG-R5 (`agent/diag-r5`): ind2 cross + MIX=22 + soft-reset n→1 → SCORE 21778410
+```
+ROUNDTRIP=OK COMPRESSED=186549457 DECOMPRESSOR=37512 SCORE=186586969
+COMPRESS_SECONDS=3427.58 DECOMPRESS_SECONDS=3403.97 PEAK_RSS_MB=4347
+```
+≈1.492 bpB · beats ~205e6 zstd-style floor on COMPRESSED alone.
 
 ## In flight
 
-- enwik9 judge on **pre-R5** main binary (DECOMP=37512); first-pass COMPRESSED≈186549457; final ROUNDTRIP pending
-- DIAG-R6 next (soft-reset schedule / mixer retune / word-o5 hybrid / RSS trim)
+- DIAG-R6: asymptotic soft-reset eq8 judged SCORE **21583876** (−194534 vs main); awaiting commit + adversarial before merge.
 
 ## Next (DIAG-R6)
 
-1. Soft-reset schedule (per-order or decay) vs fixed n→1
-2. Mixer retune after soft-reset=1 (ORDER3/5/6, SSE, APM)
-3. Word / o5 Laplace→hybrid dual-rate
-4. RSS trim before enwik9 re-measure
+Mixer retune / further keep validation; re-measure enwik9 after merge.
