@@ -1,22 +1,22 @@
 # STATUS
 
-**Current phase:** 3 (tuner)  
-**Current best SCORE:** **36483469** (enwik8, match + preprocessor, escaped markers)  
-**Best line:** `ROUNDTRIP=OK COMPRESSED=36179509 DECOMPRESSOR=303960 SCORE=36483469 COMPRESS_SECONDS=32.87 DECOMPRESS_SECONDS=23.31 PEAK_RSS_MB=344`  
-**Agent runs used:** 10 / 40  
+**Current phase:** 3 complete → next: combine held models / size pass / more tune  
+**Current best SCORE:** **28355431** (enwik8)  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=28051471 DECOMPRESSOR=303960 SCORE=28355431 COMPRESS_SECONDS=37.04 DECOMPRESS_SECONDS=28.11 PEAK_RSS_MB=584`  
+**Ratio:** compressed ≈ 3.57× vs raw; SCORE/1e8 ≈ 0.284  
+**Agent runs used:** 11 / 40  
 
-## Done recently
+## Scoreboard
 
-- P3-FIX-PRE merged: adversarial 10/10 PASS; SCORE equal to pre-fix (no regression).
-
-## Running
-
-| Task | Status |
+| Build | SCORE |
 |---|---|
-| P3-TUNER | spawning |
+| Store | 100299876 |
+| Order-2 | 38254897 |
+| Match+pre | 36483469 |
+| **Tuned match+pre** | **28355431** |
 
-## Next
+## Next three tasks
 
-1. TUNER on params (enwik8 slice → full validate).
-2. Optional size pass / combine held Phase2 models.
-3. enwik9 only at phase milestone.
+1. Second tune round OR integrate held P2-ORDERS/MIXER onto tuned base.
+2. Decompressor size pass (build-std / eh_frame).
+3. enwik9 milestone only after another enwik8 improvement batch.
