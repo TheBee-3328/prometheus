@@ -18,3 +18,5 @@
 - Retry P2-WORD / P4-ORDERS-MIX
 - Lose `R3_r102_only` validate out / JSON
 - Auto-start assuming clean TUNER-R3 commit (there isn’t one yet)
+
+**RESUMED** 2026-11-24 ~04:25 — see STATUS.md / DIAG agent.
