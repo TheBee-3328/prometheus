@@ -18,14 +18,21 @@ use crate::sparse::SparseModel;
 use crate::sse::{Sse, Sse2};
 use crate::word::WordModel;
 
+/// Number of hash-table candidate slots checked when starting a match.
+/// Slot 0 = primary (with fingerprint); slots 1.. = prior occupants (chain).
+const MATCH_CANDIDATES: usize = 4;
+
 /// LZ match model: buffer + hash → expected next bits.
 pub struct MatchModel {
     buf: Box<[u8]>,
     /// Bytes written so far (also next write index into `buf` via mask).
     pos: usize,
     ht: Box<[u32]>,
-    /// 16-bit fingerprint of context hash (collision reject).
+    /// 16-bit fingerprint of context hash (collision reject) for primary slot.
     ht_fp: Box<[u16]>,
+    /// Prior occupants of each hash slot (depth MATCH_CANDIDATES-1).
+    /// Indexed as `ht_prev[slot * HASH_SIZE + h]`.
+    ht_prev: Box<[u32]>,
     /// Absolute index of next expected matched byte.
     match_pos: usize,
     /// Matched bytes so far (0 = inactive).
@@ -41,6 +48,7 @@ impl MatchModel {
             pos: 0,
             ht: vec![0u32; HASH_SIZE].into_boxed_slice(),
             ht_fp: vec![0u16; HASH_SIZE].into_boxed_slice(),
+            ht_prev: vec![0u32; HASH_SIZE * (MATCH_CANDIDATES - 1)].into_boxed_slice(),
             match_pos: 0,
             match_len: 0,
             expected: 0,
@@ -121,39 +129,77 @@ impl MatchModel {
             }
         }
 
-        // Index context ending at `p`; look up prior occurrence.
+        // Index context ending at `p`; look up prior occurrence(s).
         if p + 1 >= HASH_ORDER {
             let (h, fp) = self.context_hash(p);
-            let candidate = self.ht[h] as usize;
-            let cand_fp = self.ht_fp[h];
-            self.ht[h] = p as u32;
-            self.ht_fp[h] = fp;
+            let primary = self.ht[h];
+            let primary_fp = self.ht_fp[h];
 
-            if self.match_len == 0 && candidate > 0 && candidate < p && cand_fp == fp {
-                // Verify shared context length.
-                let mut ctx = 0usize;
-                let max = (p - candidate).min(255);
-                while ctx < max {
-                    if self.buf[p.wrapping_sub(ctx) & BUF_MASK]
-                        != self.buf[candidate.wrapping_sub(ctx) & BUF_MASK]
-                    {
-                        break;
+            // Snapshot candidates before mutating the chain.
+            if self.match_len == 0 {
+                let mut best_len = 0u32;
+                let mut best_pos = 0usize;
+
+                // Candidate 0: primary with fingerprint reject.
+                if primary > 0 && (primary as usize) < p && primary_fp == fp {
+                    let (ctx, next) = self.verify_match(p, primary as usize);
+                    if ctx >= HASH_ORDER as u32 && next <= p && ctx > best_len {
+                        best_len = ctx;
+                        best_pos = next;
                     }
-                    ctx += 1;
                 }
-                if ctx >= HASH_ORDER {
-                    let next = candidate + 1;
-                    if next <= p {
-                        self.match_pos = next;
-                        self.match_len = ctx as u32;
-                        self.expected = self.buf[next & BUF_MASK];
+                // Candidates 1..: prior occupants (byte-verify only).
+                for slot in 0..(MATCH_CANDIDATES - 1) {
+                    let cand = self.ht_prev[slot * HASH_SIZE + h] as usize;
+                    if cand > 0 && cand < p {
+                        let (ctx, next) = self.verify_match(p, cand);
+                        if ctx >= HASH_ORDER as u32 && next <= p && ctx > best_len {
+                            best_len = ctx;
+                            best_pos = next;
+                        }
                     }
+                }
+
+                if best_len >= HASH_ORDER as u32 {
+                    self.match_pos = best_pos;
+                    self.match_len = best_len;
+                    self.expected = self.buf[best_pos & BUF_MASK];
                 }
             }
+
+            // Push primary into the prev chain, then store current.
+            if MATCH_CANDIDATES > 2 {
+                for slot in (1..MATCH_CANDIDATES - 1).rev() {
+                    self.ht_prev[slot * HASH_SIZE + h] =
+                        self.ht_prev[(slot - 1) * HASH_SIZE + h];
+                }
+            }
+            if MATCH_CANDIDATES > 1 {
+                self.ht_prev[h] = primary;
+            }
+            self.ht[h] = p as u32;
+            self.ht_fp[h] = fp;
         }
 
         self.pos = p + 1;
         self.bit_cxt = 1;
+    }
+
+    /// Verify how many trailing bytes are shared between `p` and `candidate`.
+    /// Returns (match_len, next_expected_pos).
+    #[inline]
+    fn verify_match(&self, p: usize, candidate: usize) -> (u32, usize) {
+        let mut ctx = 0usize;
+        let max = (p - candidate).min(255);
+        while ctx < max {
+            if self.buf[p.wrapping_sub(ctx) & BUF_MASK]
+                != self.buf[candidate.wrapping_sub(ctx) & BUF_MASK]
+            {
+                break;
+            }
+            ctx += 1;
+        }
+        (ctx as u32, candidate + 1)
     }
 }
 

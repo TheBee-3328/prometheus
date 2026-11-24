@@ -506,3 +506,46 @@ vs zstd 26395074 / xz 24831656: still ahead. Gap to 20.5e6: **≈2.03 MB**.
 4. State-map / dual-rate counters (paq8) instead of plain u16 rescale.
 5. Deeper preprocessor (wiki dict / entity / UTF-8) — early ablation was weak but may compound now.
 6. Speed: compress ~260s; optimize before heavier models for enwik9.
+
+# DIAG-R3
+
+Branch: `agent/diag-r3`  
+Agent: DIAG-R3  
+Start: 2026-11-24  
+Baseline to beat: `ROUNDTRIP=OK COMPRESSED=22531741 DECOMPRESSOR=42760 SCORE=22574501`
+
+## Plan
+
+1. Multi-candidate match (2–4 chain; longest verified) — priority.
+2. Indirect / record model (integer only).
+3. State-map / bit-history (not blanket u16 hash counters).
+4. STRETCH LUT reclaim if SCORE-neutral/positive.
+5. Preprocessor deepen only if ablation shows gain.
+
+## Slice baseline (first 20 MiB enwik8, tune profile)
+
+`COMPRESSED=4884107`.
+
+## Attempt 1 — multi-candidate match chain (KEEP)
+
+Design: 4-deep hash-slot chain (`ht` + 3×`ht_prev`). On match start, verify all candidates; pick longest verified context (≥HASH_ORDER). Primary keeps fingerprint reject; chain slots byte-verify only. Confidence/mix still driven by match length.
+
+| Candidates | Slice COMPRESSED | Δ vs base |
+|-----------:|-----------------:|----------:|
+| 1 (base) | 4884107 | |
+| 2 | 4877078 | −7029 |
+| 3 | 4874056 | −10051 |
+| **4** | **4872291** | **−11816** |
+
+Full enwik8 judge (cand=4):
+```
+ROUNDTRIP=OK COMPRESSED=22439085 DECOMPRESSOR=43352 SCORE=22482437 COMPRESS_SECONDS=281.75 DECOMPRESS_SECONDS=273.51 PEAK_RSS_MB=1673
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 22531741 | 22439085 | **−92656** |
+| DECOMPRESSOR | 42760 | 43352 | +592 |
+| SCORE | 22574501 | **22482437** | **−92064** |
+
+Gap to 20.5e6 ≈ 1.94 MB (was 2.03 MB). Adversarial: **10/10 PASS**.
