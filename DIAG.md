@@ -243,3 +243,17 @@ ROUNDTRIP=OK COMPRESSED=23722175 DECOMPRESSOR=32312 SCORE=23754487 COMPRESS_SECO
 | bpB | 1.93629 | 1.89777 | |
 
 20 MB slice: 4975376 → 4885161 (−1.81%).
+
+### Fix detail: order-0 + match hash fingerprint
+
+```
+ROUNDTRIP=OK COMPRESSED=23599584 DECOMPRESSOR=32872 SCORE=23632456 COMPRESS_SECONDS=129.43 DECOMPRESS_SECONDS=122.58 PEAK_RSS_MB=824
+```
+
+| | Before | After | Δ |
+|--|-------:|------:|--:|
+| COMPRESSED | 23722175 | 23599584 | **-122591** |
+| SCORE | 23754487 | 23632456 | **-122031** |
+| bpB | 1.89777 | 1.88797 | |
+
+Checksum alone size-neutral on slice; order0 mix=80 carries the gain.

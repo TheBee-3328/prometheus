@@ -5,10 +5,11 @@
 //! that prior occurrence. Mixed with order-2 only for sufficiently long matches.
 
 use crate::model::{HashOrderModel, Model, Order1Model, Order2Model};
+use crate::order0::Order0Model;
 use crate::params::{
     match_conf, mix_weight, BUF_MASK, BUF_SIZE, HASH_MASK, HASH_ORDER, HASH_SIZE, MIN_MIX_LEN,
-    ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS, ORDER4_MIX_WEIGHT,
-    SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
+    ORDER0_MIX_WEIGHT, ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS,
+    ORDER4_MIX_WEIGHT, SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_MIX_WEIGHT,
 };
 use crate::sparse::SparseModel;
 use crate::sse::{Sse, Sse2};
@@ -20,6 +21,8 @@ pub struct MatchModel {
     /// Bytes written so far (also next write index into `buf` via mask).
     pos: usize,
     ht: Box<[u32]>,
+    /// 16-bit fingerprint of context hash (collision reject).
+    ht_fp: Box<[u16]>,
     /// Absolute index of next expected matched byte.
     match_pos: usize,
     /// Matched bytes so far (0 = inactive).
@@ -34,6 +37,7 @@ impl MatchModel {
             buf: vec![0u8; BUF_SIZE].into_boxed_slice(),
             pos: 0,
             ht: vec![0u32; HASH_SIZE].into_boxed_slice(),
+            ht_fp: vec![0u16; HASH_SIZE].into_boxed_slice(),
             match_pos: 0,
             match_len: 0,
             expected: 0,
@@ -59,7 +63,7 @@ impl MatchModel {
     }
 
     #[inline]
-    fn context_hash(&self, end: usize) -> usize {
+    fn context_hash_raw(&self, end: usize) -> u32 {
         // FNV-ish hash of buf[end-HASH_ORDER+1 ..= end]
         let mut h: u32 = 2166136261;
         for i in (0..HASH_ORDER).rev() {
@@ -67,7 +71,13 @@ impl MatchModel {
             h ^= b;
             h = h.wrapping_mul(16777619);
         }
-        (h as usize) & HASH_MASK
+        h
+    }
+
+    #[inline]
+    fn context_hash(&self, end: usize) -> (usize, u16) {
+        let h = self.context_hash_raw(end);
+        ((h as usize) & HASH_MASK, (h >> 16) as u16)
     }
 
     #[inline]
@@ -110,11 +120,13 @@ impl MatchModel {
 
         // Index context ending at `p`; look up prior occurrence.
         if p + 1 >= HASH_ORDER {
-            let h = self.context_hash(p);
+            let (h, fp) = self.context_hash(p);
             let candidate = self.ht[h] as usize;
+            let cand_fp = self.ht_fp[h];
             self.ht[h] = p as u32;
+            self.ht_fp[h] = fp;
 
-            if self.match_len == 0 && candidate > 0 && candidate < p {
+            if self.match_len == 0 && candidate > 0 && candidate < p && cand_fp == fp {
                 // Verify shared context length.
                 let mut ctx = 0usize;
                 let max = (p - candidate).min(255);
@@ -171,6 +183,7 @@ impl Model for MatchModel {
 /// Mix order-1/2/3/4 + sparse/XML with the match model; match weight grows with length.
 /// Sparse/structure only blend in when match is inactive (do not fight match).
 pub struct Order2MatchModel {
+    order0: Order0Model,
     order1: Order1Model,
     order2: Order2Model,
     order3: HashOrderModel,
@@ -188,6 +201,7 @@ pub struct Order2MatchModel {
 impl Order2MatchModel {
     pub fn new() -> Self {
         Self {
+            order0: Order0Model::new(),
             order1: Order1Model::new(),
             order2: Order2Model::new(),
             order3: HashOrderModel::new(3, ORDER3_BITS),
@@ -244,6 +258,7 @@ impl Default for Order2MatchModel {
 impl Model for Order2MatchModel {
     #[inline]
     fn predict(&mut self) -> u16 {
+        let p0u = self.order0.predict();
         let p1 = self.order1.predict();
         let p2 = self.order2.predict();
         let p3 = self.order3.predict();
@@ -251,6 +266,7 @@ impl Model for Order2MatchModel {
         let mut p0 = Self::mix_w(p2, p1, ORDER1_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p3, ORDER3_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p4, ORDER4_MIX_WEIGHT);
+        p0 = Self::mix_w(p0, p0u, ORDER0_MIX_WEIGHT);
         let pw = self.word.predict();
         p0 = Self::mix_w(p0, pw, WORD_MIX_WEIGHT);
         let len = self.match_m.match_len();
@@ -269,6 +285,7 @@ impl Model for Order2MatchModel {
     fn update(&mut self, bit: u8) {
         self.sse.update(bit);
         self.sse2.update(bit);
+        self.order0.update(bit);
         self.order1.update(bit);
         self.order2.update(bit);
         self.order3.update(bit);

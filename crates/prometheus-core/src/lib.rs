@@ -3,6 +3,7 @@
 mod arithmetic;
 mod match_model;
 mod model;
+mod order0;
 pub mod params;
 mod preprocessor;
 mod sparse;
