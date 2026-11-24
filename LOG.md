@@ -61,3 +61,4 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 | 2026-11-24 | DIAG-R3 | STRETCH heap LUT; merged 5f645c4 | 22039256 | 36680 | 22075936 | 321.50 | 311.63 | 1705 | PASS merge |
 | 2026-11-24 | DIAG-R3 | FINAL REPORT partial; merged 3e70cc7 | 22039256 | 36680 | 22075936 | — | — | — | done |
 | 2026-11-24 | ORCH-NEXT | Spawn DIAG-R4 state-map / match×indirect | — | — | 22075936 | — | — | — | in progress |
+| 2026-11-24 | DIAG-R4 | Order-2 StateMap; merged 3163073 | 22008866 | 36744 | 22045610 | 315.71 | 329.03 | 1756 | PASS merge |
