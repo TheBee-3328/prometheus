@@ -797,3 +797,73 @@ ROUNDTRIP=OK COMPRESSED=21849655 DECOMPRESSOR=37512 SCORE=21887167 COMPRESS_SECO
 | SCORE | 21908733 | **21887167** | **−21566** |
 
 Gap to 20.5e6 ≈ 1.35 MB.
+
+## Attempt 9 — StateMap on hashed Order-5 (REJECT)
+
+Slice **5649546** vs o3+o4 base 5643727 (**+5819**). Reverted.
+
+## Attempt 10 — StateMap on Indirect counters (REJECT)
+
+Replace indirect Laplace n0/n1 with p+n cells (keep t3): slice **+22784**. Reverted.
+
+## Attempt 11 — STRETCH drift / RSS trim
+
+Not reached this round (time). Soft-reset / SM path left heap STRETCH as-is.
+
+## FINAL REPORT (DIAG-R4)
+
+### Verdict: **partial**
+
+Clear SCORE wins vs DIAG-R3 baseline; **≤20.5e6 COMPRESSED not reached**.
+
+### Best judge line
+
+```
+ROUNDTRIP=OK COMPRESSED=21849655 DECOMPRESSOR=37512 SCORE=21887167 COMPRESS_SECONDS=373.35 DECOMPRESS_SECONDS=345.21 PEAK_RSS_MB=1852
+```
+
+| | Baseline (R3) | Best (R4) | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 22039256 | **21849655** | **−189601** |
+| DECOMPRESSOR | 36680 | 37512 | +832 |
+| SCORE | 22075936 | **21887167** | **−188769** |
+| bpB | 1.76314 | 1.74797 | |
+
+Gap to 20.5e6: **≈1.35 MB** (was 1.54 MB).
+
+### Commits (agent/diag-r4)
+
+| Commit | Change | SCORE |
+|--------|--------|------:|
+| `3163073` | Order-2 count-dependent StateMap | 22045610 |
+| `e405da9` | indirect order-3 last-byte (t3) | 21970140 |
+| `896dd9d` | match×indirect cross MIX=16 | 21955491 |
+| `589cfe1` | StateMap soft-reset n→208 | 21951209 |
+| `15af354` | StateMap hashed Order-3 | 21908733 |
+| `94c24eb` | StateMap hashed Order-4 | **21887167** |
+
+### Acceptance
+
+- Judge ROUNDTRIP=OK and SCORE < 22075936: **YES**
+- ≤20.5e6 COMPRESSED: **NO**
+- Adversarial: **10/10 PASS** on each kept commit
+
+### Rejected
+
+| Hyp | Evidence |
+|-----|----------|
+| Fixed dual-rate p_fast/p_slow replacing O2 Laplace | slice +910 KB |
+| Match secondary hash o4 (loose / strict) | slice +80910 / +24 |
+| Indirect t3 + StateMap cells combo | slice +8282 |
+| StateMap Order-1 | slice −3 (noise) |
+| StateMap Order-5 | slice +5819 |
+| StateMap Indirect counters | slice +22784 |
+
+### Next ideas (toward 20.5e6)
+
+1. StateMap on Order-6/7 with smaller tables or only when mix weight justifies RSS.
+2. Alt-salt order-6 secondary match table (only when primary chain misses).
+3. Fix STRETCH drift (+2 KB COMPRESSED vs static LUT) if bit-identical reclaim possible.
+4. Richer match×indirect (ind2/ind3 in cross) or APM cxt × ind nibble.
+5. Bit-history state machine per dense context + dual-rate map (hybrid with Laplace).
+6. RSS trim: pack match chain / shrink HASH_BITS before enwik9 (PEAK_RSS ~1.85 GB).
