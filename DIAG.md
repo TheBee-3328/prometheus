@@ -742,3 +742,22 @@ ROUNDTRIP=OK COMPRESSED=21918203 DECOMPRESSOR=37288 SCORE=21955491 COMPRESS_SECO
 | SCORE | 21970140 | **21955491** | **−14649** |
 
 Gap to 20.5e6 ≈ 1.42 MB.
+
+## Attempt 6 — StateMap soft-reset at n=255→208 (KEEP)
+
+When count saturates, set n=208 instead of sticking at 255 so nonstationary contexts re-adapt. Affects Order-2 + match×indirect cross cells.
+
+Slice: **5664646** vs 5665469 (−823).
+
+Full enwik8:
+```
+ROUNDTRIP=OK COMPRESSED=21913905 DECOMPRESSOR=37304 SCORE=21951209 COMPRESS_SECONDS=343.83 DECOMPRESS_SECONDS=333.06 PEAK_RSS_MB=1756
+```
+
+| | Before (cross) | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21918203 | 21913905 | **−4298** |
+| DECOMPRESSOR | 37288 | 37304 | +16 |
+| SCORE | 21955491 | **21951209** | **−4282** |
+
+Gap to 20.5e6 ≈ 1.41 MB.

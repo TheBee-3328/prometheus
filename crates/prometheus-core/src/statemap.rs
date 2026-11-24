@@ -28,6 +28,11 @@ pub fn sm_update(cell: u32, bit: u8) -> u32 {
     let tgt = if bit != 0 { 65535i32 } else { 0i32 };
     // paq-ish dual-rate: step ≈ 3/(n+4) of the residual
     p += ((tgt - p) * 3) / (n + 4);
-    let n2 = if n < 255 { (n + 1) as u32 } else { 255 };
+    // Soft reset when saturated so nonstationary contexts can re-adapt.
+    let n2 = if n < 255 {
+        (n + 1) as u32
+    } else {
+        208
+    };
     ((p.clamp(1, 65534) as u32) << 16) | n2
 }
