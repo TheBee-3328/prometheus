@@ -1,0 +1,26 @@
+PROMETHEUS
+Copyright (c) 2026 TheBee-3328, Adam Grman (Adam-Grman), and contributors
+
+This project is licensed under the MIT License. See the file LICENSE.
+
+Hutter Prize compliance note
+----------------------------
+Documented source under an OSI-approved license is required before Hutter Prize
+payout (https://www.hutter1.net/prize/hrules.htm, FAQ on licensing). MIT is an
+OSI-approved license. Contest organizers list a preference order of Unlicense >
+MIT > Apache > Mozilla > GNU; MIT is chosen here to retain copyright while
+allowing reuse by future contestants (including non-commercial / contest use).
+
+Third-party / data notices
+--------------------------
+- enwik8 / enwik9 are slices of the English Wikipedia XML dump used by the
+  Hutter Prize and related benchmarks. They are not redistributed in this Git
+  repository (gitignored wholes; optional reconstructed parts under data/).
+  Wikipedia content is available under CC BY-SA and GFDL terms from the
+  Wikimedia Foundation. Obtain official dumps from Wikimedia / known mirrors
+  (e.g. Matt Mahoney’s large text compression benchmark pages) and respect
+  those licenses when redistributing the data itself.
+- The Hutter Prize name, rules, and branding belong to Marcus Hutter and the
+  contest organizers. This project is an independent implementation aimed at
+  that contest; it is not an official Hutter Prize product.
+- Rust, Nix, and other toolchain components retain their own licenses.
