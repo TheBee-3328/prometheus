@@ -1222,3 +1222,14 @@ Do **not** run enwik9 in this agent.
 1. Merge A1 mixer KEEP to main if orch agrees (SCORE 20852107).  
 2. Optional: light re-sweep ORDER3/6/7 + SSE2 on **B1 tables** (sweep was pre-B1); small extra gain possible.  
 3. Then TEMPLATE-MINER / structure contexts — not more rate knobs (flat).
+
+## Track 0B — Coder audit (2026-11-25 orch, code inspection on main)
+
+**Confirmed from source (not a SCORE claim):**
+- Arithmetic coder: 32-bit range, Witten–Neal–Cleary outstanding bits; `p1: u16` with documented range **1..=65534** (`arithmetic.rs`).
+- Model path contract: integer/fixed-point; `predict() -> u16`.
+- Final stages present: SSE (`SSE_MIX_WEIGHT=224`), SSE2 (`SSE2_MIX_WEIGHT=192`), APM (`APM_MIX_WEIGHT=224`, `APM_RATE_SHIFT=7`) in `params.rs`.
+- Precision floor: 16-bit p → ~1.5e-5 probability quantum; far cheaper than a 12-bit path would be. **No immediate precision widening hyp** until a flush/outstanding waste measurement on enwik8.
+
+**Not yet measured this session:** bits spent in final flush / outstanding; per-byte cost refresh on SCORE 20852107 binary (prior structure-stats used older/diag proxy).
+

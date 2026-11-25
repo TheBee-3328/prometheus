@@ -149,3 +149,122 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-25T04:50:04Z Hygiene: prune 12 worktrees; unstick C1
 - Removed a1/b1/diag*/p5*/tuner* worktrees. Live: main+b2+c1+pre-v2.
 - Spawned C1-MINE supersede; B2 cap watcher if slice Δ&gt;−15KB.
+
+## 2026-11-25T05:02Z ORCH resume (operator: continue where left off)
+- Cleared ORCH_HALT after duplicate-subagent kill.
+- B2 REJECT stands (best 25MB slice Δ −3909 ≪ −15KB cap). Do not relaunch B2 mixer grids.
+- C1: WIP `c86e0e5` templates ON; roundtrip OK; spawning cycle-0 enwik8 judge.
+- Next parallel after C1 judge starts: B3 contexts / match / deeper APM (not more SSE2 1D).
+- Locked best still SCORE **20852107**. Aim ~10–12MB enwik8.
+
+## 2026-11-25T06:02Z Agents cleared → respawn C1 + B3
+- Operator cleared all subagents (0 running).
+- Spawned **C1-MINE**: cycle-0 enwik8 judge on `agent/c1-tmpl` (`c86e0e5`, templates ON).
+- Spawned **B3-CTX**: new worktree `prometheus-b3-ctx` / `agent/b3-ctx` from main — contexts/match/deeper APM (B2 parked REJECT).
+- B2 stays REJECT; no SSE2 grids.
+
+## 2026-11-25T06:28Z C1 cycle-0 judge (templates ON)
+```
+ROUNDTRIP=FAIL COMPRESSED=20054334 DECOMPRESSOR=91080 SCORE=20145414
+COMPRESS_SECONDS=396.10 DECOMPRESS_SECONDS=361.08 PEAK_RSS_MB=3554
+```
+- COMPRESSED Δ vs 20765227: **−710893** (attractive if RT fixed)
+- Decode emits 96256231 B (not 1e8); rt==rt2 (deterministic bug). compress×2 OK.
+- No KEEP. C1 must fix encode/decode before SCORE counts.
+- B3 RESUME (was paused for RAM).
+
+
+## 2026-11-25T06:38Z Orch directive reload — state
+- Wrote CONSTRAINTS into STATUS.md; tagged `CHKP-a1-20852107` → `0118c25`.
+- Track 0B coder audit appended to DIAG (16-bit p confirmed; no SCORE claim).
+- C1: root-cause — `find_lit_at_depth` can match literals inside nested later templates; fixing depth + u16 param cap.
+- B3: h2 Δ−3774 best; h3 match-SM REJECT (+114092); h4 APM2 REJECT (+6679). Still under −15KB gate.
+
+
+## 2026-11-25T06:27Z Orch-verified C1 cycle-1 (depth-fix templates ON)
+```
+ROUNDTRIP=OK COMPRESSED=20777571 DECOMPRESSOR=91080 SCORE=20868651
+COMPRESS_SECONDS=407.57 DECOMPRESS_SECONDS=371.23 PEAK_RSS_MB=3563
+```
+- **Confirmed** by orch-owned `judge.sh` (agent’s prior run hit determinism/strip race — discarded).
+- Δ vs best 20852107: **+16544** → not KEEP.
+- Cycle-0 FAIL archive (20054334) was invalid encode; ignore for SCORE.
+- B3 REJECT confirmed: best 25MiB Δ −3774 (`37da1f6`).
+
+
+## 2026-11-25T08:34Z Monitoring resumed (operator)
+- C1 cycle-3: `SCORE=20866251` (+14144) N=32 — best OK prune so far, still worse than main.
+- C1 cycle-4: N=16 judge started.
+- B2/B3 stay REJECT. Locked best unchanged 20852107.
+
+
+## 2026-11-25T08:42Z C1 duplicate judges killed
+- Two cycle-4 judges overlapped (compress+decompress); available RAM ~2.5Gi.
+- Orch killed races; aligned TEMPLATE_DICT_N=16 with 666 B blob; single orch judge started (`c1_judge_c4_orch.log`).
+
+
+## 2026-11-25T09:10Z C1 prune trail (monitoring)
+| Cycle | Config | SCORE | Δ vs 20852107 |
+|------:|--------|------:|--------------:|
+| 1 | N=64 | 20868651 | +16544 |
+| 2 | INLINE | 20874013 | +21906 |
+| 3 | N=32 | 20866251 | +14144 |
+| 4 | N=16 | **20863101** | **+10994** (best OK; RT OK; timing file raced) |
+| 5 | N=8 | in flight | — |
+Prune monotonically helps but still above main. Likely THROW soon.
+
+
+## 2026-11-25T09:33Z C1 cycle-5
+`ROUNDTRIP=OK COMPRESSED=20772849 DECOMPRESSOR=88776 SCORE=20861625` (+9518). Cycle-6 started.
+
+
+## 2026-11-25T09:59Z C1 cycle-6 N=4
+`SCORE=20859637` (+7530). Cycle-7 N=0 (empty blob) started — last prune before THROW.
+
+
+## 2026-11-25T10:49Z C1 cycle-7 curated
+`SCORE=20863631` (+11524) — worse than N=4. Cycle-8 N=2 started; orch will THROW after if still ≥ baseline.
+
+
+## 2026-11-25T11:16Z C1 TEMPLATE-MINER THROW
+- Agent tip `3609879`: `PRE_STAGE_TEMPLATES=false`. Not merged (never on main).
+- Best OK trial: cycle-8 N=2 `SCORE=20859322` (+7215 vs 20852107).
+- Trail: N=64 +16544 → N=4 +7530 → N=2 +7215; curated worse.
+- Next: hierarchical / adaptive mix (B2/B3 style 1D rejected).
+
+
+## 2026-11-25T11:17Z Spawn B4-HMIX
+- Worktree `prometheus-b4-hmix` / `agent/b4-hmix` from main.
+- Brief: hierarchical / adaptive mix; 25MiB gate −15KB; no B2/B3/C1 repeats.
+
+
+## 2026-11-25T11:40Z B4-HMIX REJECT
+- Tip `66e0b41`. Best 25MiB Δ **−1280** (H2c match-on IND/CROSS mute). Gate −15KB.
+- Two-layer / dual-rate / adaptive group all regress. No full judge.
+- Next: Track 0 refresh on current main best (bit-cost by class) before new feature lane.
+
+
+## 2026-11-25T11:41Z Spawn T0-REFRESH
+- After B4 REJECT. Worktree `prometheus-t0` / `agent/t0-refresh`.
+- Re-measure bit costs on current best; rank next lane. No SCORE chase unless coder bug.
+
+
+## 2026-11-25T12:00Z T0-REFRESH complete (`5ddadc4`)
+- Diag archive COMPRESSED **20765227** matches locked best.
+- Struct: other 81.44%, template 15.36% (C1 THROW stands), ABCD 18.56%.
+- Byte-class: alpha 35.84%, ws 23.97%, other 22.89%, hibyte 13.33%, digit 3.57%.
+- Coder: 16-bit p, zero pin clamps, SSE→SSE2→APM; no free coder hyp.
+- Rank #1 next: residual NL/prose (alpha+other). Then whitespace, hibyte/token.
+
+
+## 2026-11-25T12:01Z Spawn B5-PROSE
+- After T0 rank #1 (alpha/other residual). Worktree `prometheus-b5-prose` / `agent/b5-prose`.
+- Gate: 25MiB Δ ≤ −15KB then full judge.
+
+
+## 2026-11-25T13:03Z Merge B5-PROSE KEEP
+- Merged `agent/b5-prose` (`0c3248c`) → main.
+- SCORE **20769768** (COMPRESSED=20681576 DECOMP=88192). Δ vs A1 **−82339**.
+- Adv **10/10 PASS**. Judge line from `tune/b5_full_judge.log`.
+- Word hit-gate + prose prev+cur (MODE=2 MIX=24 BITS=25).
+

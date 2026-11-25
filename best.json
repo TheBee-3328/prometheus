@@ -1,25 +1,24 @@
 {
-  "updated_at": "2026-11-25T04:18:03Z",
+  "updated_at": "2026-11-25T13:03:00Z",
   "enwik8": {
-    "SCORE": 20852107,
-    "COMPRESSED": 20765227,
-    "DECOMPRESSOR": 86880,
-    "bpB": 1.661218,
+    "SCORE": 20769768,
+    "COMPRESSED": 20681576,
+    "DECOMPRESSOR": 88192,
+    "bpB": 1.654526,
     "ROUNDTRIP": "OK",
     "adversarial": "10/10 PASS",
-    "source": "main after A1-RETUNE cand A (ORDER0=64,CROSS=16,IND=32,ORDER5=72) on B1+dict",
-    "judge_line": "ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107 COMPRESS_SECONDS=384.01 DECOMPRESS_SECONDS=365.60 PEAK_RSS_MB=3485",
+    "source": "main after B5-PROSE KEEP (word hit-gate + prose prev+cur)",
+    "judge_line": "ROUNDTRIP=OK COMPRESSED=20681576 DECOMPRESSOR=88192 SCORE=20769768 COMPRESS_SECONDS=430.91 DECOMPRESS_SECONDS=403.55 PEAK_RSS_MB=3658",
     "on_main": true,
-    "delta_vs_prior_B1": -59513,
-    "COMPRESS_SECONDS": 384.01,
-    "DECOMPRESS_SECONDS": 365.6,
-    "PEAK_RSS_MB": 3485
+    "delta_vs_prior_A1": -82339,
+    "COMPRESS_SECONDS": 430.91,
+    "DECOMPRESS_SECONDS": 403.55,
+    "PEAK_RSS_MB": 3658,
+    "commit": "0c3248c"
   },
   "enwik9_manual": {
     "label": "enwik9 manual, may be stale",
     "SCORE": 186586969,
-    "COMPRESSED": 186549457,
-    "DECOMPRESSOR": 37512,
-    "note": "pre-word-dict / pre-B1 / pre-A1 binary"
+    "note": "pre-B5 binary — re-measure after operator request only"
   }
 }
