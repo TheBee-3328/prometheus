@@ -127,3 +127,8 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 
 ## 2026-11-25T02:44:54Z Merge B1-HASH v4
 - SCORE **20911620** (−454127). Adv 10/10. Peak 3562 MB.
+
+## 2026-11-25T03:51:51Z Subagent follow-ups
+- [B1-HASH](8a0477d9-6999-4a45-b570-bd1484a8b4e8): already merged (`06bc109`); main SCORE **20911620**.
+- [DIAG-R6](97afab47-bab4-4332-811c-d75fd55ea774): FINAL SCORE 21263097 — **behind main**; do not merge. Parked (word-SM/G5 useful ideas only if rebased on B1+dict).
+- A1 cand A: provisional SCORE ~20852107 (−59513); awaiting determinism confirm before merge.
