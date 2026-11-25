@@ -5,20 +5,17 @@
 **Best line:** `ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876`  
 **bpB:** ≈ **1.724**  
 **Gap to 20.5e6:** ≈ 1.05 MB  
-**Stop policy:** Operator manual stop. Unpaused for PRE-V2 dual trials.
+**Stop policy:** Operator manual stop.
 
 ## Session SCORE path (abbrev)
 
-28080343 → … → 21778410 → **21583876**
+… → 21778410 → **21583876**
 
 ## In flight
 
-1. **PRE-V2 word dict** (`prompts/PRE_V2_WORD_DICT_CONTINUE.md`) — first  
-2. **PRE-V2 TEMPLATE-MINER** (`prompts/PRE_V2_TEMPLATE_MINER_CONTINUE.md`) — after word verdict  
-3. Continue DIAG/tuner after both KEEP/THROW
+1. PRE-V2 word dict (`agent/pre-v2`) — dict built; enable+judge next  
+2. PRE-V2 TEMPLATE-MINER after word verdict  
 
-## Rules
+## Parked (NOT merged)
 
-- Separate keep/throw; THROW on one does not cancel the other  
-- enwik8 only for gate; one heavy compress at a time; `nix develop -c …`  
-- Merge only ROUNDTRIP=OK and SCORE ≤ 21583876 (or newer main best)
+- DIAG-R6 mixer G5: enwik8 SCORE 21395251 but **adversarial 7/10 FAIL** (nondeterminism / cmp). Do not merge until 10/10.

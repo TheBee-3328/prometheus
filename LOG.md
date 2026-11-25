@@ -98,3 +98,6 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-24T23:57:16Z Unpause — PRE-V2 dual trials
 - Operator: run word-dict then TEMPLATE-MINER; continue after THROW.
 - Baseline SCORE **21583876**. Worktree `agent/pre-v2`.
+
+## 2026-11-25T01:01:38Z REVERT mixer G5 merge
+- Judge SCORE 21395251 but adversarial **7/10 FAIL** — reverted from main. Parked on agent/diag-r6.
