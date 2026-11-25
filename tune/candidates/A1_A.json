@@ -1,0 +1,48 @@
+{
+  "note": "top4:ORDER0_MIX_WEIGHT=64+MATCH_IND_CROSS_WEIGHT=16+INDIRECT_MIX_WEIGHT=32+ORDER5_MIX_WEIGHT=72",
+  "slice": 5782830,
+  "delta": -36211,
+  "params": {
+    "ORDER2_RESCALE": 250,
+    "BUF_BITS": 25,
+    "HASH_BITS": 26,
+    "HASH_ORDER": 6,
+    "MIN_MIX_LEN": 6,
+    "MATCH_CONF": [
+      32700,
+      32700,
+      32700,
+      32700,
+      32700
+    ],
+    "MIX_WEIGHT": [
+      120,
+      160,
+      190,
+      230,
+      245
+    ],
+    "STRUCT_MIX_WEIGHT": 24,
+    "ORDER1_MIX_WEIGHT": 8,
+    "ORDER3_BITS": 24,
+    "ORDER3_MIX_WEIGHT": 160,
+    "ORDER4_BITS": 25,
+    "ORDER4_MIX_WEIGHT": 48,
+    "ORDER5_BITS": 24,
+    "ORDER5_MIX_WEIGHT": 72,
+    "ORDER6_BITS": 24,
+    "ORDER6_MIX_WEIGHT": 32,
+    "ORDER7_BITS": 23,
+    "ORDER7_MIX_WEIGHT": 16,
+    "SSE_MIX_WEIGHT": 224,
+    "WORD_BITS": 23,
+    "WORD_MIX_WEIGHT": 64,
+    "SSE2_MIX_WEIGHT": 192,
+    "ORDER0_MIX_WEIGHT": 64,
+    "INDIRECT_BITS": 24,
+    "INDIRECT_MIX_WEIGHT": 32,
+    "MATCH_IND_CROSS_WEIGHT": 16,
+    "APM_MIX_WEIGHT": 224,
+    "APM_RATE_SHIFT": 7
+  }
+}

@@ -1,29 +1,30 @@
 {
-  "updated_at": "2026-11-25T02:45:00Z",
+  "updated_at": "2026-11-25T04:45:00Z",
   "enwik8": {
+    "SCORE": 20852107,
+    "COMPRESSED": 20765227,
+    "DECOMPRESSOR": 86880,
+    "bpB": 1.661218,
+    "COMPRESS_SECONDS": 384.01,
+    "DECOMPRESS_SECONDS": 365.60,
+    "PEAK_RSS_MB": 3485,
+    "ROUNDTRIP": "OK",
+    "adversarial": "10/10 PASS",
+    "source": "agent/a1-retune KEEP: ORDER0=64 CROSS=16 IND=32 ORDER5=72 on B1 tables",
+    "judge_line": "ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107 COMPRESS_SECONDS=384.01 DECOMPRESS_SECONDS=365.60 PEAK_RSS_MB=3485",
+    "on_main": false,
+    "commit": "0118c25"
+  },
+  "enwik8_prior_main": {
     "SCORE": 20911620,
     "COMPRESSED": 20824740,
     "DECOMPRESSOR": 86880,
-    "bpB": 1.665979,
-    "COMPRESS_SECONDS": 400.83,
-    "DECOMPRESS_SECONDS": 400.88,
-    "PEAK_RSS_MB": 3562,
-    "ROUNDTRIP": "OK",
-    "adversarial": "10/10 PASS",
-    "source": "main after B1-HASH v4 ORDER3/4=27",
-    "judge_line": "ROUNDTRIP=OK COMPRESSED=20824740 DECOMPRESSOR=86880 SCORE=20911620 COMPRESS_SECONDS=400.83 DECOMPRESS_SECONDS=400.88 PEAK_RSS_MB=3562",
-    "on_main": true
+    "source": "B1-HASH v4 before A1-RETUNE"
   },
-  "enwik9_manual": {
-    "label": "enwik9 manual, may be stale",
-    "SCORE": 186586969,
-    "COMPRESSED": 186549457,
-    "DECOMPRESSOR": 37512,
-    "note": "pre-word-dict / pre-B1 binary"
-  },
-  "enwik9_estimates_after_B1": {
-    "time_seconds_est": ">=4000 compress (10x)",
+  "enwik9_estimates_after_A1": {
+    "label": "ESTIMATE only — not measured; do not claim without judge.sh enwik9",
+    "time_seconds_est": ">=3840 compress (~10x enwik8 384s)",
     "peak_rss_mb_est": "3500-6000",
-    "flag": "consider ORDER*=27+ for enwik9 manual check"
+    "compressed_est_rough": "~208e6 (10x COMPRESSED; rough)"
   }
 }
