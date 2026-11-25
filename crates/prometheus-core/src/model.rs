@@ -153,7 +153,8 @@ impl Model for Order2Model {
 
 /// Hashed order-N byte context (N≥3) with bit path in the hash.
 ///
-/// Table size = 1 << bits; collisions overwrite counts (no checksum).
+/// Table size = 1 << bits. Each slot stores an 8-bit checksum of the full
+/// context hash; mismatch → treat as empty (flat p) and replace on update.
 /// `use_statemap`: paq-style p+n cells (not u16 n0/n1 — that was rejected).
 pub struct HashOrderModel {
     order: usize,
@@ -166,6 +167,8 @@ pub struct HashOrderModel {
     n0: Box<[u8]>,
     n1: Box<[u8]>,
     cells: Box<[u32]>,
+    /// 8-bit context fingerprint; 0 = empty (never written).
+    chk: Box<[u8]>,
 }
 
 impl HashOrderModel {
@@ -203,11 +206,13 @@ impl HashOrderModel {
             } else {
                 Vec::new().into_boxed_slice()
             },
+            chk: vec![0u8; size].into_boxed_slice(),
         }
     }
 
+    /// Index + non-zero 8-bit checksum (independent of index bits).
     #[inline]
-    fn hash(&self) -> usize {
+    fn hash_cs(&self) -> (usize, u8) {
         // FNV-ish over hist[0..order) and bit_cxt (bit position in context).
         let mut h: u32 = 2166136261;
         h ^= self.bit_cxt as u32;
@@ -218,7 +223,13 @@ impl HashOrderModel {
         }
         // Mix in order id so o3/o4 tables differ even if shared pattern.
         h ^= (self.order as u32).wrapping_mul(0x9e3779b9);
-        (h as usize) & self.mask
+        let idx = (h as usize) & self.mask;
+        // Checksum from a second mix so it is not just discarded index bits.
+        let mut cs = (h.wrapping_mul(0x85ebca6b) >> 24) as u8;
+        if cs == 0 {
+            cs = 1;
+        }
+        (idx, cs)
     }
 
     pub fn bits(&self) -> usize {
@@ -229,7 +240,10 @@ impl HashOrderModel {
 impl Model for HashOrderModel {
     #[inline]
     fn predict(&mut self) -> u16 {
-        let i = self.hash();
+        let (i, cs) = self.hash_cs();
+        if self.chk[i] != cs {
+            return 32768;
+        }
         if self.use_statemap {
             sm_predict(self.cells[i])
         } else {
@@ -239,7 +253,17 @@ impl Model for HashOrderModel {
 
     #[inline]
     fn update(&mut self, bit: u8) {
-        let i = self.hash();
+        let (i, cs) = self.hash_cs();
+        if self.chk[i] != cs {
+            // Collision / empty: replace slot (lowest priority = overwrite).
+            self.chk[i] = cs;
+            if self.use_statemap {
+                self.cells[i] = sm_init();
+            } else {
+                self.n0[i] = 0;
+                self.n1[i] = 0;
+            }
+        }
         if self.use_statemap {
             self.cells[i] = sm_update(self.cells[i], bit);
         } else {

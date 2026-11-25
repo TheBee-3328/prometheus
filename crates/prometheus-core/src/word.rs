@@ -11,6 +11,8 @@ pub struct WordModel {
     bit_cxt: u16,
     n0: Box<[u8]>,
     n1: Box<[u8]>,
+    /// 8-bit context fingerprint; 0 = empty.
+    chk: Box<[u8]>,
     mask: usize,
 }
 
@@ -23,15 +25,21 @@ impl WordModel {
             bit_cxt: 1,
             n0: vec![0u8; size].into_boxed_slice(),
             n1: vec![0u8; size].into_boxed_slice(),
+            chk: vec![0u8; size].into_boxed_slice(),
             mask: size - 1,
         }
     }
 
     #[inline]
-    fn index(&self) -> usize {
+    fn index_cs(&self) -> (usize, u8) {
         let mut h = self.whash ^ ((self.bit_cxt as u32) << 16);
         h = h.wrapping_mul(16777619);
-        (h as usize) & self.mask
+        let idx = (h as usize) & self.mask;
+        let mut cs = (h.wrapping_mul(0x85ebca6b) >> 24) as u8;
+        if cs == 0 {
+            cs = 1;
+        }
+        (idx, cs)
     }
 
     #[inline]
@@ -66,14 +74,22 @@ impl Model for WordModel {
         if !self.in_word && self.whash == 0 {
             return 32768;
         }
-        let i = self.index();
+        let (i, cs) = self.index_cs();
+        if self.chk[i] != cs {
+            return 32768;
+        }
         Self::prob(self.n0[i], self.n1[i])
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
         if self.in_word || self.whash != 0 {
-            let i = self.index();
+            let (i, cs) = self.index_cs();
+            if self.chk[i] != cs {
+                self.chk[i] = cs;
+                self.n0[i] = 0;
+                self.n1[i] = 0;
+            }
             if bit == 0 {
                 self.n0[i] = self.n0[i].saturating_add(1);
             } else {
