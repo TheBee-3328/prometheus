@@ -155,21 +155,36 @@ fn emit_word_token(out: &mut Vec<u8>, idx: usize) {
 
 /// Greedy word/phrase substitution on the post-markup stream.
 pub fn encode_words(input: &[u8]) -> Vec<u8> {
+    encode_words_labeled(input, None).0
+}
+
+/// Same as [`encode_words`], optionally propagating per-byte labels onto the
+/// output stream (first byte of a matched span / literal supplies the label).
+/// Used by `prometheus-diag --structure-stats` only — not on the SCORE path.
+pub fn encode_words_labeled(input: &[u8], labels: Option<&[u8]>) -> (Vec<u8>, Vec<u8>) {
     if !PRE_STAGE_WORDS || entries().is_empty() {
-        return input.to_vec();
+        let lab = labels
+            .map(|l| l.to_vec())
+            .unwrap_or_else(|| vec![0; input.len()]);
+        return (input.to_vec(), lab);
     }
     let t = trie();
     let markup_end = markup_dict_end();
     let mut out = Vec::with_capacity(input.len());
+    let mut out_l = Vec::with_capacity(input.len());
     let mut i = 0;
     while i < input.len() {
         let b = input[i];
+        let lab = labels.map(|l| l[i]).unwrap_or(0);
         // Pass through markup ESC pairs unchanged.
         if b == ESC {
             out.push(ESC);
+            out_l.push(lab);
             i += 1;
             if i < input.len() {
+                let lab2 = labels.map(|l| l[i]).unwrap_or(0);
                 out.push(input[i]);
+                out_l.push(lab2);
                 i += 1;
             }
             continue;
@@ -177,12 +192,16 @@ pub fn encode_words(input: &[u8]) -> Vec<u8> {
         // Pass through static markup tokens.
         if b >= DICT_BASE && b < markup_end {
             out.push(b);
+            out_l.push(lab);
             i += 1;
             continue;
         }
         // Try dictionary match (natural-language only; patterns are ASCII).
         if let Some((idx, len)) = t.longest_at(input, i) {
             emit_word_token(&mut out, idx);
+            while out_l.len() < out.len() {
+                out_l.push(lab);
+            }
             i += len;
             continue;
         }
@@ -191,6 +210,9 @@ pub fn encode_words(input: &[u8]) -> Vec<u8> {
             out.push(WORD_ESC);
             out.push(0xFF);
             out.push(WORD_ESC);
+            out_l.push(lab);
+            out_l.push(lab);
+            out_l.push(lab);
             i += 1;
             continue;
         }
@@ -199,13 +221,17 @@ pub fn encode_words(input: &[u8]) -> Vec<u8> {
             out.push(WORD_ESC);
             out.push(0xFF);
             out.push(b);
+            out_l.push(lab);
+            out_l.push(lab);
+            out_l.push(lab);
             i += 1;
             continue;
         }
         out.push(b);
+        out_l.push(lab);
         i += 1;
     }
-    out
+    (out, out_l)
 }
 
 /// Inverse of [`encode_words`].

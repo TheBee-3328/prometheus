@@ -1,0 +1,11 @@
+STATS bits=591224168 cost_mbits=134708712233 avg_mbits_per_bit=227847 match_active_bits=367983406 match_active_pct=6224 avg_match_len_x100=1204 match_hit_bytes=60421895 match_hit_pct=8175 p_min_pin=0 p_max_pin=0 hash_bits=26
+CLASS ws bits=84326800 cost_mbits=32296997627 avg_mbits_per_bit=382998 share_x10000=2397
+CLASS alpha bits=299923440 cost_mbits=48279669446 avg_mbits_per_bit=160973 share_x10000=3584
+CLASS digit bits=18565032 cost_mbits=4820422245 avg_mbits_per_bit=259650 share_x10000=357
+CLASS lt bits=472448 cost_mbits=28637440 avg_mbits_per_bit=60615 share_x10000=2
+CLASS gt bits=177896 cost_mbits=21567792 avg_mbits_per_bit=121238 share_x10000=1
+CLASS entity bits=1104800 cost_mbits=162110194 avg_mbits_per_bit=146732 share_x10000=12
+CLASS bracket bits=6153720 cost_mbits=295651227 avg_mbits_per_bit=48044 share_x10000=21
+CLASS hibyte bits=80334232 cost_mbits=17960147677 avg_mbits_per_bit=223567 share_x10000=1333
+CLASS other bits=100165800 cost_mbits=30843508585 avg_mbits_per_bit=307924 share_x10000=2289
+MODE=Full PRE=1 INPUT=100000000 PRE_LEN=73903021 COMPRESSED=20765227 HASH_BITS=26 HASH_ORDER=6 MIN_MIX_LEN=6 STRUCT_MIX=24

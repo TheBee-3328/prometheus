@@ -1222,3 +1222,85 @@ Do **not** run enwik9 in this agent.
 1. Merge A1 mixer KEEP to main if orch agrees (SCORE 20852107).  
 2. Optional: light re-sweep ORDER3/6/7 + SSE2 on **B1 tables** (sweep was pre-B1); small extra gain possible.  
 3. Then TEMPLATE-MINER / structure contexts — not more rate knobs (flat).
+
+---
+
+# Track 0 refresh 2026-11-25
+
+Branch: `agent/t0-refresh`  
+Agent: T0-REFRESH  
+Binary: current main best **A1+word dict+B1** (`SCORE=20852107`)  
+Tool: `prometheus-diag` release (`--structure-stats`, `--stats`; no separate cost-log flag)
+
+## CLI discovered
+
+| Flag | Role |
+|------|------|
+| `--mode full\|no-pre\|…` | Ablation compress |
+| `--stats` | Bit-cost by prev-byte class + match/p-pin counters |
+| `--structure-stats [out]` | Structure labels → pre stream → full `Order2MatchModel` cost shares |
+| `--structure-labels` | Raw-byte label counts only (cheap) |
+
+Diag instrumentation only (re-exported `preprocessor` + `encode_words_labeled` for label propagate). SCORE path unchanged.
+
+## Full enwik8 — structure cost (Order2MatchModel + production pre)
+
+Wall ~431 s. `labels_mirrored=1`. `PRE_LEN=73903021`.
+
+```
+STRUCTURE input_len=100000000 pre_len=73903021 labels_mirrored=1 total_cost_mbits=134708712233 est_compressed_bytes=16838589
+STRUCT other        raw=79036555 pre=59552553 est_bytes≈13713919 share=81.4434%
+STRUCT xml_wrapper  raw=2058342  pre=409766   est_bytes≈40192    share=0.2387%
+STRUCT entity_tag   raw=1483343  pre=741601   est_bytes≈97200    share=0.5772%
+STRUCT template     raw=15394232 pre=11549373 est_bytes≈2585698  share=15.3558%
+STRUCT url          raw=2027528  pre=1649728  est_bytes≈401580   share=2.3849%
+STRUCT_ABCD est_bytes≈3124670 share=18.5566% (gate ≥3% PASS; informational only)
+```
+
+| Class | Cost share | Est. bytes (bit-cost) | × actual COMPRESSED 20765227 (upper bound) |
+|-------|----------:|----------------------:|---------------------------------------------:|
+| other (residual NL/prose/etc.) | **81.44%** | 13.71 MB | **≈16.91 MB** |
+| template (`{{…}}`) | **15.36%** | 2.59 MB | **≈3.19 MB** |
+| url | 2.38% | 0.40 MB | ≈0.50 MB |
+| entity_tag | 0.58% | 0.10 MB | ≈0.12 MB |
+| xml_wrapper | 0.24% | 0.04 MB | ≈0.05 MB |
+
+Note: bit-cost estimator under-shoots archive size (16.84 MB est vs **20.77 MB** actual); use **shares**, scale to COMPRESSED for caps. Matches prior C1 Phase A numbers on this stack (reconfirmed).
+
+## Full enwik8 — byte-class cost (`--mode full --stats`)
+
+Wall ~411 s. Archive size **20765227** (= locked COMPRESSED; model+pre confirmed).
+
+```
+STATS bits=591224168 cost_mbits=134708712233 avg_mbits_per_bit=227847
+match_active_bits=367983406 match_active_pct=62.24%
+avg_match_len_x100=1204 match_hit_bytes=60421895 match_hit_pct=81.75%
+p_min_pin=0 p_max_pin=0 hash_bits=26
+```
+
+| Class | bits | cost share | Est. of COMPRESSED |
+|-------|-----:|----------:|-------------------:|
+| **alpha** | 299.9M | **35.84%** | **≈7.44 MB** |
+| **ws** | 84.3M | **23.97%** | **≈4.98 MB** |
+| **other** | 100.2M | **22.89%** | **≈4.75 MB** |
+| **hibyte** (dict/word tokens) | 80.3M | **13.33%** | **≈2.77 MB** |
+| digit | 18.6M | 3.57% | ≈0.74 MB |
+| bracket | 6.2M | 0.22% | ≈0.05 MB |
+| entity | 1.1M | 0.12% | ≈0.02 MB |
+| lt / gt | — | <0.03% | negligible |
+
+## Coder audit (code + cheap measure)
+
+| Item | Finding |
+|------|---------|
+| Arithmetic p precision | **16-bit** `p1: u16`; range split `(range * p1) >> 16` (`arithmetic.rs`). Confirmed. |
+| Clamp / pin waste | **`p_min_pin=0`, `p_max_pin=0`** on full enwik8 — no measurable end-clamp waste. |
+| Final flush / outstanding | WNC finish: `outstanding += 1` then `put_bit_follow`; BitWriter pads ≤7 bits. Header = 4+8. Overhead **≪1 KB** vs 20.7 MB; archive size matches judge COMPRESSED exactly → no free flush bug. |
+| SSE / APM | **Present:** SSE (`SSE_MIX=224`) → SSE2 (`192`) → APM cxt=`byte×bit_pos×match_bucket` size 16384 (`APM_MIX=224`, rate_shift=7). |
+| Free coder hyp? | **None** — stop after measurement (no 25MiB slice hyp). |
+
+## Re-rank (max possible gain from measured shares)
+
+See `STATUS.md` Track 0 ranking. Caps below assume *perfect* removal of that cost class (unachievable); use for priority only.
+
+Rejected (do not reopen): **B2** SSE grids, **B3** match/APM, **B4** hierarchical mix, **C1** templates THROW.

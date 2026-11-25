@@ -1,6 +1,8 @@
 //! Debug ablation + instrumentation for PROMETHEUS.
 //! NOT shipped in SCORE path; build with: cargo build --release -p prometheus-diag
 
+mod structure;
+
 use prometheus_core::params::{
     match_conf, mix_weight, HASH_BITS, HASH_ORDER, MIN_MIX_LEN, STRUCT_MIX_WEIGHT,
 };
@@ -37,7 +39,7 @@ fn parse_mode(s: &str) -> Option<Mode> {
 
 fn usage() -> ! {
     eprintln!(
-        "usage: prometheus-diag <input> <output> --mode <full|no-pre|no-match|no-struct|order2-only|match-only> [--stats]"
+        "usage: prometheus-diag <input> <output> --mode <full|no-pre|no-match|no-struct|order2-only|match-only> [--stats]\n       prometheus-diag <input> --structure-stats [output]\n       prometheus-diag <input> --structure-labels"
     );
     process::exit(2);
 }
@@ -131,9 +133,41 @@ fn byte_class(b: u8) -> usize {
 fn main() {
     let mut args = env::args().skip(1).collect::<Vec<_>>();
     let mut stats_flag = false;
+    let mut structure_stats = false;
+    let mut structure_labels = false;
     if let Some(i) = args.iter().position(|a| a == "--stats") {
         stats_flag = true;
         args.remove(i);
+    }
+    if let Some(i) = args.iter().position(|a| a == "--structure-stats") {
+        structure_stats = true;
+        args.remove(i);
+    }
+    if let Some(i) = args.iter().position(|a| a == "--structure-labels") {
+        structure_labels = true;
+        args.remove(i);
+    }
+    if structure_labels {
+        if args.len() != 1 {
+            usage();
+        }
+        if let Err(e) = run_structure_labels(&args[0]) {
+            eprintln!("prometheus-diag: {e}");
+            process::exit(1);
+        }
+        return;
+    }
+    if structure_stats {
+        if args.is_empty() || args.len() > 2 {
+            usage();
+        }
+        let input = &args[0];
+        let output = args.get(1).map(|s| s.as_str());
+        if let Err(e) = run_structure(input, output) {
+            eprintln!("prometheus-diag: {e}");
+            process::exit(1);
+        }
+        return;
     }
     let mode_idx = args.iter().position(|a| a == "--mode");
     let mode = if let Some(i) = mode_idx {
@@ -156,6 +190,52 @@ fn main() {
         eprintln!("prometheus-diag: {e}");
         process::exit(1);
     }
+}
+
+fn run_structure(input: &str, output: Option<&str>) -> io::Result<()> {
+    let mut raw = Vec::new();
+    File::open(input)?.read_to_end(&mut raw)?;
+    let report = if let Some(path) = output {
+        let out = BufWriter::new(File::create(path)?);
+        structure::run_structure_stats(&raw, out)?
+    } else {
+        structure::run_structure_stats(&raw, io::sink())?
+    };
+    report.print();
+    Ok(())
+}
+
+fn run_structure_labels(input: &str) -> io::Result<()> {
+    let mut raw = Vec::new();
+    File::open(input)?.read_to_end(&mut raw)?;
+    let labels = structure::label_structure(&raw);
+    let mut counts = [0u64; 5];
+    for &l in &labels {
+        counts[l as usize] += 1;
+    }
+    let n = raw.len() as u64;
+    println!("STRUCTURE_LABELS input_len={n}");
+    for i in 0..5 {
+        let pct = if n == 0 {
+            0.0
+        } else {
+            100.0 * counts[i] as f64 / n as f64
+        };
+        println!(
+            "LABEL {} raw_bytes={} share_pct={:.4}",
+            structure::LABEL_NAMES[i],
+            counts[i],
+            pct
+        );
+    }
+    let abcd = counts[1] + counts[2] + counts[3] + counts[4];
+    let abcd_pct = if n == 0 {
+        0.0
+    } else {
+        100.0 * abcd as f64 / n as f64
+    };
+    println!("LABEL_ABCD raw_bytes={abcd} share_pct={abcd_pct:.4}");
+    Ok(())
 }
 
 fn run(input: &str, output: &str, mode: Mode, stats_flag: bool) -> io::Result<()> {
@@ -419,9 +499,14 @@ fn print_stats(st: &Stats) {
             continue;
         }
         let avg = st.class_cost[i] * 1000 / st.class_bits[i];
+        let share = if st.cost_mbits > 0 {
+            st.class_cost[i] * 10000 / st.cost_mbits
+        } else {
+            0
+        };
         println!(
-            "CLASS {} bits={} cost_mbits={} avg_mbits_per_bit={}",
-            name, st.class_bits[i], st.class_cost[i], avg
+            "CLASS {} bits={} cost_mbits={} avg_mbits_per_bit={} share_x10000={}",
+            name, st.class_bits[i], st.class_cost[i], avg, share
         );
     }
 }

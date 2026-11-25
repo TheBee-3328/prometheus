@@ -1,0 +1,7 @@
+STRUCTURE input_len=100000000 pre_len=73903021 labels_mirrored=1 total_cost_mbits=134708712233 est_compressed_bytes=16838589
+STRUCT other raw_bytes=79036555 pre_bytes=59552553 cost_mbits=109711348822 est_bytes=13713919 share_pct=81.4434
+STRUCT xml_wrapper raw_bytes=2058342 pre_bytes=409766 cost_mbits=321533588 est_bytes=40192 share_pct=0.2387
+STRUCT entity_tag raw_bytes=1483343 pre_bytes=741601 cost_mbits=777601680 est_bytes=97200 share_pct=0.5772
+STRUCT template raw_bytes=15394232 pre_bytes=11549373 cost_mbits=20685585047 est_bytes=2585698 share_pct=15.3558
+STRUCT url raw_bytes=2027528 pre_bytes=1649728 cost_mbits=3212643096 est_bytes=401580 share_pct=2.3849
+STRUCT_ABCD cost_mbits=24997363411 est_bytes=3124670 share_pct=18.5566 gate_3pct=PASS
