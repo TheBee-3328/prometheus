@@ -117,3 +117,6 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-25T01:43:54Z Merge PRE-V2 word dict KEEP ([PRE-V2-WORD](438dad27-85ac-482e-ab92-791168648c7f))
 - Merged `b25a183` → main. SCORE **21365747** (COMPRESSED=21279587 DECOMP=86160). Adv 10/10. Cycles 0/15.
 - N=4096 blob 47482 B. A3 complete. Next: A1 retune + B parallel + C1 analysis.
+
+## 2026-11-25T01:44:26Z Spawn A1-RETUNE + B1-HASH
+- After word-dict merge. Baseline SCORE 21365747. No enwik9.
