@@ -98,3 +98,5 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-24T23:57:16Z Unpause — PRE-V2 dual trials
 - Operator: run word-dict then TEMPLATE-MINER; continue after THROW.
 - Baseline SCORE **21583876**. Worktree `agent/pre-v2`.
+
+| 2026-11-25 | PRE-V2-WORD | word/phrase dict N=4096 KEEP | 21279587 | 86160 | **21365747** | 307.98 | 290.25 | 1834 | PASS hold (orch merge) |
