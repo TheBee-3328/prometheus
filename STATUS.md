@@ -1,6 +1,6 @@
 # STATUS
 
-**Current phase:** LIVE — DIAG-R6 toward ≤20.5e6  
+**Current phase:** DIAG-R6 FINAL — partial vs ≤20.5e6  
 **Current best SCORE:** **21263097** (enwik8)  
 **Best line:** `ROUNDTRIP=OK COMPRESSED=21225761 DECOMPRESSOR=37336 SCORE=21263097`  
 **bpB:** ≈ **1.698**  
@@ -9,14 +9,15 @@
 
 ## Session SCORE path (abbrev)
 
-… → 21778410 → 21583876 → 21395251 → **21263097**
+21778410 → 21583876 → 21395251 → **21263097**
 
-## In flight
+## DIAG-R6 keeps
 
-- DIAG-R6 keeps: asym StateMap, mixer G5, word StateMap
+1. Asymptotic StateMap `n+=1-(n>>3)`
+2. Mixer G5 (O3=140 O4=88 IND=28 CROSS=10 SSE2=112)
+3. Word StateMap dual-rate
 
 ## Next
 
-1. Indirect / o0 Laplace→StateMap hybrid
-2. SM step coeff (3→4) / eq schedule micro-tune
-3. RSS trim before enwik9
+1. Land Order-1 SM + mix (slice −4546/20MB) when judge RSS free
+2. RSS trim / enwik9 re-measure

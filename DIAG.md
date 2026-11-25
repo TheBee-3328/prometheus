@@ -1142,3 +1142,72 @@ ROUNDTRIP=OK COMPRESSED=21225761 DECOMPRESSOR=37336 SCORE=21263097 COMPRESS_SECO
 
 Gap to 20.5e6 ≈ 0.73 MB.
 
+
+## Attempt 4 — Indirect StateMap (REJECT)
+
+Indirect n0/n1 → StateMap. 20MB **4423974** vs 4410359 (**+13615**). Reverted.
+
+## Attempt 5 — SM step 3→4 (REJECT)
+
+`*(tgt-p)*4/(n+4)`. 20MB **+14207**. Reverted.
+
+## Attempt 6 — Order-1 StateMap + mix retune (SLICE WIN; full judge blocked by OOM)
+
+Order-1 Laplace→StateMap: 20MB **−741**.
+Plus WORD_MIX 64→56, ORDER1_MIX 8→16: 20MB **4405813** (**−4546** vs word-SM baseline).
+
+Full enwik8 judge repeatedly OOM-killed (host MemAvailable ~4–8 GB with concurrent agents; model PEAK_RSS≈1.87 GB). Not committed; re-try when quieter.
+
+## FINAL REPORT (DIAG-R6)
+
+### Verdict: **partial**
+
+Clear SCORE wins vs DIAG-R5 baseline; **≤20.5e6 COMPRESSED not reached**.
+
+### Best judge line
+
+```
+ROUNDTRIP=OK COMPRESSED=21225761 DECOMPRESSOR=37336 SCORE=21263097 COMPRESS_SECONDS=375.08 DECOMPRESS_SECONDS=345.64 PEAK_RSS_MB=1870
+```
+
+| | Baseline (R5) | Best (R6) | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21740866 | **21225761** | **−515105** |
+| DECOMPRESSOR | 37544 | 37336 | −208 |
+| SCORE | 21778410 | **21263097** | **−515313** |
+| bpB | 1.73927 | 1.69806 | |
+
+Gap to 20.5e6: **≈0.73 MB** (was 1.24 MB).
+
+### Commits kept (agent/diag-r6)
+
+| Commit | Change | SCORE |
+|--------|--------|------:|
+| `73ab3c8` | asymptotic StateMap n+=1-(n>>3) | 21583876 |
+| `439cd6a` / `14eebb1` | mixer G5 retune | 21395251 |
+| `3d028c3` | word model StateMap dual-rate | **21263097** |
+
+### Acceptance
+
+- Judge ROUNDTRIP=OK and SCORE < 21778410: **YES**
+- ≤20.5e6 COMPRESSED: **NO**
+- Adversarial: **10/10 PASS** on kept commits
+
+### Rejected
+
+| Hyp | Evidence |
+|-----|----------|
+| Soft-reset modes 1–3 (surprise / mispred / halve) | slice worse than n→1 |
+| Per-order fixed soft-reset | ≤1 KB noise |
+| Asymptotic eq≈64/32/4/2 | worse than eq≈8 |
+| o5/o6/o7 learn_count_asym | +2260 vs word-SM alone |
+| Indirect StateMap | slice +13615 |
+| SM step×4 | slice +14207 |
+
+### Next ideas (toward 20.5e6)
+
+1. Re-judge Order-1 StateMap + WORD_MIX=56 + ORDER1_MIX=16 when RSS headroom exists (~−4.5 KB/20MB).
+2. Match fingerprint / chain packing for RSS trim (secondary).
+3. APM rate / richer APM cxt without ind nibble (rejected form).
+4. Sparse/struct mix retune; MIX_WEIGHT bucket curve after SM changes.
+5. Bit-history state machine on dense o2 only (already SM).
