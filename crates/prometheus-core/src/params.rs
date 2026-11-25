@@ -30,27 +30,27 @@ pub const STRUCT_MIX_WEIGHT: u32 = 24;
 pub const ORDER1_MIX_WEIGHT: u32 = 8;
 
 /// Hashed order-3 table bits (size = 1 << this).
-pub const ORDER3_BITS: usize = 24;
+pub const ORDER3_BITS: usize = 27;
 /// Blend weight (0..=255) of hashed order-3 into the CM mix.
 pub const ORDER3_MIX_WEIGHT: u32 = 160;
 
 /// Hashed order-4 table bits.
-pub const ORDER4_BITS: usize = 25;
+pub const ORDER4_BITS: usize = 27;
 /// Blend weight (0..=255) of hashed order-4 into the CM mix.
 pub const ORDER4_MIX_WEIGHT: u32 = 48;
 
 /// Hashed order-5 table bits.
-pub const ORDER5_BITS: usize = 24;
+pub const ORDER5_BITS: usize = 26;
 /// Blend weight (0..=255) of hashed order-5 into the CM mix.
 pub const ORDER5_MIX_WEIGHT: u32 = 88;
 
 /// Hashed order-6 table bits.
-pub const ORDER6_BITS: usize = 24;
+pub const ORDER6_BITS: usize = 26;
 /// Blend weight (0..=255) of hashed order-6 into the CM mix.
 pub const ORDER6_MIX_WEIGHT: u32 = 32;
 
 /// Hashed order-7 table bits.
-pub const ORDER7_BITS: usize = 23;
+pub const ORDER7_BITS: usize = 25;
 /// Blend weight (0..=255) of hashed order-7 into the CM mix.
 pub const ORDER7_MIX_WEIGHT: u32 = 16;
 
@@ -58,7 +58,7 @@ pub const ORDER7_MIX_WEIGHT: u32 = 16;
 pub const SSE_MIX_WEIGHT: u32 = 224;
 
 /// Word-model hash table bits.
-pub const WORD_BITS: usize = 23;
+pub const WORD_BITS: usize = 25;
 /// Blend weight (0..=255) of word model into CM mix (before match/SSE).
 pub const WORD_MIX_WEIGHT: u32 = 64;
 
@@ -69,7 +69,7 @@ pub const SSE2_MIX_WEIGHT: u32 = 192;
 pub const ORDER0_MIX_WEIGHT: u32 = 80;
 
 /// Indirect / record model hash table bits.
-pub const INDIRECT_BITS: usize = 24;
+pub const INDIRECT_BITS: usize = 26;
 /// Blend weight (0..=255) of indirect model into CM mix.
 pub const INDIRECT_MIX_WEIGHT: u32 = 40;
 

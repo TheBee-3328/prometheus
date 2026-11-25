@@ -20,6 +20,8 @@ pub struct IndirectModel {
     t3: Box<[u8]>,
     n0: Box<[u8]>,
     n1: Box<[u8]>,
+    /// 8-bit context fingerprint; 0 = empty.
+    chk: Box<[u8]>,
     mask: usize,
 }
 
@@ -36,6 +38,7 @@ impl IndirectModel {
             t3: vec![0u8; 65536].into_boxed_slice(),
             n0: vec![0u8; size].into_boxed_slice(),
             n1: vec![0u8; size].into_boxed_slice(),
+            chk: vec![0u8; size].into_boxed_slice(),
             mask: size - 1,
         }
     }
@@ -66,7 +69,7 @@ impl IndirectModel {
     }
 
     #[inline]
-    fn hash(&self) -> usize {
+    fn hash_cs(&self) -> (usize, u8) {
         let o2 = ((self.prev1 as usize) << 8) | (self.prev0 as usize);
         let ind1 = self.t1[self.prev0 as usize] as u32;
         let ind2 = self.t2[o2] as u32;
@@ -82,7 +85,12 @@ impl IndirectModel {
         h = h.wrapping_mul(16777619);
         h ^= ind3.wrapping_mul(0x85ebca6b);
         h = h.wrapping_mul(16777619);
-        (h as usize) & self.mask
+        let idx = (h as usize) & self.mask;
+        let mut cs = (h.wrapping_mul(0xc2b2ae35) >> 24) as u8;
+        if cs == 0 {
+            cs = 1;
+        }
+        (idx, cs)
     }
 
     #[inline]
@@ -109,13 +117,21 @@ impl Default for IndirectModel {
 impl Model for IndirectModel {
     #[inline]
     fn predict(&mut self) -> u16 {
-        let i = self.hash();
+        let (i, cs) = self.hash_cs();
+        if self.chk[i] != cs {
+            return 32768;
+        }
         Self::prob(self.n0[i], self.n1[i])
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
-        let i = self.hash();
+        let (i, cs) = self.hash_cs();
+        if self.chk[i] != cs {
+            self.chk[i] = cs;
+            self.n0[i] = 0;
+            self.n1[i] = 0;
+        }
         if bit == 0 {
             self.n0[i] = self.n0[i].saturating_add(1);
         } else {
