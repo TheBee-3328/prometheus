@@ -15,11 +15,11 @@ pub const PRE_STAGE_WORDS: bool = true;
 /// Selected word-dict size (`4096` / `16384` / `49152`). `0` = unused/empty.
 pub const WORD_DICT_N: usize = 4096;
 
-/// Mined template dictionary (companion trial).
-pub const PRE_STAGE_TEMPLATES: bool = true;
+/// Mined template dictionary (companion trial). THROW: off after Phase B miss.
+pub const PRE_STAGE_TEMPLATES: bool = false;
 
 /// Cap on embedded template entries (`0` = all in blob).
-pub const TEMPLATE_DICT_N: usize = 64;
+pub const TEMPLATE_DICT_N: usize = 0;
 
 /// `true` = params follow each template token; `false` = trailing side-stream.
 pub const PARAM_INLINE: bool = false;

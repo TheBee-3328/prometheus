@@ -79,6 +79,9 @@ fn entries() -> &'static [TemplateEntry] {
 }
 
 /// Find `lit` in `input[start..]` only at brace-depth `== base_depth`.
+/// Fails if depth would drop below `base_depth` (closing the opening template
+/// before the literal) — otherwise a later sibling template could satisfy
+/// separators like `|before=` and create multi-megabyte false matches.
 fn find_lit_at_depth(input: &[u8], start: usize, lit: &[u8], base_depth: i32) -> Option<usize> {
     if lit.is_empty() {
         return Some(start);
@@ -99,6 +102,9 @@ fn find_lit_at_depth(input: &[u8], start: usize, lit: &[u8], base_depth: i32) ->
         }
         if j + 1 < n && input[j] == b'}' && input[j + 1] == b'}' {
             depth -= 1;
+            if depth < base_depth {
+                return None;
+            }
             j += 2;
             continue;
         }
@@ -122,7 +128,12 @@ fn match_template(input: &[u8], pos: usize, ti: &TemplateEntry) -> Option<(Vec<V
     let mut params: Vec<Vec<u8>> = Vec::with_capacity(ti.n_params);
     for next in lits.iter().skip(1) {
         let at = find_lit_at_depth(input, cur, next, 1)?;
-        params.push(input[cur..at].to_vec());
+        let p = &input[cur..at];
+        // Side/inline param length is u16; refuse matches that cannot round-trip.
+        if p.len() > 0xffff {
+            return None;
+        }
+        params.push(p.to_vec());
         cur = at + next.len();
     }
     if params.len() != ti.n_params {

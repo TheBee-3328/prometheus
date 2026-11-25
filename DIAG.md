@@ -1164,3 +1164,109 @@ STRUCT_ABCD share_pct=18.5566 gate_3pct=PASS
 ```
 **Verdict:** ABOVE 3% gate → proceed to mine/transform. Templates dominate ABCD.
 **Note:** `--structure-stats <out>` currently writes the archive bitstream to `<out>`; text report is stdout.
+
+## C1 TEMPLATE-MINER Phase B (2026-11-25)
+
+Baseline to beat: `ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107`
+
+Flags: `PRE_STAGE_TEMPLATES=true`, `TEMPLATE_DICT_N=64`, `PARAM_INLINE=false`.
+
+### Cycle 0 — first full enwik8 judge (templates ON, pre-fix)
+```
+ROUNDTRIP=FAIL COMPRESSED=20054334 DECOMPRESSOR=91080 SCORE=20145414 COMPRESS_SECONDS=396.10 DECOMPRESS_SECONDS=361.08 PEAK_RSS_MB=3554
+```
+Δ vs baseline SCORE: **−706693** but **ROUNDTRIP=FAIL** (not KEEP).
+
+Root cause: `find_lit_at_depth` allowed depth to fall below the opening template, so separators like `|before=` could match inside a *later* sibling template. Combined with u16 param truncation (`0xffff`), decode lost ~3.7MB (first mismatch @ 5934349, succession-box / template idx 52).
+
+### Cycle 1 — fix depth floor + refuse params > u16
+- Fail match if `}}` would drop depth below `base_depth`.
+- Refuse template matches with any param longer than `0xffff`.
+- Preprocessor RT OK on full enwik8 after fix (probe).
+
+### Cycle 1 result (depth-fix + u16 refuse)
+```
+ROUNDTRIP=OK COMPRESSED=20777571 DECOMPRESSOR=91080 SCORE=20868651 COMPRESS_SECONDS=407.57 DECOMPRESS_SECONDS=371.23 PEAK_RSS_MB=3563
+```
+Δ vs baseline SCORE: **+16544** (COMPRESSED +12344, DECOMPRESSOR +4200). ROUNDTRIP OK; not KEEP yet.
+
+### Cycle 2 — try PARAM_INLINE=true (N=64)
+Hypothesis: colocating params with tokens helps CM more than side-stream; may cut COMPRESSED enough to cover DECOMPRESSOR overhead.
+
+### Cycle 2 result — PARAM_INLINE=true N=64
+```
+ROUNDTRIP=OK COMPRESSED=20782549 DECOMPRESSOR=91464 SCORE=20874013 COMPRESS_SECONDS=414.57 DECOMPRESS_SECONDS=367.42 PEAK_RSS_MB=3562
+```
+Δ vs baseline: **+21906** (worse than cycle 1). Revert PARAM_INLINE=false.
+
+### Cycle 3 — PARAM_INLINE=false, TEMPLATE_DICT_N=32
+Hypothesis: drop low-gain tails; smaller blob + less match work may cut DECOMPRESSOR and avoid weak matches that hurt CM.
+
+### Cycle 3 result — N=32 truncated blob, PARAM_INLINE=false
+```
+ROUNDTRIP=OK COMPRESSED=20776467 DECOMPRESSOR=89784 SCORE=20866251 COMPRESS_SECONDS=390.98 DECOMPRESS_SECONDS=379.40 PEAK_RSS_MB=3562
+```
+Δ vs baseline: **+14144** (best so far among OK rounds; still worse).
+
+### Cycle 4 — N=16 truncated blob
+
+### Cycle 3 result — N=32 truncated blob, PARAM_INLINE=false
+```
+ROUNDTRIP=OK COMPRESSED=20776467 DECOMPRESSOR=89784 SCORE=20866251 COMPRESS_SECONDS=390.98 DECOMPRESS_SECONDS=379.40 PEAK_RSS_MB=3562
+```
+Δ vs baseline: **+14144** (best so far among OK rounds; still worse).
+
+### Cycle 4 — N=16 truncated blob
+
+### Cycle 4 result — N=16 truncated blob (reconstructed after time_compress race)
+Artifacts: RT OK, compress×2 identical, decompress×2 identical. `time_compress.txt` missing at score print (orch race); sizes verified from `judge_work/`.
+```
+ROUNDTRIP=OK COMPRESSED=20774005 DECOMPRESSOR=89096 SCORE=20863101
+```
+Δ vs baseline: **+10994** (best OK so far; still worse). DECOMPRESS_SECONDS≈370.58.
+
+### Cycle 5 — N=8 truncated blob
+
+### Cycle 5 result — N=8
+```
+ROUNDTRIP=OK COMPRESSED=20772849 DECOMPRESSOR=88776 SCORE=20861625 COMPRESS_SECONDS=383.01 DECOMPRESS_SECONDS=374.22 PEAK_RSS_MB=3562
+```
+Δ vs baseline: **+9518**. Still worse; pruning helps DECOMPRESSOR but COMPRESSED remains above baseline.
+
+### Cycle 6 — N=4 truncated blob
+
+### Cycle 6 result — N=4
+```
+ROUNDTRIP=OK COMPRESSED=20771021 DECOMPRESSOR=88616 SCORE=20859637 COMPRESS_SECONDS=385.80 DECOMPRESS_SECONDS=375.53 PEAK_RSS_MB=3563
+```
+Δ vs baseline: **+7530**. Pruning asymptotes above KEEP; multi-param cite skels likely CM-hostile.
+
+### Cycle 7 — curated simple skels (0–1 param, high count; no cite*)
+
+### Cycle 6 result — N=4
+```
+ROUNDTRIP=OK COMPRESSED=20771021 DECOMPRESSOR=88616 SCORE=20859637 COMPRESS_SECONDS=385.80 DECOMPRESS_SECONDS=375.53 PEAK_RSS_MB=3563
+```
+Δ vs baseline: **+7530**. Pruning asymptotes above KEEP; multi-param cite skels likely CM-hostile.
+
+### Cycle 7 — curated simple skels (0–1 param, high count; no cite*)
+
+### Cycle 7 result — curated simple 21 skels
+```
+ROUNDTRIP=OK COMPRESSED=20774919 DECOMPRESSOR=88712 SCORE=20863631 COMPRESS_SECONDS=394.63 DECOMPRESS_SECONDS=371.33 PEAK_RSS_MB=3562
+```
+Δ vs baseline: **+11524** (worse than N=4). Cite-pruning alone insufficient.
+
+### Cycle 8 — N=2 ({{main}}, {{note}} only)
+
+### Cycle 8 result — N=2
+```
+ROUNDTRIP=OK COMPRESSED=20770866 DECOMPRESSOR=88456 SCORE=20859322 COMPRESS_SECONDS=378.95 DECOMPRESS_SECONDS=367.30 PEAK_RSS_MB=3562
+```
+Δ vs baseline: **+7215**. Best SCORE among OK template trials, still above KEEP line. Diminishing returns from further N prune; no path to <20852107 without a structural win.
+
+## C1 TEMPLATE-MINER THROW
+After cycle-0 FAIL + cycles 1–8 OK-but-worse (best +7215 @ N=2), set `PRE_STAGE_TEMPLATES=false`, restore empty/minimal blob embedding off the default path, stop pursuing template SCORE on this branch.
+
+`TEMPLATE_MINER REJECT after 8 tune cycles (≤15); resume without templates.`
+Best OK: `ROUNDTRIP=OK COMPRESSED=20770866 DECOMPRESSOR=88456 SCORE=20859322` (cycle 8).

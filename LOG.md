@@ -149,3 +149,5 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-25T04:50:04Z Hygiene: prune 12 worktrees; unstick C1
 - Removed a1/b1/diag*/p5*/tuner* worktrees. Live: main+b2+c1+pre-v2.
 - Spawned C1-MINE supersede; B2 cap watcher if slice Δ&gt;−15KB.
+
+| 2026-11-25 | C1-TMPL | TEMPLATE_MINER REJECT after 8 cycles; PRE_STAGE_TEMPLATES=false | — | 20859322 best OK | — | — | — | — | THROW |

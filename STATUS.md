@@ -1,24 +1,25 @@
-# STATUS
+# STATUS — PROMETHEUS
 
-**Current phase:** LIVE — cleaned; C1 mine + B2 capped toward ~10–12 MB enwik8  
-**Poll cadence:** **2 minutes**  
-**enwik9:** NEVER auto-start (manual only)
+**LIVE monitoring** 2026-11-25  
+**Best (main):** SCORE **20852107**  
+**Bench cap:** 1 full enwik8 judge
 
-## Locked best enwik8
+## C1-TMPL — THROW
+`PRE_STAGE_TEMPLATES=false` after Phase B miss (cycles 1–8 all SCORE > 20852107).
+Best OK trial: cycle 8 N=2 `SCORE=20859322` (Δ **+7215**). Do not merge.
 
-```
-ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107
-```
-**Gap to ~11e6:** ≈ 9.7 MB
+## C1 trail vs 20852107
+| Cyc | Trial | SCORE | Δ |
+|----:|:------|------:|--:|
+| 0 | N=64 pre-fix | FAIL 20145414 | n/a |
+| 1 | depth-fix N=64 | 20868651 | +16544 |
+| 2 | PARAM_INLINE | 20874013 | +21906 |
+| 3 | N=32 | 20866251 | +14144 |
+| 4 | N=16 | 20863101 | +10994 |
+| 5 | N=8 | 20861625 | +9518 |
+| 6 | N=4 | 20859637 | +7530 |
+| 7 | curated simple | 20863631 | +11524 |
+| 8 | N=2 | 20859322 | +7215 |
 
-## Process hygiene (2026-11-25)
-
-- Removed **12** obsolete worktrees (a1, b1, diag*, p5*, tuner*).
-- Kept: `main`, `b2-mixer`, `c1-tmpl`, `pre-v2`.
-- No zombie compress/wait loops. Live compute: B2 25MB slices only (+ new C1-MINE).
-- Stuck UI agents (old C1/B2) may still show “running” but have no extra procs — superseded by orch + C1-MINE.
-
-## In flight
-
-- **C1-MINE** — template mine/transform (gate PASS)
-- **B2** — SSE2 sweep; orch will stop if best slice Δ > −15KB
+## Next
+Hierarchical/adaptive mix (not SSE 1D) or Track 0 refresh on main. B2/B3 parked REJECT.

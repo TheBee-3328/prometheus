@@ -159,4 +159,14 @@ mod tests {
         assert_roundtrip(b"pre {{note|abc}} mid {{flagicon|USA}} post");
         assert_roundtrip(b"{{nested|a={{inner|x}}|b=y}}");
     }
+
+    #[test]
+    fn succession_sibling_does_not_span() {
+        // Two succession-like boxes: matcher must not join them across `}}`.
+        let s = b"{{succession box|title=A|x|before=B|after=C|years=1}}\n{{succession box|title=D|before=E|after=F|years=2}}";
+        assert_roundtrip(s);
+        let e = encode(s);
+        let d = decode(&e);
+        assert_eq!(d, s);
+    }
 }
