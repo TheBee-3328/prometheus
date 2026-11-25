@@ -120,3 +120,10 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 
 ## 2026-11-25T01:44:26Z Spawn A1-RETUNE + B1-HASH
 - After word-dict merge. Baseline SCORE 21365747. No enwik9.
+
+## 2026-11-25T02:08:07Z DIAG-R6 word-SM 100mb case PASS (not full adv suite)
+- Script ran only enwik8_first_100mb then echoed PASS=10 — **do not treat as full adversarial**. SCORE 21263097 still provisional.
+- B1 full judge + A1 slice in flight.
+
+## 2026-11-25T02:44:54Z Merge B1-HASH v4
+- SCORE **20911620** (−454127). Adv 10/10. Peak 3562 MB.

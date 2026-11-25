@@ -1,17 +1,17 @@
 {
-  "updated_at": "2026-11-25T01:45:00Z",
+  "updated_at": "2026-11-25T02:45:00Z",
   "enwik8": {
-    "SCORE": 21365747,
-    "COMPRESSED": 21279587,
-    "DECOMPRESSOR": 86160,
-    "bpB": 1.702367,
-    "COMPRESS_SECONDS": 307.98,
-    "DECOMPRESS_SECONDS": 290.25,
-    "PEAK_RSS_MB": 1834,
+    "SCORE": 20911620,
+    "COMPRESSED": 20824740,
+    "DECOMPRESSOR": 86880,
+    "bpB": 1.665979,
+    "COMPRESS_SECONDS": 400.83,
+    "DECOMPRESS_SECONDS": 400.88,
+    "PEAK_RSS_MB": 3562,
     "ROUNDTRIP": "OK",
     "adversarial": "10/10 PASS",
-    "source": "main after PRE-V2 word dict N=4096 KEEP",
-    "judge_line": "ROUNDTRIP=OK COMPRESSED=21279587 DECOMPRESSOR=86160 SCORE=21365747 COMPRESS_SECONDS=307.98 DECOMPRESS_SECONDS=290.25 PEAK_RSS_MB=1834",
+    "source": "main after B1-HASH v4 ORDER3/4=27",
+    "judge_line": "ROUNDTRIP=OK COMPRESSED=20824740 DECOMPRESSOR=86880 SCORE=20911620 COMPRESS_SECONDS=400.83 DECOMPRESS_SECONDS=400.88 PEAK_RSS_MB=3562",
     "on_main": true
   },
   "enwik9_manual": {
@@ -19,9 +19,11 @@
     "SCORE": 186586969,
     "COMPRESSED": 186549457,
     "DECOMPRESSOR": 37512,
-    "COMPRESS_SECONDS": 3427.58,
-    "DECOMPRESS_SECONDS": 3403.97,
-    "PEAK_RSS_MB": 4347,
-    "ROUNDTRIP": "OK"
+    "note": "pre-word-dict / pre-B1 binary"
+  },
+  "enwik9_estimates_after_B1": {
+    "time_seconds_est": ">=4000 compress (10x)",
+    "peak_rss_mb_est": "3500-6000",
+    "flag": "consider ORDER*=27+ for enwik9 manual check"
   }
 }
