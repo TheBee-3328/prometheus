@@ -101,3 +101,15 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 
 ## 2026-11-25T01:01:38Z REVERT mixer G5 merge
 - Judge SCORE 21395251 but adversarial **7/10 FAIL** — reverted from main. Parked on agent/diag-r6.
+
+## 2026-11-25T01:03:29Z DIAG-R6 word StateMap slice (parked)
+- 20M **−28008** vs G5 (4410359). No full judge until PRE-V2 free.
+
+## 2026-11-25T01:43:09Z Step 1 — baseline locked
+- Stopped all agents/orphans (compress/decompress/adversarial/diag-r6/pre-v2 workers).
+- Poll cadence set to **2 minutes** (operator).
+- Locked enwik8 (verified words-on): SCORE **21365747** COMPRESSED=21279587 DECOMPRESSOR=86160 bpB≈1.702 ROUNDTRIP=OK peak=1834MB times 307.98/290.25s. Adv 10/10.
+- main tip still 21583876 until merge.
+- enwik9 manual, may be stale: SCORE 186586969 (pre-R5 binary).
+- Provisional R6 word-SM SCORE 21263097 ROUNDTRIP=OK — adv interrupted; not locked.
+- Written `best.json`. Proceeding Step 2. **No enwik9 auto-runs.**
