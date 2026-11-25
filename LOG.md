@@ -132,3 +132,7 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 - [B1-HASH](8a0477d9-6999-4a45-b570-bd1484a8b4e8): already merged (`06bc109`); main SCORE **20911620**.
 - [DIAG-R6](97afab47-bab4-4332-811c-d75fd55ea774): FINAL SCORE 21263097 — **behind main**; do not merge. Parked (word-SM/G5 useful ideas only if rebased on B1+dict).
 - A1 cand A: provisional SCORE ~20852107 (−59513); awaiting determinism confirm before merge.
+
+## 2026-11-25T04:17:46Z Merge A1-RETUNE KEEP
+- Merged `0118c25` → main. SCORE **20852107** (COMPRESSED=20765227 DECOMP=86880). Δ −59513 vs B1. Adv 10/10. DET=OK.
+- Mix: ORDER0=64 MATCH_IND_CROSS=16 INDIRECT=32 ORDER5=72 (B1 ORDER3/4=27 retained).
