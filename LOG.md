@@ -140,3 +140,8 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-25T04:18:57Z Post-A1: spawn B2 + C1
 - Adv A1 **10/10**. Merged params + best.json SCORE **20852107**.
 - Spawned agent/b2-mixer + agent/c1-tmpl from main. A1 B/C not promoted (weaker slices).
+
+## 2026-11-25T04:44:46Z Target reframed + C1 gate
+- Operator aim: ~10–12MB enwik8 / ~95MB enwik9 (not just 20.5e6).
+- C1 structure-stats: ABCD **18.56%** cost share, templates **15.36%** (~2.59MB est) — gate PASS. Proceed mine.
+- B2: mixer sweeps ongoing; orch directing away from endless 1D grids.

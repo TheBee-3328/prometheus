@@ -1,6 +1,6 @@
 # STATUS
 
-**Current phase:** LIVE — A1 KEEP merged; continue Step 2  
+**Current phase:** LIVE — chase ~10–12 MB enwik8 / ~95 MB enwik9  
 **Poll cadence:** **2 minutes**  
 **enwik9:** NEVER auto-start (manual only)
 
@@ -9,25 +9,23 @@
 ```
 ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107
 ```
-**bpB:** ≈ **1.661** · **Gap to 20.5e6:** ≈ 0.35 MB  
+**bpB:** ≈ **1.661** · **Gap to ~11e6 mid-target:** ≈ **9.7 MB** · Gap to 20.5e6 soft: ≈ 0.35 MB  
 **Mix:** ORDER0=64 CROSS=16 IND=32 ORDER5=72 · ORDER3/4=27 (B1)
+
+## Ambition
+
+- Operator target: **~10–12 MB** SCORE on enwik8 ⇒ roughly **~95 MB** enwik9.
+- Mixer-only retunes cannot close this; need preprocessor (templates/numeric) + stronger models/contexts.
 
 ## enwik9 manual, may be stale
 
 SCORE **186586969** (old binary)
 
-## READY FOR MANUAL ENWIK9 CHECK
+## In flight
 
-- main @ A1 + B1-HASH + word dict N=4096
-- Larger word dicts 16k/48k
-- Possibly larger hash tables for enwik9 scale
-
-## In flight / next
-
-- A1 B/C skipped (weaker than A)
-- - **B2-MIXER** + **C1-TMPL** spawned on main@53a83a3
-- A4 numeric, B3 contexts queued
-- R6 parked behind (21263097)
+- **C1-TMPL:** structure gate PASS (ABCD cost share ≈18.6%; templates ≈15.4%). Mining next.
+- **B2-MIXER:** 25MB SSE/APM/STRUCT sweeps (small expected Δ). Cap burn; one full judge for best combo only.
+- Queued: A4 numeric, B3 contexts, larger dicts (manual enwik9)
 
 ## Done
 
