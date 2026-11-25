@@ -268,3 +268,7 @@ Prune monotonically helps but still above main. Likely THROW soon.
 - Adv **10/10 PASS**. Judge line from `tune/b5_full_judge.log`.
 - Word hit-gate + prose prev+cur (MODE=2 MIX=24 BITS=25).
 
+
+## 2026-11-25T13:04Z Spawn B6-WS
+- After B5 merge. Whitespace model (T0 rank #2, ≲5MB cap). Baseline now SCORE 20769768.
+
