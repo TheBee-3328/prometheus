@@ -1097,3 +1097,44 @@ ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876 COMPRESS_SECO
 
 Gap to 20.5e6 ≈ 1.05 MB. Adversarial: **10/10 PASS**.
 
+
+---
+
+## PRE-V2 word dict trial (agent PRE-V2-WORD)
+
+Start: 2026-11-25
+Branch: `agent/pre-v2`
+Baseline: `ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876`
+
+### Implementation
+- Split preprocessor into `preprocessor/{mod,stages,capitals,markup,words}.rs`
+- Added `tools/build_word_dict.py` (two-pass, memory-capped, NL-only)
+- Stage flags: `PRE_STAGE_WORDS` (default false), `WORD_DICT_N`
+
+### Phase A — dict build from enwik9
+(in progress; see judge_work/build_word_dict.log)
+
+
+### Phase A result
+- Blob sizes: 4096=47482B, 16384=201320B, 49152=647120B
+- Selected N=4096 (`the` top; savings-ranked; wiki-boilerplate blacklisted)
+- Word-boundary matching + 1-byte tokens for top 90
+
+### Phase B — words ON (cycle 0 = first judge)
+```
+ROUNDTRIP=OK COMPRESSED=21279587 DECOMPRESSOR=86160 SCORE=21365747 COMPRESS_SECONDS=307.98 DECOMPRESS_SECONDS=290.25 PEAK_RSS_MB=1834
+```
+- Δ vs baseline SCORE **21583876**: **−218129** (KEEP immediately)
+- COMPRESSED −266729; DECOMPRESSOR +48600 (blob ~47KB embedded)
+- Adversarial: **10/10 PASS**
+- Cycles used: **0/15** (no tune needed)
+
+## PRE-V2 word dict trial
+- N tried: 4096
+- Cycles used: 0/15
+- Best SCORE with dict: `ROUNDTRIP=OK COMPRESSED=21279587 DECOMPRESSOR=86160 SCORE=21365747`
+- Baseline: `ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876`
+- Verdict: KEEP
+- Blob N=4096; DECOMPRESSOR delta = +48600 (37560 → 86160)
+- Next: TEMPLATE-MINER (orch will spawn)
+

@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-25T01:42:00Z",
+  "updated_at": "2026-11-25T01:45:00Z",
   "enwik8": {
     "SCORE": 21365747,
     "COMPRESSED": 21279587,
@@ -9,11 +9,10 @@
     "DECOMPRESS_SECONDS": 290.25,
     "PEAK_RSS_MB": 1834,
     "ROUNDTRIP": "OK",
-    "source": "agent/pre-v2 words-on N=4096 (PRE_STAGE_WORDS=true)",
     "adversarial": "10/10 PASS",
+    "source": "main after PRE-V2 word dict N=4096 KEEP",
     "judge_line": "ROUNDTRIP=OK COMPRESSED=21279587 DECOMPRESSOR=86160 SCORE=21365747 COMPRESS_SECONDS=307.98 DECOMPRESS_SECONDS=290.25 PEAK_RSS_MB=1834",
-    "on_main": false,
-    "main_tip_SCORE_until_merge": 21583876
+    "on_main": true
   },
   "enwik9_manual": {
     "label": "enwik9 manual, may be stale",
@@ -23,16 +22,6 @@
     "COMPRESS_SECONDS": 3427.58,
     "DECOMPRESS_SECONDS": 3403.97,
     "PEAK_RSS_MB": 4347,
-    "ROUNDTRIP": "OK",
-    "note": "pre-R5/R6 binary; do not auto-rerun"
-  },
-  "provisional_not_locked": {
-    "diag_r6_word_sm": {
-      "SCORE": 21263097,
-      "COMPRESSED": 21225761,
-      "DECOMPRESSOR": 37336,
-      "ROUNDTRIP": "OK",
-      "adversarial": "interrupted at Step-1 agent stop — not baseline"
-    }
+    "ROUNDTRIP": "OK"
   }
 }

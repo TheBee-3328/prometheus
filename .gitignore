@@ -34,3 +34,5 @@ PROMETHEUS-v2-*/
 # Diag agent local artifacts
 /diag_work/
 .diag_start_ts
+/target-prev2/
+/target
