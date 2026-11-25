@@ -13,12 +13,13 @@ use crate::params::{
     HASH_ORDER, HASH_SIZE, INDIRECT_MIX_WEIGHT, MATCH_IND_CROSS_WEIGHT, MIN_MIX_LEN,
     ORDER0_MIX_WEIGHT, ORDER1_MIX_WEIGHT, ORDER3_BITS, ORDER3_MIX_WEIGHT, ORDER4_BITS,
     ORDER4_MIX_WEIGHT, ORDER5_BITS, ORDER5_MIX_WEIGHT, ORDER6_BITS, ORDER6_MIX_WEIGHT,
-    ORDER7_BITS, ORDER7_MIX_WEIGHT, SSE2_MIX_WEIGHT, SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT,
-    WORD_MIX_WEIGHT,
+    ORDER7_BITS, ORDER7_MIX_WEIGHT, PROSE_MATCH_GATE, PROSE_MIX_WEIGHT, SSE2_MIX_WEIGHT,
+    SSE_MIX_WEIGHT, STRUCT_MIX_WEIGHT, WORD_HIT_GATE, WORD_MIX_WEIGHT,
 };
 use crate::statemap::{sm_init, sm_predict, sm_update};
 use crate::sparse::SparseModel;
 use crate::sse::{Sse, Sse2};
+use crate::prose::ProseModel;
 use crate::word::WordModel;
 
 /// Number of hash-table candidate slots checked when starting a match.
@@ -259,6 +260,7 @@ pub struct Order2MatchModel {
     match_m: MatchModel,
     sparse: SparseModel,
     word: WordModel,
+    prose: ProseModel,
     indirect: IndirectModel,
     /// Match×indirect cross StateMap cells.
     cross: Box<[u32]>,
@@ -287,6 +289,7 @@ impl Order2MatchModel {
             match_m: MatchModel::new(),
             sparse: SparseModel::new(),
             word: WordModel::new(),
+            prose: ProseModel::new(),
             indirect: IndirectModel::new(),
             cross: vec![sm_init(); CROSS_SIZE].into_boxed_slice(),
             cross_i: 0,
@@ -362,11 +365,30 @@ impl Model for Order2MatchModel {
         p0 = Self::mix_w(p0, p6, ORDER6_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p7, ORDER7_MIX_WEIGHT);
         p0 = Self::mix_w(p0, p0u, ORDER0_MIX_WEIGHT);
-        let pw = self.word.predict();
-        p0 = Self::mix_w(p0, pw, WORD_MIX_WEIGHT);
+        if WORD_HIT_GATE != 0 {
+            if let Some(pw) = self.word.predict_hit() {
+                p0 = Self::mix_w(p0, pw, WORD_MIX_WEIGHT);
+            }
+        } else {
+            let pw = self.word.predict();
+            p0 = Self::mix_w(p0, pw, WORD_MIX_WEIGHT);
+        }
+        let len = self.match_m.match_len();
+        let prose_w = if PROSE_MIX_WEIGHT == 0 {
+            0
+        } else if PROSE_MATCH_GATE != 0 && len >= MIN_MIX_LEN {
+            0
+        } else {
+            PROSE_MIX_WEIGHT
+        };
+        if prose_w != 0 {
+            // Hit-gate: skip mix on checksum miss / cold slot (avoid diluting to 1/2).
+            if let Some(pp) = self.prose.predict_hit() {
+                p0 = Self::mix_w(p0, pp, prose_w);
+            }
+        }
         let pi = self.indirect.predict();
         p0 = Self::mix_w(p0, pi, INDIRECT_MIX_WEIGHT);
-        let len = self.match_m.match_len();
         // Match×indirect cross: mb × ind1 × ind2_hi_nibble × bit_pos × expected_bit.
         let mb = Sse::match_bucket(len) as usize;
         let bp = (Self::bits_seen(self.bit_cxt) as usize) & 7;
@@ -406,6 +428,7 @@ impl Model for Order2MatchModel {
         self.order6.update(bit);
         self.order7.update(bit);
         self.word.update(bit);
+        self.prose.update(bit);
         self.indirect.update(bit);
         self.match_m.update(bit);
         self.sparse.update(bit);
