@@ -98,3 +98,21 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-24T23:57:16Z Unpause — PRE-V2 dual trials
 - Operator: run word-dict then TEMPLATE-MINER; continue after THROW.
 - Baseline SCORE **21583876**. Worktree `agent/pre-v2`.
+
+## 2026-11-24T23:57:37Z Spawn PRE-V2-WORD
+- Agent on `agent/pre-v2` / worktree prometheus-pre-v2. Baseline SCORE 21583876.
+- After verdict → TEMPLATE-MINER then continue orch.
+
+## 2026-11-25T00:04:28Z DIAG-R6 mixer slice (parked — PRE-V2 priority)
+- 5M best candC −10234; 20M best candD −35617 (o3=140 o4=80 ind=20 cr=10 sse2=96).
+- Not merging; resume after PRE-V2 trials.
+
+## 2026-11-25T00:09:37Z DIAG-R6 20M mixer (parked)
+- Best so far **candG −37961** (o3=140 o4=88 ind=24 cr=10 sse2=112); candC2 −37641.
+- PRE-V2 word-dict build still running; no R6 merge/judge until trials done.
+
+## 2026-11-25T00:17:59Z DIAG-R6 G5 locked (parked)
+- Params locked; 20M confirm **4438367**. Await PRE-V2 before full judge/merge.
+
+## 2026-11-25T01:01:25Z Merge DIAG-R6 mixer G5
+- SCORE **21395251** (COMPRESSED=21357675). Adv 10/10. New PRE-V2 keep gate.
