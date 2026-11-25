@@ -1120,3 +1120,25 @@ ROUNDTRIP=OK COMPRESSED=21357675 DECOMPRESSOR=37576 SCORE=21395251 COMPRESS_SECO
 
 Gap to 20.5e6 ≈ 0.86 MB. Adversarial: **10/10 PASS**.
 
+
+## Attempt 3 — Word Laplace→StateMap dual-rate (KEEP)
+
+Replace word n0/n1 Laplace with StateMap cells (same asymptotic n+=1-(n>>3)). RSS +≈16 MiB.
+
+Rejected companion: o5/o6/o7 `learn_count_asym` (n≥64 → subtract n>>3) with word SM: 20MB **4412619** vs word-only **4410359** (**+2260**).
+
+20MB word SM: 4438367 → **4410359** (−28008).
+
+Full enwik8 (determinism OK; adversarial 10/10):
+```
+ROUNDTRIP=OK COMPRESSED=21225761 DECOMPRESSOR=37336 SCORE=21263097 COMPRESS_SECONDS=375.08 DECOMPRESS_SECONDS=345.64 PEAK_RSS_MB=1870
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21357675 | **21225761** | **−131914** |
+| DECOMPRESSOR | 37576 | 37336 | −240 |
+| SCORE | 21395251 | **21263097** | **−132154** |
+
+Gap to 20.5e6 ≈ 0.73 MB.
+
