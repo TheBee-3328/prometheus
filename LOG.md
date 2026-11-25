@@ -136,3 +136,7 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 ## 2026-11-25T04:17:46Z Merge A1-RETUNE KEEP
 - Merged `0118c25` → main. SCORE **20852107** (COMPRESSED=20765227 DECOMP=86880). Δ −59513 vs B1. Adv 10/10. DET=OK.
 - Mix: ORDER0=64 MATCH_IND_CROSS=16 INDIRECT=32 ORDER5=72 (B1 ORDER3/4=27 retained).
+
+## 2026-11-25T04:18:57Z Post-A1: spawn B2 + C1
+- Adv A1 **10/10**. Merged params + best.json SCORE **20852107**.
+- Spawned agent/b2-mixer + agent/c1-tmpl from main. A1 B/C not promoted (weaker slices).

@@ -24,8 +24,9 @@ SCORE **186586969** (old binary)
 
 ## In flight / next
 
-- A1 B/C candidates (if still open)
-- A4 numeric, B2 mixer, B3 contexts, C1 template analysis
+- A1 B/C skipped (weaker than A)
+- - **B2-MIXER** + **C1-TMPL** spawned on main@53a83a3
+- A4 numeric, B3 contexts queued
 - R6 parked behind (21263097)
 
 ## Done
