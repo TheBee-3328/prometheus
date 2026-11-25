@@ -1,26 +1,22 @@
 # STATUS
 
 **Current phase:** LIVE — DIAG-R6 toward ≤20.5e6  
-**Current best SCORE:** **21583876** (enwik8)  
-**Best line:** `ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876`  
-**bpB:** ≈ **1.724**  
-**Gap to 20.5e6:** ≈ 1.05 MB  
+**Current best SCORE:** **21395251** (enwik8)  
+**Best line:** `ROUNDTRIP=OK COMPRESSED=21357675 DECOMPRESSOR=37576 SCORE=21395251`  
+**bpB:** ≈ **1.709**  
+**Gap to 20.5e6:** ≈ 0.86 MB  
 **Stop policy:** Operator manual stop.  
 
 ## Session SCORE path (abbrev)
 
-28080343 → … → 21887167 → 21778410 → **21583876**
-
-## Merged
-
-- DIAG-R5 (`agent/diag-r5`): ind2 cross + MIX=22 + soft-reset n→1 → SCORE 21778410
+… → 21778410 → 21583876 → **21395251**
 
 ## In flight
 
-- DIAG-R6: asymptotic StateMap n+=1-(n>>3) → SCORE 21583876; mixer retune / word hybrid next
+- DIAG-R6: asym StateMap + mixer G5; word/o5 hybrid next
 
 ## Next (DIAG-R6)
 
-1. Mixer retune after asymptotic schedule (ORDER3/5/6, SSE, APM, CROSS)
-2. Word / o5 Laplace→hybrid dual-rate
+1. Word / o5 Laplace→hybrid dual-rate
+2. Further mixer micro-tune (ind≈28–32, o4≈88–96)
 3. RSS trim before enwik9 re-measure

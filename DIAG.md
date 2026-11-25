@@ -1097,3 +1097,26 @@ ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876 COMPRESS_SECO
 
 Gap to 20.5e6 ≈ 1.05 MB. Adversarial: **10/10 PASS**.
 
+
+## Attempt 2 — Mixer retune after asymptotic (KEEP)
+
+5MB/20MB sweeps after asym schedule. Strongest single levers: lower INDIRECT, CROSS, SSE2; higher ORDER4; slightly lower ORDER3.
+
+Best combo (G5):
+- ORDER3 160→140, ORDER4 48→88, INDIRECT 40→28, CROSS 22→10, SSE2 192→112
+
+20MB: 4476865 → **4438367** (−38498).
+
+Full enwik8:
+```
+ROUNDTRIP=OK COMPRESSED=21357675 DECOMPRESSOR=37576 SCORE=21395251 COMPRESS_SECONDS=342.80 DECOMPRESS_SECONDS=334.10 PEAK_RSS_MB=1853
+```
+
+| | Before | After | Δ |
+|--|--:|--:|--:|
+| COMPRESSED | 21546316 | **21357675** | **−188641** |
+| DECOMPRESSOR | 37560 | 37576 | +16 |
+| SCORE | 21583876 | **21395251** | **−188625** |
+
+Gap to 20.5e6 ≈ 0.86 MB. Adversarial: **10/10 PASS**.
+
