@@ -1,15 +1,29 @@
 PROMETHEUS
 Copyright (c) 2026 TheBee-3328, Adam Grman (Adam-Grman), and contributors
 
-This project is licensed under the MIT License. See the file LICENSE.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program (see the file LICENSE). If not, see
+<https://www.gnu.org/licenses/>.
 
 Hutter Prize compliance note
 ----------------------------
 Documented source under an OSI-approved license is required before Hutter Prize
-payout (https://www.hutter1.net/prize/hrules.htm, FAQ on licensing). MIT is an
-OSI-approved license. Contest organizers list a preference order of Unlicense >
-MIT > Apache > Mozilla > GNU; MIT is chosen here to retain copyright while
-allowing reuse by future contestants (including non-commercial / contest use).
+payout (https://www.hutter1.net/prize/hrules.htm). GPLv3 is OSI-approved.
+Contest FAQ preference order is Unlicense > MIT > Apache > Mozilla > GNU; GNU
+licenses remain explicitly acceptable. Using GPLv3 keeps copyright with the
+authors and requires derivative works that are distributed to stay under GPL
+terms, while still allowing other contestants to study and improve the code
+under those terms.
 
 Third-party / data notices
 --------------------------
@@ -18,8 +32,7 @@ Third-party / data notices
   repository (gitignored wholes; optional reconstructed parts under data/).
   Wikipedia content is available under CC BY-SA and GFDL terms from the
   Wikimedia Foundation. Obtain official dumps from Wikimedia / known mirrors
-  (e.g. Matt Mahoney’s large text compression benchmark pages) and respect
-  those licenses when redistributing the data itself.
+  and respect those licenses when redistributing the data itself.
 - The Hutter Prize name, rules, and branding belong to Marcus Hutter and the
   contest organizers. This project is an independent implementation aimed at
   that contest; it is not an official Hutter Prize product.

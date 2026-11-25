@@ -3,7 +3,7 @@ name = "prometheus-compress"
 version = "0.1.0"
 edition = "2021"
 description = "PROMETHEUS compressor (Phase 1: order-2 + arithmetic coding)"
-license = "MIT"
+license = "GPL-3.0-or-later"
 authors = ["TheBee-3328 <thebee3328@gmail.com>", "Adam Grman <88619001+Adam-Grman@users.noreply.github.com>"]
 repository = "https://github.com/TheBee-3328/prometheus"
 

@@ -6,7 +6,7 @@ This repository is an independent research / engineering effort. It is **not** a
 
 | | |
 |--|--|
-| **License** | [MIT](LICENSE) (OSI-approved; suitable for Hutter Prize source disclosure) |
+| **License** | [GPLv3](LICENSE) (or later; OSI-approved; suitable for Hutter Prize source disclosure) |
 | **Copyright** | © 2026 TheBee-3328, Adam Grman (Adam-Grman), and contributors — see [NOTICE](NOTICE) |
 | **Language** | Rust (Nix flake toolchain) |
 | **Internal SCORE** | `COMPRESSED_BYTES + DECOMPRESSOR_BYTES` (see [JUDGE.md](JUDGE.md); differs from official Hutter \(S\)) |
@@ -61,12 +61,12 @@ Always run with a clean `CARGO_TARGET_DIR` (or unset) so another worktree’s ta
 
 ## Copyright and licensing
 
-- **Code:** Copyright © 2026 **TheBee-3328**, **Adam Grman (Adam-Grman)**, and contributors. Licensed under the **MIT License** — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-- **Why MIT:** Satisfies the Hutter Prize OSI-source requirement while keeping copyright; permissive enough for other contestants to study and build on (as the contest intends).
-- **Data:** `enwik8` / `enwik9` are **not** part of the MIT grant in this repo. Obtain Wikipedia dump–derived files yourself; Wikimedia / dump terms (e.g. CC BY-SA, GFDL) apply to that content.
+- **Code:** Copyright © 2026 **TheBee-3328**, **Adam Grman (Adam-Grman)**, and contributors. Licensed under the **GNU General Public License v3** (or later) — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+- **Why GPLv3:** OSI-approved (Hutter Prize requires an OSI license before payout). Keeps copyright with the authors; distributed derivatives must stay under GPL terms. Contest FAQ lists GNU licenses as acceptable (after more permissive options).
+- **Data:** `enwik8` / `enwik9` are **not** covered by this project’s GPL grant. Obtain Wikipedia dump–derived files yourself; Wikimedia / dump terms (e.g. CC BY-SA, GFDL) apply to that content.
 - **Name “Hutter Prize”:** belongs to the contest; used here only for description.
 
-Contributions are accepted under the same MIT license and copyright model unless a contributor explicitly states otherwise in writing.
+Contributions are accepted under GPLv3-or-later and the same copyright model unless a contributor explicitly states otherwise in writing.
 
 ## Current best (dev judge)
 
