@@ -61,6 +61,10 @@ pub const SSE_MIX_WEIGHT: u32 = 224;
 pub const WORD_BITS: usize = 25;
 /// Blend weight (0..=255) of word model into CM mix (before match/SSE).
 pub const WORD_MIX_WEIGHT: u32 = 64;
+/// Word context enrichment: 0=baseline, 1=prev, 2=prev+pos, 3=pos, 4=weak-prev+pos.
+pub const WORD_CTX_MODE: u32 = 0;
+/// If 1, mix word model only on checksum hit (skip flat 1/2 dilution).
+pub const WORD_HIT_GATE: u32 = 1;
 
 /// Second SSE (byte-class context) blend weight.
 pub const SSE2_MIX_WEIGHT: u32 = 192;
@@ -75,6 +79,19 @@ pub const INDIRECT_MIX_WEIGHT: u32 = 32;
 
 /// Blend weight (0..=255) of match×indirect cross model into CM mix.
 pub const MATCH_IND_CROSS_WEIGHT: u32 = 16;
+
+/// Prose residual CM table bits (size = 1 << this).
+pub const PROSE_BITS: usize = 25;
+/// Prose context mode: 0=off, 1=wpos, 2=prev+cur, 3=wpos+last, 4=skip3,
+/// 5=prev+wpos, 6=cap+wpos+last, 7=prev+cur+wpos, 8=cap+prev+cur,
+/// 9=prev-only, 10=cap+wpos.
+pub const PROSE_MODE: u32 = 2;
+/// Blend weight (0..=255) of prose residual into CM mix (before match/SSE).
+pub const PROSE_MIX_WEIGHT: u32 = 24;
+/// If 1, mix prose only when match is inactive (len < MIN_MIX_LEN).
+pub const PROSE_MATCH_GATE: u32 = 0;
+/// If 1, prose uses StateMap cells; else u8 n0/n1 counts.
+pub const PROSE_SM: u32 = 0;
 
 /// Third-stage APM blend weight (0..=255) into final p after SSE2.
 pub const APM_MIX_WEIGHT: u32 = 224;

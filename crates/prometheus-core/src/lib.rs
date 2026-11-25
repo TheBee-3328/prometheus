@@ -8,6 +8,7 @@ mod model;
 mod order0;
 pub mod params;
 mod preprocessor;
+mod prose;
 mod sparse;
 mod sse;
 mod statemap;

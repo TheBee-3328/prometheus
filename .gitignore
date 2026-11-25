@@ -7,6 +7,7 @@
 
 # Judge / build artifacts
 /target/
+/target-b5/
 **/*.compressed
 **/*.out
 **/*.roundtrip
@@ -17,6 +18,8 @@
 tune/enwik8.slice
 tune/*.slice
 tune/*.slice.compressed
+tune/b5_*.bin
+tune/b5_*.comp
 tune/validate_*.out
 tune/search.log
 tune/validate.log
