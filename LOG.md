@@ -272,3 +272,5 @@ Prune monotonically helps but still above main. Likely THROW soon.
 ## 2026-11-25T13:04Z Spawn B6-WS
 - After B5 merge. Whitespace model (T0 rank #2, ≲5MB cap). Baseline now SCORE 20769768.
 
+| 2026-11-25 | B6-WS | WS CM modes/mix/bits/gate/post; best slice Δ −3133 (gate −15000) | — | — | — | — | — | — | REJECT |
+| 2026-11-25 | PHASE2 | §2: decomp mismatch=CARGO_TARGET_DIR→c1 stale 37k; official time=70000/T (T=?); working 4h+9GB in judge; webhook \\n fix; enwik9 B5 re-run parallel | — | — | — | — | — | — | in progress |

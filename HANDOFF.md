@@ -1,11 +1,12 @@
-# HANDOFF — 2026-11-25T13:03Z
+# HANDOFF — 2026-11-25T20:18Z · Phase 2
 
-**Best:** SCORE **20769768** on `main` (B5-PROSE). Prior A1 20852107.
+**Best:** `CHKP-b5-20769768` — enwik8 SCORE **20769768** (B5-PROSE).  
+**enwik9:** valid B5 re-judge **in flight** (bin 88192). Prior 186586969 run **INVALID** (stale 37k bin).
 
-**Just merged:** hit-gated word + prose CM. Adv 10/10.
+**Section 2:** mismatch explained; official time = 70000/T h (host T unknown); working ceilings 4h/dir + 9GB in `judge.sh`; webhook `\n` fixed; full determinism deferred until enwik9 frees RAM (2 MiB compress×2 hashes matched).
 
-**Next:** whitespace lane (T0 #2) or continue orch from STATUS.
+**Do not:** trust DECOMPRESSOR≠88192 enwik9 lines; auto-start extra compressors beside enwik9; use broken 20 054 334 archive.
 
-**Reproduce:** `nix develop -c ./judge.sh enwik8 .`
+**Reproduce enwik8:** `env -u CARGO_TARGET_DIR nix develop -c ./judge.sh enwik8 .`
 
-**Do not:** force-push; auto enwik9; retry B2/B3/B4/C1.
+**Next after enwik9:** record valid enwik9 + Resources on Discord; finish §2.4 determinism; profile B5; budget-ordered experiments.

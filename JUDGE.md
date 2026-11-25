@@ -37,23 +37,38 @@ Release profile (`Cargo.toml`): `opt-level = "z"`, `lto = true`, `codegen-units 
 - `workspace` is the Cargo workspace root (default `.`).
 - Work dir: `judge_work/` (gitignored).
 
-## Output (exactly one summary line)
+## Output
+
+**Success** — one summary line (includes SCORE):
 
 ```
-ROUNDTRIP=OK|FAIL COMPRESSED=<bytes> DECOMPRESSOR=<bytes> SCORE=<sum> COMPRESS_SECONDS=<n> DECOMPRESS_SECONDS=<n> PEAK_RSS_MB=<n>
+ROUNDTRIP=OK COMPRESSED=<bytes> DECOMPRESSOR=<bytes> SCORE=<sum> COMPRESS_SECONDS=<n> DECOMPRESS_SECONDS=<n> PEAK_RSS_MB=<n> CPU_* WALL_TOTAL_SECONDS=<n> RAM_TIME_GB_H=<n> TIME_LIMIT=PASS|FAIL RAM_LIMIT=PASS|FAIL ORIG_SHA256=<hex> ROUNDTRIP_SHA256=<hex> ARCHIVE_SHA256=<hex>
 ```
+
+**Failure** — exactly:
+
+```
+ROUNDTRIP=FAIL
+```
+
+(no `SCORE=` field). Exit status non-zero.
+
+Also writes `judge_work/resources.json` and `judge_work/<dataset>.hashes.txt`.
 
 | Field | Meaning |
 |---|---|
-| `ROUNDTRIP` | `OK` iff decompress succeeds and `cmp` matches the original; also requires compress×2 and decompress×2 bit-identical |
-| `COMPRESSED` | Byte size of the compressed archive |
-| `DECOMPRESSOR` | Stripped `prometheus-decompress` executable **plus** every auxiliary file the decompressor reads at runtime |
-| `SCORE` | `COMPRESSED + DECOMPRESSOR` |
-| `COMPRESS_SECONDS` | Wall seconds (GNU `time` `%e`) for one compress |
-| `DECOMPRESS_SECONDS` | Wall seconds for one decompress |
-| `PEAK_RSS_MB` | Max of compress/decompress peak RSS (`time` `%M` KB → MB, ceil) |
+| `ROUNDTRIP` | `OK` iff decompress succeeds, `cmp` + SHA256 match original; compress×2 archive hash match; decompress×2 under clean `env -i` |
+| `COMPRESSED` / `DECOMPRESSOR` / `SCORE` | Only on success. `SCORE = COMPRESSED + DECOMPRESSOR` (+ aux) |
+| `COMPRESS_SECONDS` / `DECOMPRESS_SECONDS` | Wall seconds (GNU `%e`) |
+| `PEAK_RSS_MB` | Max peak RSS; official Hutter ≤ 10240 MB |
+| `CPU_*` | `%U+%S` single-core seconds |
+| `TIME_LIMIT` | Working ceiling: wall ≤ 4 h/direction (`PROMETHEUS_WALL_LIMIT_SECONDS`, default 14400) |
+| `RAM_LIMIT` | Working ceiling: peak ≤ 9 GB (`PROMETHEUS_RAM_LIMIT_MB`, default 9216) |
+| `ORIG_SHA256` / `ROUNDTRIP_SHA256` / `ARCHIVE_SHA256` | Hashes for audit |
 
-Exit status `0` only when `ROUNDTRIP=OK`.
+Exit `0` only when `ROUNDTRIP=OK` **and** both working ceilings PASS.
+
+**Env:** judge always `unset CARGO_TARGET_DIR` so a poisoned worktree target cannot supply a stale binary.
 
 ## DECOMPRESSOR byte accounting
 
