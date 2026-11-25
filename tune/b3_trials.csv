@@ -1,0 +1,11 @@
+trial,label,compressed,baseline,delta,notes
+0,baseline,5699220,5699220,0,main A1 mix params on first 25MiB
+1,h1_soft_early_match,5699220,5699220,0,noop: match_len starts at HASH_ORDER=6 so len 3-5 never active
+2,h1b_accept4_soft,5699233,5699220,13,worse: lower verify bar to 4 + soft blend
+3,h2_candidates8,5695446,5699220,-3774,MATCH_CANDIDATES 4->8; keep for stack
+4,h3_match_sm,5813312,5699220,114092,REJECT: adaptive match SM dilutes max conf; reverted
+5,h4_apm2_class_mb_bp,5705899,5699220,6679,REJECT: deeper APM2 worse than H2 alone; reverted
+6,h5_prev_word,5809992,5699220,110772,REJECT: folding prev_whash into word hash; reverted
+7,h6_hash_order7,5702956,5699220,3736,REJECT: HASH_ORDER 6->7 worse; reverted
+8,h7_apm_match_dist,5703583,5699220,4363,REJECT: fold dist into APM byte; reverted
+9,h8_sparse_during_match,5698401,5699220,-819,with cand8; worse than cand8 alone (+2955 vs h2); reverted
