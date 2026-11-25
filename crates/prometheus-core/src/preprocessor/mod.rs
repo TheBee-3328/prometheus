@@ -2,8 +2,9 @@
 //!
 //! Encode order (decode reverses):
 //! 1. Capitals fold (optional)
-//! 2. Static markup dictionary (optional)
+//! 2. Static markup dictionary + mined templates (optional, one greedy pass)
 //! 3. Natural-language word/phrase dictionary (optional)
+//! 4. Side-stream pack for template params when `!PARAM_INLINE`
 //!
 //! Cap markers occupy `0x01..=0x08`. Literal bytes in that range (and the
 //! escape byte `0x7F`) are prefixed with `CAP_ESC` so encode/decode are
@@ -12,36 +13,53 @@
 pub mod capitals;
 pub mod markup;
 pub mod stages;
+pub mod templates;
 pub mod words;
 
 use capitals::{decode_capitals, encode_capitals};
-use markup::{decode_dict, encode_dict};
-use stages::{PRE_STAGE_CAPITALS, PRE_STAGE_MARKUP, PRE_STAGE_WORDS};
+use stages::{PARAM_INLINE, PRE_STAGE_CAPITALS, PRE_STAGE_MARKUP, PRE_STAGE_TEMPLATES, PRE_STAGE_WORDS};
+use templates::{
+    decode_markup_templates, encode_markup_templates, pack_side_stream, unpack_side_stream,
+    uses_side_stream,
+};
 use words::{decode_words, encode_words};
 
-/// Encode: capitals → markup → words. Inverse of [`decode`].
+/// Encode: capitals → markup+templates → words → optional side-stream pack.
 pub fn encode(input: &[u8]) -> Vec<u8> {
     let mut cur = input.to_vec();
     if PRE_STAGE_CAPITALS {
         cur = encode_capitals(&cur);
     }
-    if PRE_STAGE_MARKUP {
-        cur = encode_dict(&cur);
+    let mut side = Vec::new();
+    if PRE_STAGE_MARKUP || PRE_STAGE_TEMPLATES {
+        let (body, s) = encode_markup_templates(&cur);
+        cur = body;
+        side = s;
     }
     if PRE_STAGE_WORDS {
         cur = encode_words(&cur);
     }
-    cur
+    if uses_side_stream() && !PARAM_INLINE {
+        pack_side_stream(&cur, &side)
+    } else {
+        // Inline (or no templates): side must be empty.
+        debug_assert!(side.is_empty() || PARAM_INLINE);
+        cur
+    }
 }
 
-/// Decode: words → markup → capitals. Inverse of [`encode`].
+/// Decode: optional side-stream unpack → words → markup+templates → capitals.
 pub fn decode(input: &[u8]) -> Vec<u8> {
-    let mut cur = input.to_vec();
+    let (mut cur, side) = if uses_side_stream() {
+        unpack_side_stream(input)
+    } else {
+        (input.to_vec(), Vec::new())
+    };
     if PRE_STAGE_WORDS {
         cur = decode_words(&cur);
     }
-    if PRE_STAGE_MARKUP {
-        cur = decode_dict(&cur);
+    if PRE_STAGE_MARKUP || PRE_STAGE_TEMPLATES {
+        cur = decode_markup_templates(&cur, &side);
     }
     if PRE_STAGE_CAPITALS {
         cur = decode_capitals(&cur);
@@ -52,8 +70,8 @@ pub fn decode(input: &[u8]) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use capitals::{encode_capitals, decode_capitals, CAP_ESC};
-    use markup::{encode_dict, decode_dict};
+    use capitals::{decode_capitals, encode_capitals, CAP_ESC};
+    use markup::{decode_dict, encode_dict};
 
     fn assert_roundtrip(data: &[u8]) {
         let enc = encode(data);
@@ -132,5 +150,13 @@ mod tests {
         let e = encode_dict(s);
         assert!(e.len() < s.len());
         assert_eq!(decode_dict(&e), s);
+    }
+
+    #[test]
+    fn templateish_roundtrip() {
+        assert_roundtrip(b"{{ref}}");
+        assert_roundtrip(b"{{cite web|url=http://example.com|title=Hello}}");
+        assert_roundtrip(b"pre {{note|abc}} mid {{flagicon|USA}} post");
+        assert_roundtrip(b"{{nested|a={{inner|x}}|b=y}}");
     }
 }

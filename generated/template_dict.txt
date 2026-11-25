@@ -1,0 +1,70 @@
+  0 count=  1420 params=1 gain=32168  {{main|·}}
+  1 count=  1821 params=1 gain=23299  {{note|·}}
+  2 count=    77 params=8 gain=21765  {{cite journal| author=·| title=·| journal=·| year=·| pages=·| volume=·| issue=·| id=·}}
+  3 count=   114 params=5 gain=15622  {{cite book| author=·| title=·| publisher=·| year=·| id=·}}
+  4 count=   454 params=2 gain=14398  {{flag athl iocc|·|·}}
+  5 count=    82 params=4 gain=12300  {{cite web| title=·| url=·| accessdate=·| accessyear=·}}
+  6 count=    97 params=1 gain=10515  {{dablink|·}}
+  7 count=    57 params=5 gain=10080  {{cite web| title =·| work =·| url =·| accessdate =·| accessyear =·}}
+  8 count=   113 params=3 gain=9586  {{ActingFilmography-movie|title =·| year =·| role =·}}
+  9 count=   682 params=1 gain=8979  {{flagicon|·}}
+ 10 count=    54 params=4 gain=7781  {{multi-listen item|filename=·|title=·|description=·|format=·}}
+ 11 count=    42 params=5 gain=6879  {{cite web| title=·| work=·| url=·| accessdate=·| accessyear=·}}
+ 12 count=    32 params=3 gain=5576  {{cite web| url =·| title =·| accessdate =·}}
+ 13 count=    12 params=3 gain=5569  {{Quotation|·|·|·}}
+ 14 count=    98 params=2 gain=5343  {{gutenberg author| id=·| name=·}}
+ 15 count=    68 params=1 gain=5225  {{main articles|·}}
+ 16 count=   240 params=1 gain=4392  {{Commons|·}}
+ 17 count=   246 params=1 gain=4356  {{unicode|·}}
+ 18 count=    38 params=4 gain=4349  {{succession box|title=·|before=·|after=·|years=·}}
+ 19 count=    78 params=4 gain=4311  {{Fs player| no=·| nat=·| pos=·| name=·}}
+ 20 count=    78 params=4 gain=4272  {{Football squad player|no=·|nat=·|name=·|pos=·}}
+ 21 count=    25 params=5 gain=4191  {{succession box| title=·|·| before=·| after=·| years=·}}
+ 22 count=   216 params=1 gain=4162  {{commons|·}}
+ 23 count=   413 params=0 gain=4114  {{disambig}}
+ 24 count=   237 params=1 gain=4021  {{Unicode|·}}
+ 25 count=    23 params=6 gain=3964  {{cite journal| author=·| title=·| journal=·| year=·| volume=·| pages=·}}
+ 26 count=    17 params=6 gain=3951  {{cite web| author=·| publisher=·| year=·| url=·| title=·| accessdate=·}}
+ 27 count=    34 params=2 gain=3845  {{Elementbox_econfig|·|·}}
+ 28 count=    93 params=2 gain=3752  {{imdb title|id=·|title=·}}
+ 29 count=    32 params=4 gain=3649  {{DiseaseDisorder infobox|
+ name        =·|
+ iCD10       =·|
+ iCD9        =·|·}}
+ 30 count=    25 params=6 gain=3629  {{cite book| last =·| first =·| title =·| publisher =·| year =·| id =·}}
+ 31 count=    26 params=4 gain=3542  {{cite web| title =·| url =·| accessdate =·| accessyear =·}}
+ 32 count=    43 params=3 gain=3533  {{ActingFilmography-movie|
+ title =·|
+ year =·|
+ role =·}}
+ 33 count=   443 params=1 gain=3527  {{LinkfA|·}}
+ 34 count=    72 params=4 gain=3483  {{Elementbox_isotopes_stable| mn=·| sym=·| na=·| n=·}}
+ 35 count=   314 params=0 gain=3437  {{start box}}
+ 36 count=    61 params=1 gain=3263  {{polytonic|·}}
+ 37 count=   135 params=1 gain=3191  {{Main|·}}
+ 38 count=    21 params=5 gain=3184  {{succession box| before =·| title =·|·| years =·| after =·}}
+ 39 count=    22 params=12 gain=3183  {{Elementbox_isotopes_decay| mn=·| sym=·| na=·|·| hl=·|·| dm=·|·| de=·| pn=·| ps=·|·}}
+ 40 count=    22 params=5 gain=3182  {{cite book| author =·| title =·| publisher =·| year =·| id =·}}
+ 41 count=    97 params=2 gain=3163  {{imdb name|id=·|name=·}}
+ 42 count=   283 params=0 gain=3097  {{wikiquote}}
+ 43 count=   219 params=1 gain=3086  {{ArabDIN|·}}
+ 44 count=    89 params=2 gain=3071  {{ThisDateInRecentYears|Month=·|Day=·}}
+ 45 count=   130 params=1 gain=2985  {{cleanup-date|·}}
+ 46 count=    20 params=4 gain=2842  {{succession box| title=·| before=·| after=·| years=·}}
+ 47 count=    17 params=4 gain=2836  {{Web reference| title=·| url=·| date=·| year=·}}
+ 48 count=   316 params=0 gain=2829  {{end box}}
+ 49 count=    12 params=7 gain=2821  {{cite journal| author=·| title=·| journal=·| year=·| volume=·| pages=·| url=·}}
+ 50 count=    17 params=4 gain=2810  {{Citenews| title=·| org=·| date=·| url=·}}
+ 51 count=    88 params=1 gain=2695  {{seealso|·}}
+ 52 count=    20 params=5 gain=2589  {{succession box|title=·|·|before=·|after=·|years=·}}
+ 53 count=   206 params=1 gain=2576  {{Note|·}}
+ 54 count=    17 params=3 gain=2521  {{cite web| title =·| url =·| accessdate =·}}
+ 55 count=    94 params=1 gain=2489  {{Africa in topic|·}}
+ 56 count=    17 params=6 gain=2437  {{cite book| last =·| first =·| year =·| title =·| publisher =·| id =·}}
+ 57 count=    71 params=2 gain=2435  {{Audio|·|·}}
+ 58 count=    36 params=3 gain=2430  {{Elementbox_isotopes_begin| isotopesof=·| color1=·| color2=·}}
+ 59 count=    45 params=2 gain=2247  {{gutenberg author|id=·|name=·}}
+ 60 count=    14 params=4 gain=2219  {{Citenews| title=·| date=·| org=·| url=·}}
+ 61 count=    13 params=7 gain=2150  {{cite book| last =·| first =·| title =·| location =·| publisher =·| year =·| id =·}}
+ 62 count=    78 params=1 gain=2139  {{Wikisource1911Enc|·}}
+ 63 count=    14 params=5 gain=2114  {{Web reference| title=·| work=·| url=·| date=·| year=·}}

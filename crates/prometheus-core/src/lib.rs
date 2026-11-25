@@ -7,7 +7,7 @@ mod match_model;
 mod model;
 mod order0;
 pub mod params;
-mod preprocessor;
+pub mod preprocessor;
 mod sparse;
 mod sse;
 mod statemap;

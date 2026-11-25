@@ -1,0 +1,18 @@
+warning: Git tree '/tmp/workspace/prometheus-c1-tmpl' is dirty
+PROMETHEUS nix shell: rustc 1.102.0-nightly (137d1d494 2026-11-22) | cargo 1.102.0-nightly (ae8f06eb4 2026-11-21)
+STRUCTURE_LABELS input_len=100000000
+LABEL other raw_bytes=79036555 share_pct=79.0366
+LABEL xml_wrapper raw_bytes=2058342 share_pct=2.0583
+LABEL entity_tag raw_bytes=1483343 share_pct=1.4833
+LABEL template raw_bytes=15394232 share_pct=15.3942
+LABEL url raw_bytes=2027528 share_pct=2.0275
+LABEL_ABCD raw_bytes=20963445 share_pct=20.9634
+warning: Git tree '/tmp/workspace/prometheus-c1-tmpl' is dirty
+PROMETHEUS nix shell: rustc 1.102.0-nightly (137d1d494 2026-11-22) | cargo 1.102.0-nightly (ae8f06eb4 2026-11-21)
+STRUCTURE_LABELS input_len=1000000000
+LABEL other raw_bytes=776626287 share_pct=77.6626
+LABEL xml_wrapper raw_bytes=41319635 share_pct=4.1320
+LABEL entity_tag raw_bytes=14747771 share_pct=1.4748
+LABEL template raw_bytes=150723053 share_pct=15.0723
+LABEL url raw_bytes=16583254 share_pct=1.6583
+LABEL_ABCD raw_bytes=223373713 share_pct=22.3374

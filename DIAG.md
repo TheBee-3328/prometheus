@@ -1148,77 +1148,19 @@ COMPRESS_SECONDS=400.83 DECOMPRESS_SECONDS=400.88 PEAK_RSS_MB=3562
 Δ vs 21365747: **−454127**. Slice 20MB −69771; ratio OK. Adv **10/10**.
 enwik9 estimate: time ≳10× (~4000s+), RAM ~3.5–6GB (flag larger tables for manual check).
 
----
+## C1 TEMPLATE-MINER Phase A (orch-assisted 2026-11-25)
 
-# A1-RETUNE (agent/a1-retune) — mixer retune after word-dict (+B1 tables)
+### Raw label shares
+| corpus | xml | entity | template | url | ABCD |
+|--------|-----|--------|----------|-----|------|
+| enwik8 | 2.06% | 1.48% | 15.39% | 2.03% | **20.96%** |
+| enwik9 | 4.13% | 1.47% | 15.07% | 1.66% | **22.34%** |
 
-**Start baseline (task brief):** `SCORE=21365747` (PRE-V2 word dict N=4096)  
-**Current main when validating:** B1-HASH `SCORE=20911620`  
-**Slice:** `data/enwik8_25mb.bin` (first 25 MiB of enwik8)
-
-## Sweep (25MB, pre-B1 table sizes then transferred)
-
-1D winners (vs slice baseline **5819041** on pre-B1 tables):
-
-| Knob | Best | Slice Δ |
-|------|------|--------:|
-| ORDER0_MIX_WEIGHT | 64 (was 80) | **−12967** |
-| MATCH_IND_CROSS_WEIGHT | 16 (was 22) | **−10495** |
-| INDIRECT_MIX_WEIGHT | 32 (was 40) | **−9561** |
-| ORDER5_MIX_WEIGHT | 72 (was 88) | **−6309** |
-| ORDER3_MIX_WEIGHT | 144 | −3690 |
-| ORDER4_MIX_WEIGHT | 56 | −3164 |
-| ORDER7_MIX_WEIGHT | 8 | −2697 |
-| ORDER6_MIX_WEIGHT | 24 | −2238 |
-| SSE2_MIX_WEIGHT | 176 | −2103 |
-
-Rates (ORDER2_RESCALE, APM_RATE/MIX, SSE) were **near-optimal / worse** when moved.
-
-Stacked top4 on slice: **5782830 (−36211)**.
-
-## Candidates (best 3)
-
-| ID | Note | Slice (pre-B1) | Full enwik8 |
-|----|------|---------------:|-------------|
-| **A** | O0=64+CROSS=16+IND=32+O5=72 | −36211 | **KEEP** (below) |
-| B | O0=64+CROSS=16+IND=32 | −29593 | not judged (A dominates; reject vs A) |
-| C | O0=64+CROSS=16 | −22059 | not judged (A dominates; reject vs A) |
-
-Rejected 1D / rate probes: ORDER2_RESCALE≠250, APM_RATE≠7, higher WORD/ORDER mixes, MIN_MIX_LEN≠6 — all slice-worse or noise.
-
-## Candidate A — full judge (on B1 tables)
-
-Applied same four mix deltas atop B1 (`ORDER3/4_BITS=27`, etc.):
-
+### Compressed-cost shares (enwik8, diag Order2MatchModel proxy)
 ```
-ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107 COMPRESS_SECONDS=384.01 DECOMPRESS_SECONDS=365.60 PEAK_RSS_MB=3485
+est_compressed_bytes≈16838589
+template share_pct=15.3558 (~2.59MB)
+STRUCT_ABCD share_pct=18.5566 gate_3pct=PASS
 ```
-
-| | B1 main | A1 KEEP | Δ |
-|--|--:|--:|--:|
-| COMPRESSED | 20824740 | **20765227** | **−59513** |
-| DECOMPRESSOR | 86880 | 86880 | 0 |
-| SCORE | 20911620 | **20852107** | **−59513** |
-
-vs task brief 21365747: **−513640** (includes B1 table growth already on main).  
-Slice 25MB on B1 with cand A: **5699220**. Pre-B1 slice gain −36211 vs full mixer gain −59513 → **not** >2× (overfit gate PASS).  
-Adversarial: **10/10 PASS**.
-
-Commit: `0118c25` on `agent/a1-retune`.
-
-## enwik9 estimates (NOT measured — label: estimate)
-
-| | Estimate |
-|--|--|
-| Compress wall | **≳10× enwik8** → **≳3840–4000 s** (≥1.1 h) |
-| Decompress wall | similar order **≳3600–4000 s** |
-| Peak RSS | **~3.5–6 GB** (B1 tables; same class as enwik8 PEAK_RSS_MB≈3485) |
-| Compressed size | rough **~10×** COMPRESSED ≈ **~208 MB** (very rough; do not claim without `./judge.sh enwik9`) |
-
-Do **not** run enwik9 in this agent.
-
-## Next suggestion
-
-1. Merge A1 mixer KEEP to main if orch agrees (SCORE 20852107).  
-2. Optional: light re-sweep ORDER3/6/7 + SSE2 on **B1 tables** (sweep was pre-B1); small extra gain possible.  
-3. Then TEMPLATE-MINER / structure contexts — not more rate knobs (flat).
+**Verdict:** ABOVE 3% gate → proceed to mine/transform. Templates dominate ABCD.
+**Note:** `--structure-stats <out>` currently writes the archive bitstream to `<out>`; text report is stdout.

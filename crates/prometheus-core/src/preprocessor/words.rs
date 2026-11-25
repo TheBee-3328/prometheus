@@ -15,7 +15,8 @@
 use std::sync::OnceLock;
 
 use super::markup::{markup_dict_end, DICT_BASE, ESC};
-use super::stages::{PRE_STAGE_WORDS, WORD_DICT_N};
+use super::stages::{PARAM_INLINE, PRE_STAGE_TEMPLATES, PRE_STAGE_WORDS, WORD_DICT_N};
+use super::templates::{copy_inline_param, template_n_params, TMPL_ESC};
 
 /// First single-byte word token (sits above static markup tokens).
 pub const WORD_BASE: u8 = 0xA4;
@@ -155,21 +156,33 @@ fn emit_word_token(out: &mut Vec<u8>, idx: usize) {
 
 /// Greedy word/phrase substitution on the post-markup stream.
 pub fn encode_words(input: &[u8]) -> Vec<u8> {
+    encode_words_labeled(input, None).0
+}
+
+/// Same as [`encode_words`], optionally propagating per-byte labels onto the
+/// output stream (first byte of a matched span / literal supplies the label).
+pub fn encode_words_labeled(input: &[u8], labels: Option<&[u8]>) -> (Vec<u8>, Vec<u8>) {
     if !PRE_STAGE_WORDS || entries().is_empty() {
-        return input.to_vec();
+        let lab = labels.map(|l| l.to_vec()).unwrap_or_else(|| vec![0; input.len()]);
+        return (input.to_vec(), lab);
     }
     let t = trie();
     let markup_end = markup_dict_end();
     let mut out = Vec::with_capacity(input.len());
+    let mut out_l = Vec::with_capacity(input.len());
     let mut i = 0;
     while i < input.len() {
         let b = input[i];
+        let lab = labels.map(|l| l[i]).unwrap_or(0);
         // Pass through markup ESC pairs unchanged.
         if b == ESC {
             out.push(ESC);
+            out_l.push(lab);
             i += 1;
             if i < input.len() {
+                let lab2 = labels.map(|l| l[i]).unwrap_or(0);
                 out.push(input[i]);
+                out_l.push(lab2);
                 i += 1;
             }
             continue;
@@ -177,12 +190,44 @@ pub fn encode_words(input: &[u8]) -> Vec<u8> {
         // Pass through static markup tokens.
         if b >= DICT_BASE && b < markup_end {
             out.push(b);
+            out_l.push(lab);
             i += 1;
+            continue;
+        }
+        // Pass through template tokens (and inline params when enabled).
+        if PRE_STAGE_TEMPLATES && b == TMPL_ESC {
+            out.push(TMPL_ESC);
+            out_l.push(lab);
+            i += 1;
+            if i < input.len() {
+                let idx_b = input[i];
+                out.push(idx_b);
+                out_l.push(lab);
+                i += 1;
+                if PARAM_INLINE {
+                    if let Some(np) = template_n_params(idx_b as usize) {
+                        for _ in 0..np {
+                            let before = out.len();
+                            copy_inline_param(input, &mut i, &mut out);
+                            while out_l.len() < out.len() {
+                                out_l.push(lab);
+                            }
+                            let _ = before;
+                        }
+                    }
+                }
+            }
             continue;
         }
         // Try dictionary match (natural-language only; patterns are ASCII).
         if let Some((idx, len)) = t.longest_at(input, i) {
+            let before = out.len();
             emit_word_token(&mut out, idx);
+            while out_l.len() < out.len() {
+                out_l.push(lab);
+            }
+            debug_assert_eq!(out.len(), before + (out.len() - before));
+            let _ = before;
             i += len;
             continue;
         }
@@ -191,6 +236,9 @@ pub fn encode_words(input: &[u8]) -> Vec<u8> {
             out.push(WORD_ESC);
             out.push(0xFF);
             out.push(WORD_ESC);
+            out_l.push(lab);
+            out_l.push(lab);
+            out_l.push(lab);
             i += 1;
             continue;
         }
@@ -199,13 +247,17 @@ pub fn encode_words(input: &[u8]) -> Vec<u8> {
             out.push(WORD_ESC);
             out.push(0xFF);
             out.push(b);
+            out_l.push(lab);
+            out_l.push(lab);
+            out_l.push(lab);
             i += 1;
             continue;
         }
         out.push(b);
+        out_l.push(lab);
         i += 1;
     }
-    out
+    (out, out_l)
 }
 
 /// Inverse of [`encode_words`].
@@ -231,6 +283,23 @@ pub fn decode_words(input: &[u8]) -> Vec<u8> {
         if b >= DICT_BASE && b < markup_end {
             out.push(b);
             i += 1;
+            continue;
+        }
+        if PRE_STAGE_TEMPLATES && b == TMPL_ESC {
+            out.push(TMPL_ESC);
+            i += 1;
+            if i < input.len() {
+                let idx_b = input[i];
+                out.push(idx_b);
+                i += 1;
+                if PARAM_INLINE {
+                    if let Some(np) = template_n_params(idx_b as usize) {
+                        for _ in 0..np {
+                            copy_inline_param(input, &mut i, &mut out);
+                        }
+                    }
+                }
+            }
             continue;
         }
         if (WORD_BASE..WORD_ESC).contains(&b) {

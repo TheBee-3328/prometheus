@@ -1,0 +1,455 @@
+{
+  "corpus": "enwik8",
+  "bytes": 100000000,
+  "n_templates": 64,
+  "templates": [
+    {
+      "skeleton": "{{main|\u0000}}",
+      "count": 1420,
+      "params": 1,
+      "est_gain": 32168.0,
+      "skel_len": 10
+    },
+    {
+      "skeleton": "{{note|\u0000}}",
+      "count": 1821,
+      "params": 1,
+      "est_gain": 23299.000000000004,
+      "skel_len": 10
+    },
+    {
+      "skeleton": "{{cite journal| author=\u0000| title=\u0000| journal=\u0000| year=\u0000| pages=\u0000| volume=\u0000| issue=\u0000| id=\u0000}}",
+      "count": 77,
+      "params": 8,
+      "est_gain": 21764.999999999996,
+      "skel_len": 88
+    },
+    {
+      "skeleton": "{{cite book| author=\u0000| title=\u0000| publisher=\u0000| year=\u0000| id=\u0000}}",
+      "count": 114,
+      "params": 5,
+      "est_gain": 15622.0,
+      "skel_len": 59
+    },
+    {
+      "skeleton": "{{flag athl iocc|\u0000|\u0000}}",
+      "count": 454,
+      "params": 2,
+      "est_gain": 14398.000000000002,
+      "skel_len": 22
+    },
+    {
+      "skeleton": "{{cite web| title=\u0000| url=\u0000| accessdate=\u0000| accessyear=\u0000}}",
+      "count": 82,
+      "params": 4,
+      "est_gain": 12299.999999999998,
+      "skel_len": 56
+    },
+    {
+      "skeleton": "{{dablink|\u0000}}",
+      "count": 97,
+      "params": 1,
+      "est_gain": 10515.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{cite web| title =\u0000| work =\u0000| url =\u0000| accessdate =\u0000| accessyear =\u0000}}",
+      "count": 57,
+      "params": 5,
+      "est_gain": 10080.0,
+      "skel_len": 69
+    },
+    {
+      "skeleton": "{{ActingFilmography-movie|\u0001title =\u0000| \u0001year =\u0000| \u0001role =\u0000}}",
+      "count": 113,
+      "params": 3,
+      "est_gain": 9586.0,
+      "skel_len": 57
+    },
+    {
+      "skeleton": "{{flagicon|\u0000}}",
+      "count": 682,
+      "params": 1,
+      "est_gain": 8979.0,
+      "skel_len": 14
+    },
+    {
+      "skeleton": "{{multi-listen item|filename=\u0000|title=\u0000|description=\u0000|format=\u0000}}",
+      "count": 54,
+      "params": 4,
+      "est_gain": 7781.000000000001,
+      "skel_len": 63
+    },
+    {
+      "skeleton": "{{cite web| title=\u0000| work=\u0000| url=\u0000| accessdate=\u0000| accessyear=\u0000}}",
+      "count": 42,
+      "params": 5,
+      "est_gain": 6879.0,
+      "skel_len": 64
+    },
+    {
+      "skeleton": "{{cite web| url =\u0000| title =\u0000| accessdate =\u0000}}",
+      "count": 32,
+      "params": 3,
+      "est_gain": 5576.0,
+      "skel_len": 45
+    },
+    {
+      "skeleton": "{{Quotation|\u0000|\u0000|\u0000}}",
+      "count": 12,
+      "params": 3,
+      "est_gain": 5569.0,
+      "skel_len": 19
+    },
+    {
+      "skeleton": "{{gutenberg author| id=\u0000| name=\u0000}}",
+      "count": 98,
+      "params": 2,
+      "est_gain": 5343.000000000001,
+      "skel_len": 34
+    },
+    {
+      "skeleton": "{{main articles|\u0000}}",
+      "count": 68,
+      "params": 1,
+      "est_gain": 5225.0,
+      "skel_len": 19
+    },
+    {
+      "skeleton": "{{Commons|\u0000}}",
+      "count": 240,
+      "params": 1,
+      "est_gain": 4392.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{unicode|\u0000}}",
+      "count": 246,
+      "params": 1,
+      "est_gain": 4356.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{succession box|title=\u0000|before=\u0000|after=\u0000|years=\u0000}}",
+      "count": 38,
+      "params": 4,
+      "est_gain": 4349.0,
+      "skel_len": 51
+    },
+    {
+      "skeleton": "{{Fs player| no=\u0000| nat=\u0000| pos=\u0000| name=\u0000}}",
+      "count": 78,
+      "params": 4,
+      "est_gain": 4310.999999999999,
+      "skel_len": 41
+    },
+    {
+      "skeleton": "{{Football squad player|no=\u0000|nat=\u0000|name=\u0000|pos=\u0000}}",
+      "count": 78,
+      "params": 4,
+      "est_gain": 4271.999999999999,
+      "skel_len": 49
+    },
+    {
+      "skeleton": "{{succession box| title=\u0000|\u0000| before=\u0000| after=\u0000| years=\u0000}}",
+      "count": 25,
+      "params": 5,
+      "est_gain": 4191.0,
+      "skel_len": 57
+    },
+    {
+      "skeleton": "{{commons|\u0000}}",
+      "count": 216,
+      "params": 1,
+      "est_gain": 4162.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{disambig}}",
+      "count": 413,
+      "params": 0,
+      "est_gain": 4114.0,
+      "skel_len": 12
+    },
+    {
+      "skeleton": "{{Unicode|\u0000}}",
+      "count": 237,
+      "params": 1,
+      "est_gain": 4020.9999999999995,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{cite journal| author=\u0000| title=\u0000| journal=\u0000| year=\u0000| volume=\u0000| pages=\u0000}}",
+      "count": 23,
+      "params": 6,
+      "est_gain": 3963.9999999999995,
+      "skel_len": 73
+    },
+    {
+      "skeleton": "{{cite web| author=\u0000| publisher=\u0000| year=\u0000| url=\u0000| title=\u0000| accessdate=\u0000}}",
+      "count": 17,
+      "params": 6,
+      "est_gain": 3951.0,
+      "skel_len": 73
+    },
+    {
+      "skeleton": "{{Elementbox_econfig|\u0000|\u0000}}",
+      "count": 34,
+      "params": 2,
+      "est_gain": 3845.0,
+      "skel_len": 26
+    },
+    {
+      "skeleton": "{{imdb title|id=\u0000|title=\u0000}}",
+      "count": 93,
+      "params": 2,
+      "est_gain": 3752.0,
+      "skel_len": 27
+    },
+    {
+      "skeleton": "{{DiseaseDisorder infobox|\n \u0001name        =\u0000|\n \u0001iCD10       =\u0000|\n \u0001iCD9        =\u0000|\u0000}}",
+      "count": 32,
+      "params": 4,
+      "est_gain": 3649.0,
+      "skel_len": 83
+    },
+    {
+      "skeleton": "{{cite book| last =\u0000| first =\u0000| title =\u0000| publisher =\u0000| year =\u0000| id =\u0000}}",
+      "count": 25,
+      "params": 6,
+      "est_gain": 3628.9999999999995,
+      "skel_len": 72
+    },
+    {
+      "skeleton": "{{cite web| title =\u0000| url =\u0000| accessdate =\u0000| accessyear =\u0000}}",
+      "count": 26,
+      "params": 4,
+      "est_gain": 3541.9999999999995,
+      "skel_len": 60
+    },
+    {
+      "skeleton": "{{ActingFilmography-movie|\n \u0001title =\u0000|\n \u0001year =\u0000|\n \u0001role =\u0000}}",
+      "count": 43,
+      "params": 3,
+      "est_gain": 3533.0,
+      "skel_len": 61
+    },
+    {
+      "skeleton": "{{Link\u0001fA|\u0000}}",
+      "count": 443,
+      "params": 1,
+      "est_gain": 3527.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{Elementbox_isotopes_stable| mn=\u0000| sym=\u0000| na=\u0000| n=\u0000}}",
+      "count": 72,
+      "params": 4,
+      "est_gain": 3483.0,
+      "skel_len": 54
+    },
+    {
+      "skeleton": "{{start box}}",
+      "count": 314,
+      "params": 0,
+      "est_gain": 3437.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{polytonic|\u0000}}",
+      "count": 61,
+      "params": 1,
+      "est_gain": 3263.0,
+      "skel_len": 15
+    },
+    {
+      "skeleton": "{{Main|\u0000}}",
+      "count": 135,
+      "params": 1,
+      "est_gain": 3191.0,
+      "skel_len": 10
+    },
+    {
+      "skeleton": "{{succession box| before =\u0000| title =\u0000|\u0000| years =\u0000| after =\u0000}}",
+      "count": 21,
+      "params": 5,
+      "est_gain": 3184.0,
+      "skel_len": 61
+    },
+    {
+      "skeleton": "{{Elementbox_isotopes_decay| mn=\u0000| sym=\u0000| na=\u0000|\u0000| hl=\u0000|\u0000| dm=\u0000|\u0000| de=\u0000| pn=\u0000| ps=\u0000|\u0000}}",
+      "count": 22,
+      "params": 12,
+      "est_gain": 3183.0,
+      "skel_len": 86
+    },
+    {
+      "skeleton": "{{cite book| author =\u0000| title =\u0000| publisher =\u0000| year =\u0000| id =\u0000}}",
+      "count": 22,
+      "params": 5,
+      "est_gain": 3182.0,
+      "skel_len": 64
+    },
+    {
+      "skeleton": "{{imdb name|id=\u0000|name=\u0000}}",
+      "count": 97,
+      "params": 2,
+      "est_gain": 3162.9999999999995,
+      "skel_len": 25
+    },
+    {
+      "skeleton": "{{wikiquote}}",
+      "count": 283,
+      "params": 0,
+      "est_gain": 3097.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{ArabDIN|\u0000}}",
+      "count": 219,
+      "params": 1,
+      "est_gain": 3086.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{ThisDateInRecentYears|Month=\u0000|Day=\u0000}}",
+      "count": 89,
+      "params": 2,
+      "est_gain": 3071.0,
+      "skel_len": 39
+    },
+    {
+      "skeleton": "{{cleanup-date|\u0000}}",
+      "count": 130,
+      "params": 1,
+      "est_gain": 2985.0,
+      "skel_len": 18
+    },
+    {
+      "skeleton": "{{succession box| title=\u0000| before=\u0000| after=\u0000| years=\u0000}}",
+      "count": 20,
+      "params": 4,
+      "est_gain": 2842.0,
+      "skel_len": 55
+    },
+    {
+      "skeleton": "{{Web reference| title=\u0000| url=\u0000| date=\u0000| year=\u0000}}",
+      "count": 17,
+      "params": 4,
+      "est_gain": 2836.0,
+      "skel_len": 49
+    },
+    {
+      "skeleton": "{{end box}}",
+      "count": 316,
+      "params": 0,
+      "est_gain": 2829.0,
+      "skel_len": 11
+    },
+    {
+      "skeleton": "{{cite journal| author=\u0000| title=\u0000| journal=\u0000| year=\u0000| volume=\u0000| pages=\u0000| url=\u0000}}",
+      "count": 12,
+      "params": 7,
+      "est_gain": 2821.0,
+      "skel_len": 80
+    },
+    {
+      "skeleton": "{{Citenews| title=\u0000| org=\u0000| date=\u0000| url=\u0000}}",
+      "count": 17,
+      "params": 4,
+      "est_gain": 2810.0,
+      "skel_len": 43
+    },
+    {
+      "skeleton": "{{seealso|\u0000}}",
+      "count": 88,
+      "params": 1,
+      "est_gain": 2695.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{succession box|title=\u0000|\u0000|before=\u0000|after=\u0000|years=\u0000}}",
+      "count": 20,
+      "params": 5,
+      "est_gain": 2589.0,
+      "skel_len": 53
+    },
+    {
+      "skeleton": "{{Note|\u0000}}",
+      "count": 206,
+      "params": 1,
+      "est_gain": 2575.9999999999995,
+      "skel_len": 10
+    },
+    {
+      "skeleton": "{{cite web| title =\u0000| url =\u0000| accessdate =\u0000}}",
+      "count": 17,
+      "params": 3,
+      "est_gain": 2521.0,
+      "skel_len": 45
+    },
+    {
+      "skeleton": "{{Africa in topic|\u0000}}",
+      "count": 94,
+      "params": 1,
+      "est_gain": 2488.9999999999995,
+      "skel_len": 21
+    },
+    {
+      "skeleton": "{{cite book| last =\u0000| first =\u0000| year =\u0000| title =\u0000| publisher =\u0000| id =\u0000}}",
+      "count": 17,
+      "params": 6,
+      "est_gain": 2437.0,
+      "skel_len": 72
+    },
+    {
+      "skeleton": "{{Audio|\u0000|\u0000}}",
+      "count": 71,
+      "params": 2,
+      "est_gain": 2435.0,
+      "skel_len": 13
+    },
+    {
+      "skeleton": "{{Elementbox_isotopes_begin| isotopesof=\u0000| color1=\u0000| color2=\u0000}}",
+      "count": 36,
+      "params": 3,
+      "est_gain": 2430.0,
+      "skel_len": 63
+    },
+    {
+      "skeleton": "{{gutenberg author|id=\u0000|name=\u0000}}",
+      "count": 45,
+      "params": 2,
+      "est_gain": 2247.0,
+      "skel_len": 32
+    },
+    {
+      "skeleton": "{{Citenews| title=\u0000| date=\u0000| org=\u0000| url=\u0000}}",
+      "count": 14,
+      "params": 4,
+      "est_gain": 2219.0,
+      "skel_len": 43
+    },
+    {
+      "skeleton": "{{cite book| last =\u0000| first =\u0000| title =\u0000| location =\u0000| publisher =\u0000| year =\u0000| id =\u0000}}",
+      "count": 13,
+      "params": 7,
+      "est_gain": 2150.0,
+      "skel_len": 85
+    },
+    {
+      "skeleton": "{{Wikisource1911Enc|\u0000}}",
+      "count": 78,
+      "params": 1,
+      "est_gain": 2139.0,
+      "skel_len": 23
+    },
+    {
+      "skeleton": "{{Web reference| title=\u0000| work=\u0000| url=\u0000| date=\u0000| year=\u0000}}",
+      "count": 14,
+      "params": 5,
+      "est_gain": 2114.0,
+      "skel_len": 57
+    }
+  ]
+}

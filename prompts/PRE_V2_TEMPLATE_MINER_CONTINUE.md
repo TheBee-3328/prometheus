@@ -13,15 +13,15 @@ Finish **TEMPLATE-MINER**: measure structural compressed cost, mine a template d
 
 ## Baseline (beat or match this)
 
-Re-measure from current `main` / `STATUS.md` tip before starting (tip moves). Prefer the SCORE **after** the word-dict trial if that trial KEEP-merged; otherwise post–DIAG-R6:
+Re-measure from current `main` / `STATUS.md` tip before starting (tip moves). Current tip (word dict N=4096 + B1 ORDER3/4=27 + A1 mix retune):
 
 ```
-ROUNDTRIP=OK COMPRESSED=21546316 DECOMPRESSOR=37560 SCORE=21583876
+ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107
 ```
 
 (Confirm exact line with `nix develop -c ./judge.sh enwik8 .` on clean `main` if STATUS disagrees.)
 
-`SCORE = COMPRESSED + DECOMPRESSOR` (embedded template blob counts in DECOMPRESSOR). A stage **only keeps** if SCORE ≤ baseline (prefer strict improve; equal OK only with smaller/cleaner code).
+`SCORE = COMPRESSED + DECOMPRESSOR` (embedded template blob counts in DECOMPRESSOR). A stage **only keeps** if SCORE ≤ baseline (prefer strict improve; equal OK only with smaller/cleaner code). KEEP for this trial requires strict SCORE **< 20852107**.
 
 ## What already ran (do not redo blindly)
 
