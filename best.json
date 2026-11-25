@@ -8,9 +8,12 @@
     "ROUNDTRIP": "OK",
     "adversarial": "10/10 PASS",
     "source": "main after A1-RETUNE cand A (ORDER0=64,CROSS=16,IND=32,ORDER5=72) on B1+dict",
-    "judge_line": "ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107",
+    "judge_line": "ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107 COMPRESS_SECONDS=384.01 DECOMPRESS_SECONDS=365.60 PEAK_RSS_MB=3485",
     "on_main": true,
-    "delta_vs_prior_B1": -59513
+    "delta_vs_prior_B1": -59513,
+    "COMPRESS_SECONDS": 384.01,
+    "DECOMPRESS_SECONDS": 365.6,
+    "PEAK_RSS_MB": 3485
   },
   "enwik9_manual": {
     "label": "enwik9 manual, may be stale",
