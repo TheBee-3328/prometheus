@@ -145,3 +145,7 @@ SETUP | machine ready | SCORE=28080343 | unrestricted=yes
 - Operator aim: ~10–12MB enwik8 / ~95MB enwik9 (not just 20.5e6).
 - C1 structure-stats: ABCD **18.56%** cost share, templates **15.36%** (~2.59MB est) — gate PASS. Proceed mine.
 - B2: mixer sweeps ongoing; orch directing away from endless 1D grids.
+
+## 2026-11-25T04:50:04Z Hygiene: prune 12 worktrees; unstick C1
+- Removed a1/b1/diag*/p5*/tuner* worktrees. Live: main+b2+c1+pre-v2.
+- Spawned C1-MINE supersede; B2 cap watcher if slice Δ&gt;−15KB.

@@ -1,32 +1,24 @@
 # STATUS
 
-**Current phase:** LIVE — chase ~10–12 MB enwik8 / ~95 MB enwik9  
+**Current phase:** LIVE — cleaned; C1 mine + B2 capped toward ~10–12 MB enwik8  
 **Poll cadence:** **2 minutes**  
 **enwik9:** NEVER auto-start (manual only)
 
-## Locked / current best enwik8 (on main)
+## Locked best enwik8
 
 ```
 ROUNDTRIP=OK COMPRESSED=20765227 DECOMPRESSOR=86880 SCORE=20852107
 ```
-**bpB:** ≈ **1.661** · **Gap to ~11e6 mid-target:** ≈ **9.7 MB** · Gap to 20.5e6 soft: ≈ 0.35 MB  
-**Mix:** ORDER0=64 CROSS=16 IND=32 ORDER5=72 · ORDER3/4=27 (B1)
+**Gap to ~11e6:** ≈ 9.7 MB
 
-## Ambition
+## Process hygiene (2026-11-25)
 
-- Operator target: **~10–12 MB** SCORE on enwik8 ⇒ roughly **~95 MB** enwik9.
-- Mixer-only retunes cannot close this; need preprocessor (templates/numeric) + stronger models/contexts.
-
-## enwik9 manual, may be stale
-
-SCORE **186586969** (old binary)
+- Removed **12** obsolete worktrees (a1, b1, diag*, p5*, tuner*).
+- Kept: `main`, `b2-mixer`, `c1-tmpl`, `pre-v2`.
+- No zombie compress/wait loops. Live compute: B2 25MB slices only (+ new C1-MINE).
+- Stuck UI agents (old C1/B2) may still show “running” but have no extra procs — superseded by orch + C1-MINE.
 
 ## In flight
 
-- **C1-TMPL:** structure gate PASS (ABCD cost share ≈18.6%; templates ≈15.4%). Mining next.
-- **B2-MIXER:** 25MB SSE/APM/STRUCT sweeps (small expected Δ). Cap burn; one full judge for best combo only.
-- Queued: A4 numeric, B3 contexts, larger dicts (manual enwik9)
-
-## Done
-
-- A3 word dict KEEP · B1 hash grow KEEP · A1 mix retune KEEP
+- **C1-MINE** — template mine/transform (gate PASS)
+- **B2** — SSE2 sweep; orch will stop if best slice Δ > −15KB
