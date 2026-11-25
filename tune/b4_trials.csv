@@ -1,0 +1,10 @@
+note,elapsed_s,slice_compressed,delta_vs_baseline,detail
+baseline,99,5699220,0,A1 weights ORDER0=64 CROSS=16 IND=32 ORDER5=72
+H1a_group128,88,5773465,74245,two-layer short=o1-4+o0 long=o5+/word/ind/cross GROUP=128
+H2a_match_wset,92,5713053,13833,match-on: O0=48 O5=56 IND=40 CROSS=24 WORD=48
+H2b_mild_cross_ind,89,5703939,4719,match-on: IND=40 CROSS=22 rest=A1
+H2c_less_cross_ind,90,5697940,-1280,match-on: IND=24 CROSS=10 rest=A1
+H2d_mute_cross_ind,89,5700865,1645,match-on: IND=16 CROSS=4 rest=A1
+H2e_ind24_cross8,88,5698176,-1044,match-on: IND=24 CROSS=8 rest=A1
+H3a_dual_rate,86,5760011,60791,dual-rate match mix FAST=2 SLOW=5 CLAMP=48 +loss EMA
+H4_adapt_group,89,5896068,196848,short vs long + adaptive gw[mb×bp] init=96
