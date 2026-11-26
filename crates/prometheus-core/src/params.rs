@@ -56,6 +56,10 @@ pub const ORDER7_MIX_WEIGHT: u32 = 16;
 
 /// SSE blend weight (0..=255) of secondary estimate into final p.
 pub const SSE_MIX_WEIGHT: u32 = 224;
+/// SSE cell/cxt mode: 0=tip Laplace buckets, 1=StateMap cells, 2=SM+last_nibble cxt,
+/// 3=warm-gate Laplace, 4=fine 128 p-buckets, 5=interp Apm-style SSE,
+/// 6=Laplace+last_nibble cxt, 7=Laplace+last_byte cxt (256×mb×64).
+pub const SSE_MODE: u32 = 0;
 
 /// Word-model hash table bits.
 pub const WORD_BITS: usize = 25;
@@ -97,6 +101,11 @@ pub const PROSE_SM: u32 = 0;
 pub const APM_MIX_WEIGHT: u32 = 224;
 /// APM adaptation shift (larger = slower). Careful default.
 pub const APM_RATE_SHIFT: u32 = 7;
+/// APM chain mode: 0=tip single APM, 1=APM2 hashed (prev×bit_cxt), 2=APM n=32768 richer cxt,
+/// 3=APM n=65536 hash(last,bit_cxt,mb).
+pub const APM_MODE: u32 = 1;
+/// Second APM blend weight when APM_MODE!=0 (0..=255).
+pub const APM2_MIX_WEIGHT: u32 = 160;
 // === END TUNABLE ===
 
 pub const BUF_SIZE: usize = 1 << BUF_BITS;
