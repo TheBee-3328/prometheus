@@ -380,3 +380,65 @@ Prune monotonically helps but still above main. Likely THROW soon.
 - SCORE=20753959 COMPRESSED=20666823 DECOMP=87136 Δ=-15809
 - Adv 10/10 PASS; TIME/RAM PASS
 - CM exclusive adv2 started (prior 9/10 suspect race)
+
+## 2026-11-26T04:34Z orch tick
+- PRE KEEP on main (tip 20753959)
+- CM adv2 exclusive: 7 PASS, enwik8_1mb running
+
+## 2026-11-26T04:37Z orch tick
+- CM adv2: 9 PASS, exclusive 100mb compress ~40s
+
+## 2026-11-26T04:40Z orch tick
+- CM adv2: 100mb compress ~12.8MB; exclusive OK
+
+## 2026-11-26T04:43Z orch tick
+- CM adv2: 100mb compress done (20602314); decompress mid
+
+## 2026-11-26T04:46Z orch tick
+- CM adv2: still decompressing 100mb (~4m)
+
+## 2026-11-26T04:49Z orch tick
+- CM adv2: 100mb roundtrip written; compress×2 started
+
+## 2026-11-26T04:52Z orch tick
+- CM adv2: compress×2 ~12.2MB
+
+## 2026-11-26T04:55Z CM adv 10/10
+- Exclusive adv2 PASS=10
+- KEEP commit 97da7c5; merged main PRE into branch
+- Combined enwik8 judge started before tip bump (need < 20753959)
+
+## 2026-11-26T04:58Z orch tick
+- Combined APM2+nocaps enwik8 compress ~7.2MB
+
+## 2026-11-26T05:01Z orch tick
+- Combined judge compress ~17.1MB; no competing adv
+
+## 2026-11-26T05:04Z orch tick
+- Combined compress=20598476 (better than APM2-only 20602314); decompress started
+
+## 2026-11-26T05:07Z operator: Discord + continue
+- Webhook file missing post-relocation; restored `~/.prometheus/discord_webhook.url` + `discord_notify.sh`; catch-up embed HTTP 204
+- Combined judge decompress mid (comp 20598476); will merge CM KEEP on SCORE < 20753959
+- Orch continues unattended
+
+## 2026-11-26T05:08Z OPERATOR PAUSE
+- Killed all Cursor tasks on request. Resume: ORCH_RESUME.md
+- Combined judge was mid-decompress (comp 20598476); restart judge after revive
+
+## 2026-11-26T05:12Z ORCH REVIVED
+- Operator: resume orchestration after kill-all. Notes: ORCH_RESUME.md
+- Discord online ping HTTP 204
+- Restarted P2-CM combined enwik8 judge (wipe judge_work + full ./judge.sh)
+  - worktree prometheus-p2-cm / agent/p2-cm @ 333de83
+  - APM_MODE=1 APM2_MIX=160 SSE=0 PRE_STAGE_CAPITALS=false
+  - log: tune/p2cm_combined_enwik8_judge.log
+  - gate SCORE < tip 20753959 → merge KEEP + Discord
+- Armed 3m orch monitor loop (AGENT_LOOP_TICK_prometheus_orch)
+
+## 2026-11-26T05:36Z P2-CM KEEP merged
+- Combined judge (APM2 mix=160 + PRE CAPITALS=false):
+  `ROUNDTRIP=OK COMPRESSED=20598476 DECOMPRESSOR=87616 SCORE=20686092 COMPRESS_SECONDS=360.80 DECOMPRESS_SECONDS=353.20 PEAK_RSS_MB=3655 CPU_TOTAL_SECONDS=711.42 WALL_TOTAL_SECONDS=714.00 RAM_TIME_GB_H=0.7079 TIME_LIMIT=PASS RAM_LIMIT=PASS`
+- Δ −67867 vs prior tip 20753959; Δ −4078 vs APM2-only 20690170
+- Fast-forward main → `333de83` (agent/p2-cm); adv exclusive 10/10 prior
+- UNVERIFIED FOR 10 GB
