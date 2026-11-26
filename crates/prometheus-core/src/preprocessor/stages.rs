@@ -4,7 +4,7 @@
 //! template stages are trial flags — flip only for measured SCORE trials.
 
 /// Fold word-initial capitals to lowercase + separator markers.
-pub const PRE_STAGE_CAPITALS: bool = true;
+pub const PRE_STAGE_CAPITALS: bool = false;
 
 /// Static XML/wiki markup dictionary (`0x80..` tokens).
 pub const PRE_STAGE_MARKUP: bool = true;
