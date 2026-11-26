@@ -276,3 +276,107 @@ Prune monotonically helps but still above main. Likely THROW soon.
 | 2026-11-25 | PHASE2 | §2: decomp mismatch=CARGO_TARGET_DIR→c1 stale 37k; official time=70000/T (T=?); working 4h+9GB in judge; webhook \\n fix; enwik9 B5 re-run parallel | — | — | — | — | — | — | in progress |
 | 2026-11-26 | ENWIK9 | B5 valid judge | 173873383 | 88208 | 173961591 | 3977.34 | 3676.61 | 5973 | OK |
 | 2026-11-26 | ENWIK9 | B5 valid (frozen judge) | 173873383 | 88208 | 173961591 | 3977 | 3677 | 5973 | OK TIME/RAM PASS |
+
+## 2026-11-26T02:05Z ORCH RESUME (storage abandon)
+- Disk recovered: workspace 871 Gi free; RAM ~37 Gi avail; no compress/judge orphans.
+- Restored P2-MATCH tip params (was mid-sweep BUF=24); fixed `target-p2-match` (broken /tmp symlink).
+- P2-SPEED: uncommitted microopts; tip+opt2 archives sha256 `d400abb…` bit-identical; tip WALL~126s (cold) / opt2 WALL~99s — need paired retime.
+- P2-MATCH trials so far: hash_24 +513, hash_25 +187, hash_27 −31 (≪ −15KB gate). Next: BUF family then mix schedule.
+- Spawning P2-SPEED + P2-MATCH agents; orch monitors continuously.
+- Locked best unchanged: enwik8 **20769768** · enwik9 **173961591**.
+
+## 2026-11-26T02:21Z Merge P2-SPEED KEEP
+- Agent [P2-SPEED](9bc64298-1223-432e-b7b4-52103164d56f): KEEP bit-identical microopts.
+- Tip mean WALL 124.90s → opt 94.91s (−24%); sha256 `d400abb…` unchanged; RSS flat ~3.55 GB.
+- Merged `91d4173` → main @ `cfe950a`. SCORE unchanged (budget win).
+- Spawned **P2-PRE** worktree `prometheus-p2-pre` / `agent/p2-pre`.
+- P2-MATCH continues mix_weight (BUF/hash families no −15KB win).
+
+## 2026-11-26T02:46Z P2-MATCH THROW
+- Agent [P2-MATCH](09de23a8-46a3-42b7-b139-514832234042): gate −15000 not cleared.
+- Best 25MiB Δ **−1314** (`mix_cool`). Top: mildcool −865, conf_soft −216, hash_27 −31.
+- BUF 26/27 noop; hash shrink/grow and minmix fail. Tip params restored.
+- Commit `796353a` on `agent/p2-match` (report + CSV). **Not merged** (no SCORE win).
+- Next: wait P2-PRE (N=1024 leading); then CM scale. Match/hash saturated on this tip.
+
+## 2026-11-26T03:22Z P2-PRE N=1024 enwik8 judge → THROW
+- ROUNDTRIP=OK COMPRESSED=20760693 DECOMPRESSOR=52416 SCORE=**20813109** (+43341 vs 20769768).
+- Slice proj (~−76KB SCORE) **failed on full enwik8**: archive +79117 outweighs decomp −35776.
+- TIME/RAM PASS. Tip N=4096 remains. Agent to commit THROW report; restore tip dict.
+- Next orch: spawn **P2-CM** (CM scale) after PRE closes.
+
+## 2026-11-26T03:49Z orch tick
+- PRE: enwik8 judge compress running (~6.9MB written, CAPITALS=false)
+- CM: apm2_ok GATE CLEAR Δ-24051; sequential APM2 mix m96 in flight; directed enwik8 after current trial
+- Disk: 870Gi free; monitor loop alive
+
+## 2026-11-26T03:52Z orch tick
+- PRE: enwik8 compress ~16.8MB written (~5min in)
+- CM: mix sweep m96/m128 worse than 160; killed mid-m192; locked mix=160; started enwik8 judge
+
+## 2026-11-26T03:55Z orch tick
+- PRE: compress done 20666823; decompress/roundtrip in progress
+- CM: enwik8 compress ~6.7MB written (~2min)
+
+## 2026-11-26T03:58Z orch tick
+- PRE: still decompressing (~5m); SCORE pending
+- CM: compress ~16.6MB
+
+## 2026-11-26T04:01Z orch tick
+- PRE: ROUNDTRIP OK (sha match); compress×2 in progress; proj SCORE 20753959 Δ-15809
+- CM: compress 20602314; decompressing; proj SCORE 20690170 Δ-79598
+
+## 2026-11-26T04:04Z orch tick
+- PRE: compress×2 ~16.6MB; CM: still decompressing; no SCORE line yet
+
+## 2026-11-26T04:07Z orch tick
+- PRE: compress×2 size-identical; roundtrip2 decompress running
+- CM: roundtrip hashes present; compress×2 mid
+
+## 2026-11-26T04:10Z orch tick
+- PRE: roundtrip2 decompress ~5m; CM: compress×2 ~15.4MB; still no SCORE line
+
+## 2026-11-26T04:11Z PRE enwik8 KEEP gate
+- ROUNDTRIP=OK SCORE=20753959 COMPRESSED=20666823 DECOMP=87136 Δ=-15809 vs 20769768
+- TIME/RAM PASS; adv 10/10 started
+
+## 2026-11-26T04:12Z
+- PRE judge DONE SCORE=20753959; killed raced adv; single clean adv running
+- CM roundtrip2 decompress in progress
+
+## 2026-11-26T04:13Z orch tick
+- PRE adv: 7+ PASS, on enwik8_10mb; single suite
+- CM: roundtrip2 decompress ~1.5m
+
+## 2026-11-26T04:16Z orch tick
+- PRE adv: 9 PASS, enwik8_100mb compress mid
+- CM: roundtrip2 ~4.5m
+
+## 2026-11-26T04:19Z CM enwik8 KEEP gate
+- ROUNDTRIP=OK SCORE=20690170 COMPRESSED=20602314 DECOMP=87856 Δ=-79598
+- TIME/RAM PASS; adv started
+- PRE adv still on 100mb
+
+## 2026-11-26T04:22Z orch tick
+- Both lanes adv on final 100mb case (9 PASS each)
+
+## 2026-11-26T04:25Z orch tick
+- Killed duplicate CM adv race
+- PRE 100mb decompress ~4m; CM 100mb compress ~3m
+
+## 2026-11-26T04:26Z
+- PRE small-under-load adv: 8/8 PASS (isolated dir)
+- Orch full adv still on 100mb (PRE decompress / CM compress)
+
+## 2026-11-26T04:28Z orch tick
+- PRE adv: 100mb compress×2; CM adv: 100mb first compress ~6m
+
+## 2026-11-26T04:31Z orch tick
+- CM adv 9/10 FAIL(decompress) — suspect rogue rm -rf race; will exclusive re-run
+- PRE adv still on 100mb compress×2
+
+## 2026-11-26T04:34Z P2-PRE KEEP merged
+- Commit 0af9e43 / merge on main: CAPITALS=false
+- SCORE=20753959 COMPRESSED=20666823 DECOMP=87136 Δ=-15809
+- Adv 10/10 PASS; TIME/RAM PASS
+- CM exclusive adv2 started (prior 9/10 suspect race)
