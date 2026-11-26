@@ -471,3 +471,6 @@ Prune monotonically helps but still above main. Likely THROW soon.
 - Winner: HIT=1 O0=40 IND=28/40 CROSS=8 (+ hit-gate skip pi==32768)
 - vs O6 tip 20415163: Δ=−61683 · RT=OK · TIME/RAM PASS · PEAK_RSS≈8968MB
 - Auto-push via orch_keep_land.sh
+
+## 2026-11-26T23:41Z — P2-IND2 adv 10/10 PASS
+- SCORE tip 20353480 @ 1d6d1cd; adversarial_roundtrip.sh PASS=10 FAIL=0

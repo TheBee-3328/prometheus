@@ -5,7 +5,7 @@
     "DECOMPRESSOR": 87488,
     "bpB": 1.621279,
     "ROUNDTRIP": "OK",
-    "adversarial": "pending",
+    "adversarial": "10/10 PASS (P2-IND2 HIT=1 O0=40 IND=28/40 CROSS=8)",
     "source": "P2-IND2 KEEP: HIT=1 O0=40 IND=28/40 CROSS=8 hit-gate",
     "judge_line": "ROUNDTRIP=OK COMPRESSED=20265992 DECOMPRESSOR=87488 SCORE=20353480 COMPRESS_SECONDS=398.16 DECOMPRESS_SECONDS=384.92 PEAK_RSS_MB=8968 CPU_TOTAL_SECONDS=780.02 WALL_TOTAL_SECONDS=783.08 RAM_TIME_GB_H=1.9048 TIME_LIMIT=PASS RAM_LIMIT=PASS",
     "on_main": true,
@@ -37,5 +37,6 @@
     "RAM_LIMIT": "PASS",
     "source": "main B5 valid re-measure",
     "on_main": true
-  }
+  },
+  "updated_at": "2026-11-26T23:41:35.055.000Z"
 }

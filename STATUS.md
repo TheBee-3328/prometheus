@@ -19,8 +19,8 @@
 | P2-CM3 | `agent/p2-cm3` | **THROW** 20580794 ≥ 20566057 (agent mislabeled KEEP vs stale tip) |
 | P2-O6 | `agent/p2-o6` | **KEEP** SCORE=**20415163** · adv 10/10 · origin pushed |
 | P2-SSE2 | `agent/p2-sse2` | **THROW** best Δ=−9014; closed |
-| P2-IND2 | `agent/p2-ind2` | **KEEP** SCORE=**20353480** · **KEEP** SCORE=**20353480** · adv pending · origin pushed |
-| P2-MIX3 | `agent/p2-mix3` | ACTIVE — tip 20353480; mixer residual |
+| P2-IND2 | `agent/p2-ind2` | **KEEP** SCORE=**20353480** · adv **10/10 PASS** · origin pushed |
+| P2-MIX3 | `agent/p2-mix3` | ACTIVE best Δ=−7605 (apm_mode3); gate −15KB unmet; WORD/PROSE wave |
 
 ## Queue
 After CM2/MATCH2 land or THROW → next CM/mixer/indirect family. Neural blocked until §2.4 determinism PASS.
