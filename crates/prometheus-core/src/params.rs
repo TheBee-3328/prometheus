@@ -30,12 +30,12 @@ pub const STRUCT_MIX_WEIGHT: u32 = 24;
 pub const ORDER1_MIX_WEIGHT: u32 = 8;
 
 /// Hashed order-3 table bits (size = 1 << this).
-pub const ORDER3_BITS: usize = 27;
+pub const ORDER3_BITS: usize = 28;
 /// Blend weight (0..=255) of hashed order-3 into the CM mix.
 pub const ORDER3_MIX_WEIGHT: u32 = 160;
 
 /// Hashed order-4 table bits.
-pub const ORDER4_BITS: usize = 27;
+pub const ORDER4_BITS: usize = 28;
 /// Blend weight (0..=255) of hashed order-4 into the CM mix.
 pub const ORDER4_MIX_WEIGHT: u32 = 48;
 
@@ -45,9 +45,9 @@ pub const ORDER5_BITS: usize = 28;
 pub const ORDER5_MIX_WEIGHT: u32 = 88;
 
 /// Hashed order-6 table bits.
-pub const ORDER6_BITS: usize = 26;
+pub const ORDER6_BITS: usize = 30;
 /// Blend weight (0..=255) of hashed order-6 into the CM mix.
-pub const ORDER6_MIX_WEIGHT: u32 = 32;
+pub const ORDER6_MIX_WEIGHT: u32 = 72;
 
 /// Hashed order-7 table bits.
 pub const ORDER7_BITS: usize = 25;
