@@ -1,6 +1,7 @@
 //! Secondary symbol estimation (SSE / light APM). Integer only.
 //!
 //! Refines a primary probability using (bit_cxt, quantized p) counts.
+//! Counts are packed as `u16 = n0 | (n1 << 8)` so each slot is one cache line touch.
 
 use crate::params::ORDER2_RESCALE;
 
@@ -9,10 +10,49 @@ const N_CXT: usize = 2048;
 const N_BUCKET: usize = 64; // p >> 10
 const SIZE: usize = N_CXT * N_BUCKET;
 
+#[inline]
+fn pack_counts(n0: u8, n1: u8) -> u16 {
+    (n0 as u16) | ((n1 as u16) << 8)
+}
+
+#[inline]
+fn unpack_counts(c: u16) -> (u8, u8) {
+    (c as u8, (c >> 8) as u8)
+}
+
+#[inline]
+fn laplace_prob(n0: u8, n1: u8) -> u16 {
+    let a = n1 as u32 + 1;
+    let b = n0 as u32 + n1 as u32 + 2;
+    let p = (a * 65535) / b;
+    if p < 1 {
+        1
+    } else if p > 65534 {
+        65534
+    } else {
+        p as u16
+    }
+}
+
+#[inline]
+fn learn_packed(counts: &mut [u16], i: usize, bit: u8) {
+    let (mut n0, mut n1) = unpack_counts(counts[i]);
+    if bit == 0 {
+        n0 = n0.saturating_add(1);
+    } else {
+        n1 = n1.saturating_add(1);
+    }
+    if (n0 as u16) + (n1 as u16) >= ORDER2_RESCALE {
+        n0 >>= 1;
+        n1 >>= 1;
+    }
+    counts[i] = pack_counts(n0, n1);
+}
+
 /// Adaptive SSE table: mixes primary p with a learned conditional.
 pub struct Sse {
-    n0: Box<[u8]>,
-    n1: Box<[u8]>,
+    /// Packed n0/n1 per slot (lo8=n0, hi8=n1).
+    counts: Box<[u16]>,
     /// last index for update
     last_i: usize,
     /// blend of SSE vs primary (0..=255)
@@ -22,24 +62,9 @@ pub struct Sse {
 impl Sse {
     pub fn new(mix_w: u32) -> Self {
         Self {
-            n0: vec![0u8; SIZE].into_boxed_slice(),
-            n1: vec![0u8; SIZE].into_boxed_slice(),
+            counts: vec![0u16; SIZE].into_boxed_slice(),
             last_i: 0,
             mix_w,
-        }
-    }
-
-    #[inline]
-    fn prob(n0: u8, n1: u8) -> u16 {
-        let a = n1 as u32 + 1;
-        let b = n0 as u32 + n1 as u32 + 2;
-        let p = (a * 65535) / b;
-        if p < 1 {
-            1
-        } else if p > 65534 {
-            65534
-        } else {
-            p as u16
         }
     }
 
@@ -67,7 +92,8 @@ impl Sse {
         let bucket = bucket.min(N_BUCKET - 1);
         let i = cxt * N_BUCKET + bucket;
         self.last_i = i;
-        let ps = Self::prob(self.n0[i], self.n1[i]);
+        let (n0, n1) = unpack_counts(self.counts[i]);
+        let ps = laplace_prob(n0, n1);
         let w = self.mix_w;
         let out = (p as u32 * (256 - w) + ps as u32 * w) / 256;
         if out < 1 {
@@ -81,16 +107,7 @@ impl Sse {
 
     #[inline]
     pub fn update(&mut self, bit: u8) {
-        let i = self.last_i;
-        if bit == 0 {
-            self.n0[i] = self.n0[i].saturating_add(1);
-        } else {
-            self.n1[i] = self.n1[i].saturating_add(1);
-        }
-        if (self.n0[i] as u16) + (self.n1[i] as u16) >= ORDER2_RESCALE {
-            self.n0[i] >>= 1;
-            self.n1[i] >>= 1;
-        }
+        learn_packed(&mut self.counts, self.last_i, bit);
     }
 }
 
@@ -101,8 +118,7 @@ const N2_BUCKET: usize = 32; // p >> 11
 const SIZE2: usize = N2_CLASS * N2_BIT * N2_BUCKET;
 
 pub struct Sse2 {
-    n0: Box<[u8]>,
-    n1: Box<[u8]>,
+    counts: Box<[u16]>,
     last_i: usize,
     mix_w: u32,
 }
@@ -110,24 +126,9 @@ pub struct Sse2 {
 impl Sse2 {
     pub fn new(mix_w: u32) -> Self {
         Self {
-            n0: vec![0u8; SIZE2].into_boxed_slice(),
-            n1: vec![0u8; SIZE2].into_boxed_slice(),
+            counts: vec![0u16; SIZE2].into_boxed_slice(),
             last_i: 0,
             mix_w,
-        }
-    }
-
-    #[inline]
-    fn prob(n0: u8, n1: u8) -> u16 {
-        let a = n1 as u32 + 1;
-        let b = n0 as u32 + n1 as u32 + 2;
-        let p = (a * 65535) / b;
-        if p < 1 {
-            1
-        } else if p > 65534 {
-            65534
-        } else {
-            p as u16
         }
     }
 
@@ -138,7 +139,8 @@ impl Sse2 {
         let bucket = ((p as usize) >> 11).min(N2_BUCKET - 1);
         let i = (c * N2_BIT + bxt) * N2_BUCKET + bucket;
         self.last_i = i;
-        let ps = Self::prob(self.n0[i], self.n1[i]);
+        let (n0, n1) = unpack_counts(self.counts[i]);
+        let ps = laplace_prob(n0, n1);
         let w = self.mix_w;
         let out = (p as u32 * (256 - w) + ps as u32 * w) / 256;
         if out < 1 {
@@ -152,15 +154,6 @@ impl Sse2 {
 
     #[inline]
     pub fn update(&mut self, bit: u8) {
-        let i = self.last_i;
-        if bit == 0 {
-            self.n0[i] = self.n0[i].saturating_add(1);
-        } else {
-            self.n1[i] = self.n1[i].saturating_add(1);
-        }
-        if (self.n0[i] as u16) + (self.n1[i] as u16) >= ORDER2_RESCALE {
-            self.n0[i] >>= 1;
-            self.n1[i] >>= 1;
-        }
+        learn_packed(&mut self.counts, self.last_i, bit);
     }
 }

@@ -147,7 +147,12 @@ impl Apm {
 
     /// Predict refined probability (12-bit) given raw `p` (12-bit) and context.
     pub fn predict(&mut self, p: u16, cxt: usize) -> u16 {
-        let cxt = cxt % self.n;
+        // Power-of-two `n` (production 16384): mask ≡ `% n`. Else keep `%`.
+        let cxt = if self.n.is_power_of_two() {
+            cxt & (self.n - 1)
+        } else {
+            cxt % self.n
+        };
         self.cbase = cxt * 33;
         let s = stretch(p) + 2047; // 0..4094
         self.bi = (s >> 7) as usize; // 0..31
@@ -166,11 +171,10 @@ impl Apm {
     pub fn update(&mut self, bit: u8) {
         let tgt = if bit != 0 { 65520i32 } else { 0i32 };
         let rs = self.rate_shift;
+        // bi is always 0..31 and table rows are 33 wide → both bins in-bounds.
+        let base = self.cbase + self.bi;
         for off in 0..2 {
-            let idx = self.cbase + self.bi + off;
-            if idx >= self.t.len() {
-                break;
-            }
+            let idx = base + off;
             let cur = self.t[idx] as i32;
             let next = cur + ((tgt - cur) >> rs);
             self.t[idx] = next.clamp(0, 65520) as u16;

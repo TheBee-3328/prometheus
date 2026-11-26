@@ -3,6 +3,16 @@
 use crate::model::Model;
 use crate::params::{ORDER2_RESCALE, WORD_BITS, WORD_CTX_MODE};
 
+#[inline]
+fn pack_counts(n0: u8, n1: u8) -> u16 {
+    (n0 as u16) | ((n1 as u16) << 8)
+}
+
+#[inline]
+fn unpack_counts(c: u16) -> (u8, u8) {
+    (c as u8, (c >> 8) as u8)
+}
+
 /// Hashed whole-word context + bit path.
 pub struct WordModel {
     /// Rolling hash of letters in the current word (0 if not in word).
@@ -13,11 +23,15 @@ pub struct WordModel {
     wpos: u8,
     in_word: bool,
     bit_cxt: u16,
-    n0: Box<[u8]>,
-    n1: Box<[u8]>,
+    /// Packed n0/n1 (lo8=n0, hi8=n1).
+    counts: Box<[u16]>,
     /// 8-bit context fingerprint; 0 = empty.
     chk: Box<[u8]>,
     mask: usize,
+    /// Cached slot from last `predict_hit` (valid when `have_slot`).
+    last_i: usize,
+    last_cs: u8,
+    have_slot: bool,
 }
 
 impl WordModel {
@@ -29,10 +43,12 @@ impl WordModel {
             wpos: 0,
             in_word: false,
             bit_cxt: 1,
-            n0: vec![0u8; size].into_boxed_slice(),
-            n1: vec![0u8; size].into_boxed_slice(),
+            counts: vec![0u16; size].into_boxed_slice(),
             chk: vec![0u8; size].into_boxed_slice(),
             mask: size - 1,
+            last_i: 0,
+            last_cs: 0,
+            have_slot: false,
         }
     }
 
@@ -105,18 +121,23 @@ impl Default for WordModel {
 impl WordModel {
     /// Hit-gated prediction: `None` on inactive / checksum miss / cold slot.
     #[inline]
-    pub fn predict_hit(&self) -> Option<u16> {
+    pub fn predict_hit(&mut self) -> Option<u16> {
         if !self.in_word && self.whash == 0 {
+            self.have_slot = false;
             return None;
         }
         let (i, cs) = self.index_cs();
+        self.last_i = i;
+        self.last_cs = cs;
+        self.have_slot = true;
         if self.chk[i] != cs {
             return None;
         }
-        if self.n0[i] == 0 && self.n1[i] == 0 {
+        let (n0, n1) = unpack_counts(self.counts[i]);
+        if n0 == 0 && n1 == 0 {
             return None;
         }
-        Some(Self::prob(self.n0[i], self.n1[i]))
+        Some(Self::prob(n0, n1))
     }
 }
 
@@ -129,22 +150,28 @@ impl Model for WordModel {
     #[inline]
     fn update(&mut self, bit: u8) {
         if self.in_word || self.whash != 0 {
-            let (i, cs) = self.index_cs();
+            let (i, cs) = if self.have_slot {
+                (self.last_i, self.last_cs)
+            } else {
+                self.index_cs()
+            };
             if self.chk[i] != cs {
                 self.chk[i] = cs;
-                self.n0[i] = 0;
-                self.n1[i] = 0;
+                self.counts[i] = 0;
             }
+            let (mut n0, mut n1) = unpack_counts(self.counts[i]);
             if bit == 0 {
-                self.n0[i] = self.n0[i].saturating_add(1);
+                n0 = n0.saturating_add(1);
             } else {
-                self.n1[i] = self.n1[i].saturating_add(1);
+                n1 = n1.saturating_add(1);
             }
-            if (self.n0[i] as u16) + (self.n1[i] as u16) >= ORDER2_RESCALE {
-                self.n0[i] >>= 1;
-                self.n1[i] >>= 1;
+            if (n0 as u16) + (n1 as u16) >= ORDER2_RESCALE {
+                n0 >>= 1;
+                n1 >>= 1;
             }
+            self.counts[i] = pack_counts(n0, n1);
         }
+        self.have_slot = false;
         self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
         if self.bit_cxt >= 256 {
             let byte = (self.bit_cxt & 0xff) as u8;

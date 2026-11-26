@@ -11,14 +11,10 @@ pub fn sm_init() -> u32 {
 
 #[inline]
 pub fn sm_predict(cell: u32) -> u16 {
+    // Cells are always clamped to 1..=65534 on init/update; keep a cheap saturating
+    // view so a corrupt cell cannot feed 0/65535 to the arithmetic coder.
     let p = (cell >> 16) as u16;
-    if p < 1 {
-        1
-    } else if p > 65534 {
-        65534
-    } else {
-        p
-    }
+    p.clamp(1, 65534)
 }
 
 /// StateMap update. Count schedule: asymptotic `n += 1 - (n>>3)` (eq ≈ 8).

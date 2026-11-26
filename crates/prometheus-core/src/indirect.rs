@@ -6,6 +6,16 @@
 use crate::model::Model;
 use crate::params::{INDIRECT_BITS, ORDER2_RESCALE};
 
+#[inline]
+fn pack_counts(n0: u8, n1: u8) -> u16 {
+    (n0 as u16) | ((n1 as u16) << 8)
+}
+
+#[inline]
+fn unpack_counts(c: u16) -> (u8, u8) {
+    (c as u8, (c >> 8) as u8)
+}
+
 /// Last-byte-after-context predictor.
 pub struct IndirectModel {
     prev0: u8,
@@ -18,11 +28,13 @@ pub struct IndirectModel {
     t2: Box<[u8]>,
     /// Last byte after hashed order-3 context.
     t3: Box<[u8]>,
-    n0: Box<[u8]>,
-    n1: Box<[u8]>,
+    /// Packed n0/n1 (lo8=n0, hi8=n1).
+    counts: Box<[u16]>,
     /// 8-bit context fingerprint; 0 = empty.
     chk: Box<[u8]>,
     mask: usize,
+    last_i: usize,
+    last_cs: u8,
 }
 
 impl IndirectModel {
@@ -36,10 +48,11 @@ impl IndirectModel {
             t1: [0u8; 256],
             t2: vec![0u8; 65536].into_boxed_slice(),
             t3: vec![0u8; 65536].into_boxed_slice(),
-            n0: vec![0u8; size].into_boxed_slice(),
-            n1: vec![0u8; size].into_boxed_slice(),
+            counts: vec![0u16; size].into_boxed_slice(),
             chk: vec![0u8; size].into_boxed_slice(),
             mask: size - 1,
+            last_i: 0,
+            last_cs: 0,
         }
     }
 
@@ -118,29 +131,34 @@ impl Model for IndirectModel {
     #[inline]
     fn predict(&mut self) -> u16 {
         let (i, cs) = self.hash_cs();
+        self.last_i = i;
+        self.last_cs = cs;
         if self.chk[i] != cs {
             return 32768;
         }
-        Self::prob(self.n0[i], self.n1[i])
+        let (n0, n1) = unpack_counts(self.counts[i]);
+        Self::prob(n0, n1)
     }
 
     #[inline]
     fn update(&mut self, bit: u8) {
-        let (i, cs) = self.hash_cs();
+        let i = self.last_i;
+        let cs = self.last_cs;
         if self.chk[i] != cs {
             self.chk[i] = cs;
-            self.n0[i] = 0;
-            self.n1[i] = 0;
+            self.counts[i] = 0;
         }
+        let (mut n0, mut n1) = unpack_counts(self.counts[i]);
         if bit == 0 {
-            self.n0[i] = self.n0[i].saturating_add(1);
+            n0 = n0.saturating_add(1);
         } else {
-            self.n1[i] = self.n1[i].saturating_add(1);
+            n1 = n1.saturating_add(1);
         }
-        if (self.n0[i] as u16) + (self.n1[i] as u16) >= ORDER2_RESCALE {
-            self.n0[i] >>= 1;
-            self.n1[i] >>= 1;
+        if (n0 as u16) + (n1 as u16) >= ORDER2_RESCALE {
+            n0 >>= 1;
+            n1 >>= 1;
         }
+        self.counts[i] = pack_counts(n0, n1);
 
         self.bit_cxt = (self.bit_cxt << 1) | (bit as u16);
         if self.bit_cxt >= 256 {

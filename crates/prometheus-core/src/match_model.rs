@@ -26,6 +26,9 @@ use crate::word::WordModel;
 /// Slot 0 = primary (with fingerprint); slots 1.. = prior occupants (chain).
 const MATCH_CANDIDATES: usize = 4;
 
+// `context_hash_raw` is unrolled for HASH_ORDER == 6.
+const _: () = assert!(HASH_ORDER == 6);
+
 /// LZ match model: buffer + hash → expected next bits.
 pub struct MatchModel {
     buf: Box<[u8]>,
@@ -89,13 +92,22 @@ impl MatchModel {
 
     #[inline]
     fn context_hash_raw(&self, end: usize) -> u32 {
-        // FNV-ish hash of buf[end-HASH_ORDER+1 ..= end]
+        // FNV-ish hash of buf[end-HASH_ORDER+1 ..= end]. HASH_ORDER is 6 —
+        // unrolled for a fixed mul chain (bit-identical to the loop).
         let mut h: u32 = 2166136261;
-        for i in (0..HASH_ORDER).rev() {
-            let b = self.buf[end.wrapping_sub(i) & BUF_MASK] as u32;
-            h ^= b;
-            h = h.wrapping_mul(16777619);
-        }
+        // i = HASH_ORDER-1 .. 0
+        h ^= self.buf[end.wrapping_sub(5) & BUF_MASK] as u32;
+        h = h.wrapping_mul(16777619);
+        h ^= self.buf[end.wrapping_sub(4) & BUF_MASK] as u32;
+        h = h.wrapping_mul(16777619);
+        h ^= self.buf[end.wrapping_sub(3) & BUF_MASK] as u32;
+        h = h.wrapping_mul(16777619);
+        h ^= self.buf[end.wrapping_sub(2) & BUF_MASK] as u32;
+        h = h.wrapping_mul(16777619);
+        h ^= self.buf[end.wrapping_sub(1) & BUF_MASK] as u32;
+        h = h.wrapping_mul(16777619);
+        h ^= self.buf[end & BUF_MASK] as u32;
+        h = h.wrapping_mul(16777619);
         h
     }
 
@@ -146,6 +158,14 @@ impl MatchModel {
         // Index context ending at `p`; look up prior occurrence(s).
         if p + 1 >= HASH_ORDER {
             let (h, fp) = self.context_hash(p);
+            // Prefetch primary + first prev chain slot (large HASH_SIZE tables).
+            #[cfg(target_arch = "x86_64")]
+            unsafe {
+                use core::arch::x86_64::{_mm_prefetch, _MM_HINT_T0};
+                _mm_prefetch(self.ht.as_ptr().add(h) as *const i8, _MM_HINT_T0);
+                _mm_prefetch(self.ht_fp.as_ptr().add(h) as *const i8, _MM_HINT_T0);
+                _mm_prefetch(self.ht_prev.as_ptr().add(h) as *const i8, _MM_HINT_T0);
+            }
             let primary = self.ht[h];
             let primary_fp = self.ht_fp[h];
 
