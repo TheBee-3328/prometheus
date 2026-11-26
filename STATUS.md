@@ -1,9 +1,9 @@
 # STATUS — PROMETHEUS Phase 2
 
-**LIVE** 2026-11-26T15:45Z · orch **IMPROVING** · main `0818e20` · RAM ~7 Gi avail  
+**LIVE** 2026-11-26T17:23Z · orch **IMPROVING** · main `0818e20` · RAM ~7 Gi avail  
 **Host CPU:** AMD Ryzen 5 5600X (6C/12T)  
 **Geekbench5 T:** **1650 assumed** (not measured yet — GB5 run queued) → H≈42.42 h/dir · working 0.8×H≈33.94 h/dir (122182 s)  
-**Best:** enwik8 **20566057** · enwik9 **173961591** — both **UNVERIFIED FOR 10 GB** (no ceiling test yet; prior 9 GB working gate retired)  
+**Best:** enwik8 **20415163** · enwik9 **173961591** — both **UNVERIFIED FOR 10 GB** (no ceiling test yet; prior 9 GB working gate retired)  
 **Limits:** `PROMETHEUS_PHASE2_LIMITS.md` — time is the budget; default RAM=NO_CAP  
 **License:** GPLv3-or-later
 
@@ -16,8 +16,8 @@
 | P2-CM | `agent/p2-cm` | **KEEP merged** SCORE=**20686092** |
 | P2-CM2 | `agent/p2-cm2` | **KEEP** SCORE=**20566057** · adv 10/10 · origin pushed |
 | P2-MATCH2 | `agent/p2-match2` | **THROW** best −3693; closed |
-| P2-CM3 | `agent/p2-cm3` | **THROW** SCORE=20580794 ≥ 20566057 |
-| P2-O6 | `agent/p2-o6` | ACTIVE ORDER6 grow |
+| P2-CM3 | `agent/p2-cm3` | **THROW** 20580794 ≥ 20566057 (agent mislabeled KEEP vs stale tip) |
+| P2-O6 | `agent/p2-o6` | **KEEP merged** SCORE=**20415163** (−150894) |
 
 ## Queue
 After CM2/MATCH2 land or THROW → next CM/mixer/indirect family. Neural blocked until §2.4 determinism PASS.

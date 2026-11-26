@@ -457,3 +457,9 @@ Prune monotonically helps but still above main. Likely THROW soon.
 
 ## 2026-11-26 — P2-CM2 adv 10/10 confirmed
 - KEEP SCORE 20566057 on main; adversarial exclusive 10/10 PASS merged.
+
+## 2026-11-26 — P2-O6 KEEP SCORE 20415163 (−150894)
+- Winner: ORDER6_BITS=30 MIX=72 + O3=28 + O4=28 (bits assert ..=30); O5=28 MIX=88 retained
+- enwik8 ROUNDTRIP=OK PEAK_RSS_MB=8391
+- Resources: wall 827.83s cpu 824.84s RAM·time 1.8843 GB·h
+- Merged + pushed via orch_keep_land.sh
