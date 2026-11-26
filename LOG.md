@@ -466,3 +466,8 @@ Prune monotonically helps but still above main. Likely THROW soon.
 
 ## 2026-11-26 — P2-O6 adv 10/10 confirmed
 - KEEP SCORE 20415163 on main; adversarial exclusive 10/10 PASS.
+
+## 2026-11-26T22:45Z — P2-IND2 KEEP SCORE=20353480
+- Winner: HIT=1 O0=40 IND=28/40 CROSS=8 (+ hit-gate skip pi==32768)
+- vs O6 tip 20415163: Δ=−61683 · RT=OK · TIME/RAM PASS · PEAK_RSS≈8968MB
+- Auto-push via orch_keep_land.sh
