@@ -463,3 +463,6 @@ Prune monotonically helps but still above main. Likely THROW soon.
 - enwik8 ROUNDTRIP=OK PEAK_RSS_MB=8391
 - Resources: wall 827.83s cpu 824.84s RAM·time 1.8843 GB·h
 - Merged + pushed via orch_keep_land.sh
+
+## 2026-11-26 — P2-O6 adv 10/10 confirmed
+- KEEP SCORE 20415163 on main; adversarial exclusive 10/10 PASS.
