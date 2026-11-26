@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-11-26T15:15:41.655Z",
+  "updated_at": "2026-11-26T15:45:22.340Z",
   "enwik8": {
     "SCORE": 20566057,
     "COMPRESSED": 20478441,
     "DECOMPRESSOR": 87616,
     "bpB": 1.647878,
     "ROUNDTRIP": "OK",
-    "adversarial": "10/10 PASS (APM2 exclusive; combined RT+det OK)",
+    "adversarial": "10/10 PASS (P2-CM2 O5=28 MIX=88)",
     "source": "P2-CM2 KEEP: ORDER5_BITS=28 MIX=88",
     "judge_line": "ROUNDTRIP=OK COMPRESSED=20478441 DECOMPRESSOR=87616 SCORE=20566057 COMPRESS_SECONDS=394.08 DECOMPRESS_SECONDS=389.53 PEAK_RSS_MB=4232 CPU_TOTAL_SECONDS=780.80 WALL_TOTAL_SECONDS=783.61 RAM_TIME_GB_H=0.8994",
     "on_main": true,
@@ -19,7 +19,7 @@
     "RAM_TIME_GB_H": 0.8994,
     "TIME_LIMIT": "PASS",
     "RAM_LIMIT": "PASS",
-    "commit": "2fc291c",
+    "commit": "9bed0fd",
     "delta_vs_prior_CM": -120035
   },
   "enwik9": {
