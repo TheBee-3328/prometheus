@@ -442,3 +442,15 @@ Prune monotonically helps but still above main. Likely THROW soon.
 - Δ −67867 vs prior tip 20753959; Δ −4078 vs APM2-only 20690170
 - Fast-forward main → `333de83` (agent/p2-cm); adv exclusive 10/10 prior
 - UNVERIFIED FOR 10 GB
+
+## 2026-11-26T14:24Z ORCH IMPROVEMENT LOOP RESUME
+- Operator: stop idle-only; continue infinite SCORE improvement + Discord
+- Spawned P2-CM2 (prometheus-p2-cm2 / agent/p2-cm2): ORDER5→StateMap / o3–o5 grow
+- Spawned P2-MATCH2 (prometheus-p2-match2 / agent/p2-match2): match/hash budget retry
+- Tip Best still 20686092 @ 0818e20; neural still blocked
+
+## 2026-11-26 — P2-CM2 KEEP SCORE 20566057 (−120035)
+- Hyp: ORDER5_BITS=28 ORDER5_MIX_WEIGHT=88
+- slice25 Δ=−17887; enwik8 ROUNDTRIP=OK PEAK_RSS_MB=4232
+- Resources: wall 783.61s cpu 780.80s RAM·time 0.8994 GB·h
+- Merged + pushed via orch_keep_land.sh
