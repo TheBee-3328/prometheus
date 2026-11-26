@@ -1,7 +1,19 @@
-# P2-CM3 — THROW (2026-11-26)
+# P2-CM3 report — THROW (2026-11-26)
 
 **Lane:** `agent/p2-cm3`  
-**Hyp:** APM_MODE=5 APM2_MIX_WEIGHT=144 (slice m5_a144 Δ=−26892)  
-**enwik8:** ROUNDTRIP=OK COMPRESSED=20493226 DECOMPRESSOR=87568 SCORE=20580794 COMPRESS_SECONDS=383.56 DECOMPRESS_SECONDS=393.86 PEAK_RSS_MB=3658 CPU_COMPRESS_SECONDS=381.95 CPU_DECOMPRESS_SECONDS=392.43 CPU_TOTAL_SECONDS=774.38 WALL_TOTAL_SECONDS=777.42 RAM_TIME_GB_H=0.7714 TIME_LIMIT=PASS RAM_LIMIT=PASS ORIG_SHA256=2b49720ec4d78c3c9fabaee6e4179a5e997302b3a70029f30f2d582218c024a8 ROUNDTRIP_SHA256=2b49720ec4d78c3c9fabaee6e4179a5e997302b3a70029f30f2d582218c024a8 ARCHIVE_SHA256=949512263312193a3a3604327a07b97501a8664f9820d1c7f2f2bd2fd4246af7  
-**Tip:** 20566057 @ main b9e8668  
-**Verdict:** **THROW**
+**Family:** APM3 richer context (mode 5 + APM2 mix 144)  
+**Verdict:** **THROW** vs current tip  
+
+| | SCORE |
+|--|--:|
+| CM3 enwik8 | **20580794** |
+| Tip (P2-CM2 O5=28 MIX=88) | **20566057** |
+| Δ vs tip | **+14737** (worse) |
+
+Agent briefly mislabeled KEEP against stale tip **20686092** (pre-CM2). Orch rejects merge.
+
+**slice25:** m5_a144 Δ=−26892 vs old baseline 5643811 (gate aesthetic only; enwik8 loses to CM2 tip).
+
+**Resources (judge):** wall 777.42s · cpu 774.38s · peak RSS 3658 MB · RAM·time 0.7714 GB·h · UNVERIFIED FOR 10 GB
+
+Do not merge. Params restored to tip-equivalent on this branch.
