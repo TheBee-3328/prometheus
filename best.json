@@ -18,7 +18,7 @@
     "TIME_LIMIT": "PASS",
     "RAM_LIMIT": "PASS",
     "delta_vs_prior_O6": -61683,
-    "commit": "6ff942b"
+    "commit": "870dcd3"
   },
   "enwik9": {
     "SCORE": 173961591,

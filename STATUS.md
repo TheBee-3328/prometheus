@@ -19,7 +19,7 @@
 | P2-CM3 | `agent/p2-cm3` | **THROW** 20580794 ≥ 20566057 (agent mislabeled KEEP vs stale tip) |
 | P2-O6 | `agent/p2-o6` | **KEEP** SCORE=**20415163** · adv 10/10 · origin pushed |
 | P2-SSE2 | `agent/p2-sse2` | **THROW** best Δ=−9014; closed |
-| P2-IND2 | `agent/p2-ind2` | **KEEP** SCORE=**20353480** · origin push via orch_keep_land |
+| P2-IND2 | `agent/p2-ind2` | **KEEP** SCORE=**20353480** · **KEEP** SCORE=**20353480** · adv pending · origin pushed |
 | P2-MIX3 | `agent/p2-mix3` | ACTIVE — tip 20353480; mixer residual |
 
 ## Queue
