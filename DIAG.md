@@ -1233,3 +1233,75 @@ Do **not** run enwik9 in this agent.
 
 **Not yet measured this session:** bits spent in final flush / outstanding; per-byte cost refresh on SCORE 20852107 binary (prior structure-stats used older/diag proxy).
 
+
+## Track 0C — Phase 2 B5 profile kickoff (2026-11-25 orch, static + timed compress)
+
+**Constraint:** full per-component CPU profile deferred until enwik9 judge finishes (do not stack compressors). This section is static inventory + measured timed-compress so far.
+
+### Measured (valid B5 enwik9 timed compress, in-flight judge)
+| | |
+|--|--|
+| Archive so far | **173 873 383** B (compress finished) |
+| Compress wall | **3977.34** s (~66.3 min) |
+| Compress CPU | ~3963 s (≈1.0× wall → single-thread) |
+| Peak RSS (compress) | **5038** MB |
+| Decompress | in progress at write time |
+| Decompressor size | **88192** B |
+
+Working ceilings: TIME 4 h/dir (compress PASS), RAM 9 GB (PASS so far).
+
+### Static ensemble (params on main / B5)
+| Component | Table bits | Mix w | Notes |
+|--|--:|--:|--|
+| Match + hash | HASH 26, BUF 25 | len-스케일 120–245 | largest RAM + CPU suspect |
+| Order3/4 | 27/27 | 160/48 | huge tables |
+| Order5/6/7 | 26/26/25 | 72/32/16 | |
+| Word + hit-gate | 25 | 64 | B5 |
+| Prose prev+cur | 25 | 24 | B5 KEEP |
+| Indirect | 26 | 32 | |
+| Order0 | — | 64 | |
+| SSE / SSE2 / APM | — | 224/192/224 | final stages |
+| StateMap cell | — | — | packed **u32** (p16+n8) |
+
+Rough u32-table floor (orders+word+prose+indirect+hash only) ≫ 2 GiB before match buffer — consistent with ~5 GB peak.
+
+### Highest-ratio candidates (budget rule — measure after enwik9)
+1. **Free speedups** that keep bit-identical output (hash layout / prefetch / SIMD where deterministic) — buys CPU-hour headroom for bigger models.
+2. **Match/hash cost** — largest tables; profile time in match vs orders before growing contexts.
+3. **Preprocessing** (dict/caps/markup) — decoder cost in SCORE; only if net SCORE↓.
+4. **Do not** start neural/LSTM until §2.4 full determinism PASS.
+
+### Not done yet
+- `perf`/instrumented per-component seconds on enwik8
+- bytes saved per added CPU-hour table for new hyps
+
+### 25 MiB B5 slice baseline (parallel, 2026-11-25)
+| | |
+|--|--|
+| COMPRESSED | **5680631** (matches prior WS-off tip) |
+| Wall | 101.52 s |
+| CPU | 101.15 s |
+| Peak RSS | 3466 MB |
+| Determinism | compress×2 + clean-env RT **PASS** |
+
+Mix-weight ablations (off_*=mix→0) running in `parallel/ablate_mix.csv`.
+
+### Mix ablation results (25 MiB, mix→0, baseline 5680631)
+| Off | Δ (bytes worse) | wall_s |
+|--|--:|--:|
+| SSE | +191299 | 103 |
+| APM | +93653 | 101 |
+| ORDER5 | +88668 | 112 |
+| ORDER3 | +87765 | 114 |
+| WORD | +86562 | 104 |
+| ORDER4 | +53229 | 113 |
+| INDIRECT | +47029 | 103 |
+| SSE2 | +23945 | 103 |
+| ORDER6 | +21214 | 110 |
+| PROSE | +9580 | 108 |
+| ORDER7 | +5792 | 109 |
+| ORDER0 | +3959 | 102 |
+| ORDER1 | +387 | 103 |
+| STRUCT | +150 | 104 |
+
+Edit prompts written: `prompts/PHASE2_*.md` + `PHASE2_ORCH_EDIT_QUEUE.md`.
