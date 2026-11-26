@@ -204,7 +204,7 @@ impl HashOrderModel {
 
     fn new_with(order: usize, bits: usize, use_statemap: bool) -> Self {
         assert!((3..=8).contains(&order));
-        assert!((12..=28).contains(&bits));
+        assert!((12..=30).contains(&bits));
         let size = 1usize << bits;
         Self {
             order,
