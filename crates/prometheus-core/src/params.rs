@@ -40,9 +40,9 @@ pub const ORDER4_BITS: usize = 27;
 pub const ORDER4_MIX_WEIGHT: u32 = 48;
 
 /// Hashed order-5 table bits.
-pub const ORDER5_BITS: usize = 26;
+pub const ORDER5_BITS: usize = 28;
 /// Blend weight (0..=255) of hashed order-5 into the CM mix.
-pub const ORDER5_MIX_WEIGHT: u32 = 72;
+pub const ORDER5_MIX_WEIGHT: u32 = 88;
 
 /// Hashed order-6 table bits.
 pub const ORDER6_BITS: usize = 26;
