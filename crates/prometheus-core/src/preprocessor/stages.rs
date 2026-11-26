@@ -1,10 +1,11 @@
 //! Compile-time preprocessor stage switches.
 //!
-//! Capitals + static markup stay on (main baseline). Word/phrase dict and
-//! template stages are trial flags — flip only for measured SCORE trials.
+//! Markup + word dict on (main baseline). Capitals OFF after P2-PRE KEEP
+//! (enwik8 SCORE 20753959). Template stage remains a trial flag.
 
 /// Fold word-initial capitals to lowercase + separator markers.
-pub const PRE_STAGE_CAPITALS: bool = true;
+/// Disabled: measured SCORE win with capitals off (P2-PRE KEEP).
+pub const PRE_STAGE_CAPITALS: bool = false;
 
 /// Static XML/wiki markup dictionary (`0x80..` tokens).
 pub const PRE_STAGE_MARKUP: bool = true;
