@@ -274,3 +274,5 @@ Prune monotonically helps but still above main. Likely THROW soon.
 
 | 2026-11-25 | B6-WS | WS CM modes/mix/bits/gate/post; best slice Δ −3133 (gate −15000) | — | — | — | — | — | — | REJECT |
 | 2026-11-25 | PHASE2 | §2: decomp mismatch=CARGO_TARGET_DIR→c1 stale 37k; official time=70000/T (T=?); working 4h+9GB in judge; webhook \\n fix; enwik9 B5 re-run parallel | — | — | — | — | — | — | in progress |
+| 2026-11-26 | ENWIK9 | B5 valid judge | 173873383 | 88208 | 173961591 | 3977.34 | 3676.61 | 5973 | OK |
+| 2026-11-26 | ENWIK9 | B5 valid (frozen judge) | 173873383 | 88208 | 173961591 | 3977 | 3677 | 5973 | OK TIME/RAM PASS |
