@@ -1,25 +1,22 @@
 # STATUS — PROMETHEUS Phase 2
 
-**LIVE** 2026-11-26T01:00Z  
-**Best checkpoint:** `CHKP-b5-20769768`  
+**LIVE** 2026-11-26T03:24Z · orch tick · main `cfe950a` · RAM ~28 Gi avail  
+**Host CPU:** AMD Ryzen 5 5600X (6C/12T)  
+**Geekbench5 T:** **1650 assumed** (not measured yet — GB5 run queued) → H≈42.42 h/dir · working 0.8×H≈33.94 h/dir (122182 s)  
+**Best:** enwik8 **20753959** · enwik9 **173961591** — both **UNVERIFIED FOR 10 GB** (no ceiling test yet; prior 9 GB working gate retired)  
+**Limits:** `PROMETHEUS_PHASE2_LIMITS.md` — time is the budget; default RAM=NO_CAP  
 **License:** GPLv3-or-later
 
-## Locked results
-| | enwik8 | enwik9 |
-|--|--:|--:|
-| SCORE | **20 769 768** | **173 961 591** |
-| Archive | 20 681 576 | 173 873 383 |
-| Decompressor | 88 192 | **88 208** (same B5 build; strip Δ) |
-| Peak RSS | 3658 MB | **5973 MB** |
-| Wall c+d | ~834 s | **7654 s** (~2.13 h) |
-| Limits | — | TIME **PASS** · RAM **PASS** (9 GB working) |
-
-Target ~150 MB SCORE: still **~24 MB** above. Invalid prior 186 586 969 discarded.
-
 ## Active
-- **[P2-SPEED](6ee6c78c-db59-4d68-9038-c1e8cf955b8b)** `agent/p2-speed` bit-identical CPU opts
+| Lane | Branch | State |
+|--|--|--|
+| P2-SPEED | `agent/p2-speed` | **KEEP** on main (−24% wall, bit-id) |
+| P2-MATCH | `agent/p2-match` | **THROW** `796353a` |
+| P2-PRE | `agent/p2-pre` | **KEEP merged** SCORE=20753959 adv 10/10 |
+| P2-CM | orch-direct | SCORE=20690170; **exclusive adv2** re-run mid |
 
-## Next
-1. Land speed results → spawn `PHASE2_MATCH_HASH_BUDGET`  
-2. Preprocess / CM scale per ablation (SSE/APM/o3/o5/word)  
-3. Neural blocked until speed/CM ratios known
+## Queue
+Neural blocked
+
+## Orch
+Continuous monitor. Strip Cursor coauthor trailer on commits.
