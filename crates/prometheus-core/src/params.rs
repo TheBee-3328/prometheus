@@ -74,15 +74,15 @@ pub const WORD_HIT_GATE: u32 = 1;
 pub const SSE2_MIX_WEIGHT: u32 = 192;
 
 /// Blend weight (0..=255) of order-0 into CM mix.
-pub const ORDER0_MIX_WEIGHT: u32 = 64;
+pub const ORDER0_MIX_WEIGHT: u32 = 40;
 
 /// Indirect / record model hash table bits.
-pub const INDIRECT_BITS: usize = 26;
+pub const INDIRECT_BITS: usize = 28;
 /// Blend weight (0..=255) of indirect model into CM mix.
-pub const INDIRECT_MIX_WEIGHT: u32 = 32;
+pub const INDIRECT_MIX_WEIGHT: u32 = 40;
 
 /// Blend weight (0..=255) of match×indirect cross model into CM mix.
-pub const MATCH_IND_CROSS_WEIGHT: u32 = 16;
+pub const MATCH_IND_CROSS_WEIGHT: u32 = 8;
 
 /// Prose residual CM table bits (size = 1 << this).
 pub const PROSE_BITS: usize = 25;

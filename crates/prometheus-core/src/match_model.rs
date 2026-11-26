@@ -424,7 +424,10 @@ impl Model for Order2MatchModel {
             }
         }
         let pi = self.indirect.predict();
-        p0 = Self::mix_w(p0, pi, INDIRECT_MIX_WEIGHT);
+        // Hit-gate: skip mix on checksum miss / cold (pi==32768).
+        if pi != 32768 {
+            p0 = Self::mix_w(p0, pi, INDIRECT_MIX_WEIGHT);
+        }
         // Match×indirect cross: mb × ind1 × ind2_hi_nibble × bit_pos × expected_bit.
         let mb = Sse::match_bucket(len) as usize;
         let bp = (Self::bits_seen(self.bit_cxt) as usize) & 7;
