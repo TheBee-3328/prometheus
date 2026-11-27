@@ -1,24 +1,21 @@
 {
   "enwik8": {
-    "SCORE": 20353480,
-    "COMPRESSED": 20265992,
-    "DECOMPRESSOR": 87488,
-    "bpB": 1.621279,
+    "SCORE": 20268625,
+    "COMPRESSED": 20180561,
+    "DECOMPRESSOR": 88064,
+    "bpB": 1.614445,
     "ROUNDTRIP": "OK",
-    "adversarial": "10/10 PASS (P2-IND2 HIT=1 O0=40 IND=28/40 CROSS=8)",
-    "source": "P2-IND2 KEEP: HIT=1 O0=40 IND=28/40 CROSS=8 hit-gate",
-    "judge_line": "ROUNDTRIP=OK COMPRESSED=20265992 DECOMPRESSOR=87488 SCORE=20353480 COMPRESS_SECONDS=398.16 DECOMPRESS_SECONDS=384.92 PEAK_RSS_MB=8968 CPU_TOTAL_SECONDS=780.02 WALL_TOTAL_SECONDS=783.08 RAM_TIME_GB_H=1.9048 TIME_LIMIT=PASS RAM_LIMIT=PASS",
+    "adversarial": "pending",
+    "source": "P2-MIX3 KEEP: APM_MODE=3 PROSE_MODE=8 SM=1 BITS=26 STRUCT=12 WORD_BITS=26",
+    "judge_line": "ROUNDTRIP=OK COMPRESSED=20180561 DECOMPRESSOR=88064 SCORE=20268625 COMPRESS_SECONDS=429.61 DECOMPRESS_SECONDS=424.26 PEAK_RSS_MB=9290 TIME_LIMIT=PASS",
     "on_main": true,
-    "COMPRESS_SECONDS": 398.16,
-    "DECOMPRESS_SECONDS": 384.92,
-    "PEAK_RSS_MB": 8968,
-    "CPU_TOTAL_SECONDS": 780.02,
-    "WALL_TOTAL_SECONDS": 783.08,
-    "RAM_TIME_GB_H": 1.9048,
+    "COMPRESS_SECONDS": 429.61,
+    "DECOMPRESS_SECONDS": 424.26,
+    "PEAK_RSS_MB": 9290,
     "TIME_LIMIT": "PASS",
-    "RAM_LIMIT": "PASS",
-    "delta_vs_prior_O6": -61683,
-    "commit": "870dcd3"
+    "RAM_NOTE": "peak 9290MB under 10GB official; lane working 9GB ceiling FAIL",
+    "commit": "63b243b",
+    "delta_vs_prior_IND2": -84855
   },
   "enwik9": {
     "SCORE": 173961591,
@@ -38,5 +35,5 @@
     "source": "main B5 valid re-measure",
     "on_main": true
   },
-  "updated_at": "2026-11-26T23:41:35.055.000Z"
+  "updated_at": "2026-11-27T04:08:13.433Z"
 }

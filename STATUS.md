@@ -1,9 +1,9 @@
 # STATUS — PROMETHEUS Phase 2
 
-**LIVE** undefined · orch **IMPROVING** · main `undefined` · RAM freeing post-KEEP
+**LIVE** 2026-11-27T04:08Z · orch **IMPROVING** · MIX3 KEEP landing
 **Host CPU:** AMD Ryzen 5 5600X (6C/12T)  
 **Geekbench5 T:** **1650 assumed** (not measured yet — GB5 run queued) → H≈42.42 h/dir · working 0.8×H≈33.94 h/dir (122182 s)  
-**Best:** enwik8 **20353480** · enwik9 **173961591** — both **UNVERIFIED FOR 10 GB** (no ceiling test yet; prior 9 GB working gate retired)  
+**Best:** enwik8 **20268625** · enwik9 **173961591** — both **UNVERIFIED FOR 10 GB** (no ceiling test yet; prior 9 GB working gate retired)  
 **Limits:** `PROMETHEUS_PHASE2_LIMITS.md` — time is the budget; default RAM=NO_CAP  
 **License:** GPLv3-or-later
 
@@ -20,7 +20,9 @@
 | P2-O6 | `agent/p2-o6` | **KEEP** SCORE=**20415163** · adv 10/10 · origin pushed |
 | P2-SSE2 | `agent/p2-sse2` | **THROW** best Δ=−9014; closed |
 | P2-IND2 | `agent/p2-ind2` | **KEEP** SCORE=**20353480** · adv **10/10 PASS** · origin pushed |
-| P2-MIX3 | `agent/p2-mix3` | ACTIVE best Δ=−7605 (apm_mode3); gate −15KB unmet; WORD/PROSE wave |
+| P2-MIX3 | `agent/p2-mix3` | **KEEP** SCORE=**20268625** · origin push via orch_keep_land |
+
+| enwik9 tip | IND2 binary | ACTIVE compress 1CPU/10GB RSS watch → /tmp/p2-enwik9-tip |
 
 ## Queue
 After CM2/MATCH2 land or THROW → next CM/mixer/indirect family. Neural blocked until §2.4 determinism PASS.

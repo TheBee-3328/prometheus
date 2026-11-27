@@ -474,3 +474,8 @@ Prune monotonically helps but still above main. Likely THROW soon.
 
 ## 2026-11-26T23:41Z — P2-IND2 adv 10/10 PASS
 - SCORE tip 20353480 @ 1d6d1cd; adversarial_roundtrip.sh PASS=10 FAIL=0
+
+## 2026-11-27T04:08Z — P2-MIX3 KEEP SCORE=20268625
+- Winner: APM_MODE=3 PROSE_MODE=8 SM=1 BITS=26 STRUCT=12 WORD26
+- Δ vs IND2: −84855 · RT=OK · peak RSS 9290MB
+- enwik9 tip earlier: RSS_CAP_FAIL ~10380MiB @ 1CPU/10GiB
