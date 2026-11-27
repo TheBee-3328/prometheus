@@ -1,9 +1,9 @@
 # STATUS — PROMETHEUS Phase 2
 
-**LIVE** 2026-11-27T04:08Z · orch **IMPROVING** · MIX3 KEEP landing
+**LIVE** 2026-11-27T06:34Z · orch **IMPROVING** · CM4 KEEP landing
 **Host CPU:** AMD Ryzen 5 5600X (6C/12T)  
 **Geekbench5 T:** **1650 assumed** (not measured yet — GB5 run queued) → H≈42.42 h/dir · working 0.8×H≈33.94 h/dir (122182 s)  
-**Best:** enwik8 **20268625** · enwik9 **173961591** — both **UNVERIFIED FOR 10 GB** (no ceiling test yet; prior 9 GB working gate retired)  
+**Best:** enwik8 **20163922** · enwik9 **173961591** — both **UNVERIFIED FOR 10 GB** (no ceiling test yet; prior 9 GB working gate retired)  
 **Limits:** `PROMETHEUS_PHASE2_LIMITS.md` — time is the budget; default RAM=NO_CAP  
 **License:** GPLv3-or-later
 
@@ -21,6 +21,7 @@
 | P2-SSE2 | `agent/p2-sse2` | **THROW** best Δ=−9014; closed |
 | P2-IND2 | `agent/p2-ind2` | **KEEP** SCORE=**20353480** · adv **10/10 PASS** · origin pushed |
 | P2-MIX3 | `agent/p2-mix3` | **KEEP** SCORE=**20268625** · origin push via orch_keep_land |
+| P2-CM4 | `agent/p2-cm4` | **KEEP** SCORE=**20163922** |
 
 | enwik9 tip | IND2 binary | ACTIVE compress 1CPU/10GB RSS watch → /tmp/p2-enwik9-tip |
 

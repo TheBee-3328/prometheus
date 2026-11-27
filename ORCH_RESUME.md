@@ -1,4 +1,4 @@
 # ORCH RESUME
-Tip SCORE=**20268625** (P2-MIX3 KEEP). Prior IND2=20353480.
-Next: spawn residual lane. Neural blocked. Adv pending for MIX3.
+Tip SCORE=**20163922** (P2-CM4 KEEP). Prior MIX3=20268625.
+Next: spawn residual lane. Neural blocked. Adv pending.
 On KEEP: orch_keep_land.sh → Discord → spawn next

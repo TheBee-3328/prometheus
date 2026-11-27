@@ -479,3 +479,7 @@ Prune monotonically helps but still above main. Likely THROW soon.
 - Winner: APM_MODE=3 PROSE_MODE=8 SM=1 BITS=26 STRUCT=12 WORD26
 - Δ vs IND2: −84855 · RT=OK · peak RSS 9290MB
 - enwik9 tip earlier: RSS_CAP_FAIL ~10380MiB @ 1CPU/10GiB
+
+## 2026-11-27T06:34Z — P2-CM4 KEEP SCORE=20163922
+- Winner: O3_MIX=100 O4_MIX=88 O7_BITS=27 O7_MIX=32
+- Δ vs MIX3: −104703 · RT=OK · peak RSS 9577MB

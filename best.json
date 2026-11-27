@@ -1,21 +1,21 @@
 {
   "enwik8": {
-    "SCORE": 20268625,
-    "COMPRESSED": 20180561,
+    "SCORE": 20163922,
+    "COMPRESSED": 20075858,
     "DECOMPRESSOR": 88064,
-    "bpB": 1.614445,
+    "bpB": 1.606069,
     "ROUNDTRIP": "OK",
     "adversarial": "pending",
-    "source": "P2-MIX3 KEEP: APM_MODE=3 PROSE_MODE=8 SM=1 BITS=26 STRUCT=12 WORD_BITS=26",
-    "judge_line": "ROUNDTRIP=OK COMPRESSED=20180561 DECOMPRESSOR=88064 SCORE=20268625 COMPRESS_SECONDS=429.61 DECOMPRESS_SECONDS=424.26 PEAK_RSS_MB=9290 TIME_LIMIT=PASS",
+    "source": "P2-CM4 KEEP: O3_MIX=100 O4_MIX=88 O7_BITS=27 O7_MIX=32",
+    "judge_line": "ROUNDTRIP=OK COMPRESSED=20075858 DECOMPRESSOR=88064 SCORE=20163922 COMPRESS_SECONDS=427.15 DECOMPRESS_SECONDS=419.33 PEAK_RSS_MB=9577 TIME_LIMIT=PASS",
     "on_main": true,
-    "COMPRESS_SECONDS": 429.61,
-    "DECOMPRESS_SECONDS": 424.26,
-    "PEAK_RSS_MB": 9290,
+    "COMPRESS_SECONDS": 427.15,
+    "DECOMPRESS_SECONDS": 419.33,
+    "PEAK_RSS_MB": 9577,
     "TIME_LIMIT": "PASS",
-    "RAM_NOTE": "peak 9290MB under 10GB official; lane working 9GB ceiling FAIL",
-    "commit": "63b243b",
-    "delta_vs_prior_IND2": -84855
+    "RAM_NOTE": "peak 9577MB under 10GB official; working 9GB ceiling FAIL",
+    "commit": "df344f1",
+    "delta_vs_prior_MIX3": -104703
   },
   "enwik9": {
     "SCORE": 173961591,
@@ -35,5 +35,5 @@
     "source": "main B5 valid re-measure",
     "on_main": true
   },
-  "updated_at": "2026-11-27T04:08:13.433Z"
+  "updated_at": "2026-11-27T06:34:15.406Z"
 }
