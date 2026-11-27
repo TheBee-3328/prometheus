@@ -24,7 +24,7 @@ pub const MATCH_CONF: [u32; 5] = [32700, 32700, 32700, 32700, 32700];
 pub const MIX_WEIGHT: [u32; 5] = [120, 160, 190, 230, 245];
 
 /// When match is inactive: blend weight (0..=255) of XML/wiki structure into the mix.
-pub const STRUCT_MIX_WEIGHT: u32 = 24;
+pub const STRUCT_MIX_WEIGHT: u32 = 12;
 
 /// Blend weight (0..=255) of order-1 into order-2 before match/struct mix.
 pub const ORDER1_MIX_WEIGHT: u32 = 8;
@@ -62,7 +62,7 @@ pub const SSE_MIX_WEIGHT: u32 = 224;
 pub const SSE_MODE: u32 = 0;
 
 /// Word-model hash table bits.
-pub const WORD_BITS: usize = 25;
+pub const WORD_BITS: usize = 26;
 /// Blend weight (0..=255) of word model into CM mix (before match/SSE).
 pub const WORD_MIX_WEIGHT: u32 = 64;
 /// Word context enrichment: 0=baseline, 1=prev, 2=prev+pos, 3=pos, 4=weak-prev+pos.
@@ -85,17 +85,17 @@ pub const INDIRECT_MIX_WEIGHT: u32 = 40;
 pub const MATCH_IND_CROSS_WEIGHT: u32 = 8;
 
 /// Prose residual CM table bits (size = 1 << this).
-pub const PROSE_BITS: usize = 25;
+pub const PROSE_BITS: usize = 26;
 /// Prose context mode: 0=off, 1=wpos, 2=prev+cur, 3=wpos+last, 4=skip3,
 /// 5=prev+wpos, 6=cap+wpos+last, 7=prev+cur+wpos, 8=cap+prev+cur,
 /// 9=prev-only, 10=cap+wpos.
-pub const PROSE_MODE: u32 = 2;
+pub const PROSE_MODE: u32 = 8;
 /// Blend weight (0..=255) of prose residual into CM mix (before match/SSE).
 pub const PROSE_MIX_WEIGHT: u32 = 24;
 /// If 1, mix prose only when match is inactive (len < MIN_MIX_LEN).
 pub const PROSE_MATCH_GATE: u32 = 0;
 /// If 1, prose uses StateMap cells; else u8 n0/n1 counts.
-pub const PROSE_SM: u32 = 0;
+pub const PROSE_SM: u32 = 1;
 
 /// Third-stage APM blend weight (0..=255) into final p after SSE2.
 pub const APM_MIX_WEIGHT: u32 = 224;
@@ -103,7 +103,7 @@ pub const APM_MIX_WEIGHT: u32 = 224;
 pub const APM_RATE_SHIFT: u32 = 7;
 /// APM chain mode: 0=tip single APM, 1=APM2 hashed (prev×bit_cxt), 2=APM n=32768 richer cxt,
 /// 3=APM n=65536 hash(last,bit_cxt,mb).
-pub const APM_MODE: u32 = 1;
+pub const APM_MODE: u32 = 3;
 /// Second APM blend weight when APM_MODE!=0 (0..=255).
 pub const APM2_MIX_WEIGHT: u32 = 160;
 // === END TUNABLE ===
